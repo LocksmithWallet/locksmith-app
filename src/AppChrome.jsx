@@ -20,12 +20,15 @@ import {
 } from '@chakra-ui/react';
 import { Link, useNavigate } from 'react-router-dom';
 
+// Navigation components
+import { NetworkSwitcher } from './navigation/NetworkSwitcher';
+import { WalletConnector } from "./navigation/WalletConnector";
+
 // Icons
 import { FiMenu } from 'react-icons/fi';
 import { BiCoinStack } from 'react-icons/bi';
 import { HiOutlineKey } from 'react-icons/hi';
 import { RiLock2Fill } from 'react-icons/ri';
-import { ColorModeSwitcher } from './components/ColorModeSwitcher';
 
 const LinkItems = [
   { name: 'Keys', icon: HiOutlineKey, href: '/keys'},
@@ -128,16 +131,12 @@ const MobileNav = ({ onOpen, ...rest }) => {
         variant="outline"
         aria-label="open menu"
         icon={<FiMenu />}/>
-      <HStack spacing={0} display={{base: 'flex', md: 'none'}}>
-        <Text fontSize='2xl'><b>L</b></Text>
-        <RiLock2Fill size='22px'/>
-        <Text fontSize='2xl'><b>cksmith</b></Text>
-      </HStack>
-      <HStack spacing={{ base: '0', md: '6' }}>
-        <Flex alignItems={'center'}>
-          <ColorModeSwitcher justifySelf="flex-end" />
-        </Flex>
-      </HStack>
+      <Flex alignItems={'center'}>
+        <HStack spacing='1em'>
+          <WalletConnector/>
+          <NetworkSwitcher/>
+        </HStack>
+      </Flex>
     </Flex>
   );
 };
