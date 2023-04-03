@@ -4,7 +4,7 @@ import {
 } from '@chakra-ui/react';
 
 export function DisplayAddress({address, ...rest}) {
-  return address.substring(0,5) + '...' + address.substring(address.length - 3)
+  return address.substring(0,6) + '...' + address.substring(address.length - 4)
 }
 
 export function CopyButton({label, thing, ...rest}) {

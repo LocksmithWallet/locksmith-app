@@ -24,6 +24,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { NetworkSwitcher } from './navigation/NetworkSwitcher';
 import { WalletConnector } from "./navigation/WalletConnector";
 
+import { AttentionSeeker, Fade } from 'react-awesome-reveal';
+
 // Icons
 import { FiMenu } from 'react-icons/fi';
 import { BiCoinStack } from 'react-icons/bi';
@@ -67,9 +69,15 @@ const SidebarContent = ({ onClose, ...rest }) => {
       {...rest}>
       <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
         <HStack spacing={0} onClick={() => {navigate('/');}} cursor='pointer'>
-          <Text fontSize='2xl'><b>L</b></Text>
-          <RiLock2Fill size='22px'/>
-          <Text fontSize='2xl'><b>cksmith</b></Text>
+          <Fade direction='left'>
+            <Text fontSize='2xl'><b>L</b></Text>
+          </Fade>
+          <Fade direction='down'> 
+            <RiLock2Fill size='22px'/>
+          </Fade>
+          <Fade direction='right'>
+            <Text fontSize='2xl'><b>cksmith</b></Text>
+          </Fade>
         </HStack>
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose}/>
       </Flex>
@@ -133,8 +141,12 @@ const MobileNav = ({ onOpen, ...rest }) => {
         icon={<FiMenu />}/>
       <Flex alignItems={'center'}>
         <HStack spacing='1em'>
-          <WalletConnector/>
-          <NetworkSwitcher/>
+          <Fade direction='down'>
+            <WalletConnector/>
+          </Fade>
+          <Fade direction='right'>
+            <NetworkSwitcher/>
+          </Fade>
         </HStack>
       </Flex>
     </Flex>

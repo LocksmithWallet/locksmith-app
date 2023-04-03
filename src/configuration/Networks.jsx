@@ -18,6 +18,14 @@ export const Networks = (function() {
       return networks[networkId];
     },
     //////////////////////////
+    // getSupportedNetworks
+    //
+    // Returns a list of all supported networks.
+    //////////////////////////
+    getSupportedNetworks: function() {
+      return Object.values(networks);
+    },
+    //////////////////////////
     // wagmiChains
     //
     // Returns a prioritized list of chain infos
