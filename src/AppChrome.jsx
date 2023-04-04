@@ -19,11 +19,13 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useNetwork } from 'wagmi';
 
 // Navigation components
 import { NetworkSwitcher } from './navigation/NetworkSwitcher';
 import { WalletConnector } from "./navigation/WalletConnector";
 
+// Animations
 import { AttentionSeeker, Fade } from 'react-awesome-reveal';
 
 // Icons
@@ -122,31 +124,30 @@ const NavItem = ({ href, icon, children, ...rest }) => {
 };
 
 const MobileNav = ({ onOpen, ...rest }) => {
+  const network = useNetwork();
   return (
     <Flex
       ml={{ base: 0, md: 60 }}
       px={{ base: 4, md: 4 }}
       height="20"
       alignItems="center"
-      bg={useColorModeValue('white', 'gray.900')}
-      borderBottomWidth="1px"
-      borderBottomColor={useColorModeValue('gray.200', 'gray.700')}
       justifyContent={{ base: 'space-between', md: 'flex-end' }}
       {...rest}>
       <IconButton
+        size='sm'
+        boxShadow='lg'
         display={{ base: 'flex', md: 'none' }}
         onClick={onOpen}
-        variant="outline"
         aria-label="open menu"
         icon={<FiMenu />}/>
       <Flex alignItems={'center'}>
         <HStack spacing='1em'>
-          <Fade direction='down'>
+          <Fade direction='right'>
             <WalletConnector/>
           </Fade>
-          <Fade direction='right'>
+          { network && network.chain && <Fade direction='right'>
             <NetworkSwitcher/>
-          </Fade>
+          </Fade> }
         </HStack>
       </Flex>
     </Flex>
