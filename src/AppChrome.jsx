@@ -157,18 +157,16 @@ const MobileNav = ({ onOpen, ...rest }) => {
                 layout: {type: 'spring'},
                 type: 'spring'}}>
               <WalletConnector/>
-          </motion.div>
-          <AnimatePresence>
+            </motion.div>
+            <AnimatePresence>
             { network && network.chain && (
-              <motion.div key='network-switcher-tracker'
+              <motion.div 
                 initial={{opacity: 0, x: 100}}
                 animate={{opacity: 1, x: 0}}
-                exit={{opacity: 0, x: 100}}
-                transition={{ type: 'spring' }}>
+                transition={{ type: 'spring'}}>
                   <NetworkSwitcher/> 
-              </motion.div>)
-            }
-          </AnimatePresence>
+              </motion.div>)}
+            </AnimatePresence>
           </LayoutGroup>
         </HStack>
       </Flex>
