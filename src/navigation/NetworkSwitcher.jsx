@@ -1,4 +1,4 @@
-import { React, useState } from 'react';
+import { React, useState, useEffect } from 'react';
 import { 
   Button,
   HStack,
@@ -17,14 +17,9 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react';
+import { motion, useAnimationControls, AnimatePresence } from 'framer-motion';
 import { Fade, AttentionSeeker } from 'react-awesome-reveal';
-import {
-  ClickAnimation,
-  badClick,
-  quickClick,
-  HoverAnimation,
-  hoverScaleAnimation 
-} from '../components/Animations';
+import { ChakraBox, HeadShakeMotion } from '../components/Animations';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
 import { Networks } from '../configuration/Networks';
 import { FaMoon, FaSun } from 'react-icons/fa';
@@ -33,10 +28,23 @@ import { FiAlertCircle } from 'react-icons/fi';
 export const NetworkSwitcher = () => {
   const network = useNetwork();
   const modalDisclosure = useDisclosure();
+  const [icon, setIcon] = useState(null);
+  const [label, setLabel] = useState(null);
+  
+  useEffect(() => {
+    if (network && network.chain) {
+      const config = Networks.getNetwork(network.chain.id);
+      if(config) {
+        setIcon(config.icon({size: 16}));
+        setLabel(config.label);
+      }
+    }
+  })
 
   // if we aren't connected, show nothing at all
   if (!(network && network.chain)) {
-    return "";
+    return <Button boxShadow='lg'
+      size='sm' leftIcon={icon}>{label}</Button>
   }
 
   const networkConfiguration = Networks.getNetwork(network.chain.id);
@@ -50,16 +58,15 @@ export const NetworkSwitcher = () => {
 };
 
 const NetworkDialog = ({disclosure, ...rest}) => {
-  const boxColor = useColorModeValue('gray.100','gray.800');
   const network = useNetwork();
   const [isClosing, setClosing] = useState(false);
   
   const closeModal = function(confirm) {
     setTimeout(() => { setClosing(true); }, confirm ? 300 : 0);
-    setTimeout(() => { disclosure.onClose(); setClosing(false);}, confirm ? 600 : 250); 
+    setTimeout(() => { setClosing(false); disclosure.onClose(); }, confirm ? 600 : 250); 
   }
 
-  const { isLoading, pendingChainId, switchNetwork } = useSwitchNetwork({
+  const switcher = useSwitchNetwork({
     onSuccess(data) { closeModal(true); } 
   });
 
@@ -75,30 +82,8 @@ const NetworkDialog = ({disclosure, ...rest}) => {
           <List spacing='1em'>
             <Fade direction={isClosing ? 'up' : 'down'} {... isClosing ? {reverse: true} : {}}  duration='300' cascade>
               { Networks.getSupportedNetworks().map((n) => (
-                <AttentionSeeker effect='pulse' key={'pulser' + n.id}>
-                  <ClickAnimation on={n.id === network.chain.id} onClick={badClick} timeout={300}> 
-                  <ClickAnimation on={n.id !== network.chain.id} onClick={quickClick} timeout={300}> 
-                    <HoverAnimation on={n.id !== network.chain.id}
-                      onEnter={hoverScaleAnimation.onEnter} onLeave={hoverScaleAnimation.onLeave}>
-                      <ListItem key={'network-'+n.id} 
-                        onClick={() => { if(n.id !== network.chain.id) {switchNetwork?.(n.id);} }}
-                        border='1px' 
-                        borderColor='gray.300'
-                        bgColor={boxColor} 
-                        boxShadow='md' borderRadius='full' padding='0.5em' 
-                        cursor='pointer'>
-                        <HStack spacing='1em' pr='1em'>
-                          { isLoading && pendingChainId === n.id ? <Spinner size='lg'/> : n.icon({size: 32}) }
-                          <Text>{ n.label }</Text>
-                          <Spacer/>
-                          { network && network.chain && network.chain.id === n.id && 
-                            <Text fontSize='sm' color="gray" fontStyle='italic'>Connected</Text> }
-                        </HStack>
-                      </ListItem>
-                    </HoverAnimation>
-                  </ClickAnimation>
-                  </ClickAnimation>
-                </AttentionSeeker>
+                <NetworkListItem key={'nli'+n.id} network={n} isConnected={network && network.chain && network.chain.id === n.id}
+                  switcher={switcher}/>
               )) }
             </Fade>
           </List>
@@ -108,4 +93,47 @@ const NetworkDialog = ({disclosure, ...rest}) => {
       </ModalContent>
     </Modal>
   )
+}
+
+const NetworkListItem = ({network, isConnected, switcher, ...rest}) => {
+  const boxColor = useColorModeValue('gray.100','gray.800');
+  const controls = useAnimationControls();
+  return (<ChakraBox animate={controls}>
+    <AttentionSeeker effect='pulse'>
+    <ListItem key={'network-'+network.id}
+      as={motion.div}
+      whileTap={ !isConnected ? {scale: 0.95} : {} }
+      onClick={() => { 
+        if(!isConnected) {
+          switcher.switchNetwork?.(network.id);
+        } else {
+          controls.start(HeadShakeMotion);
+        }
+      }}
+      border='1px'
+      borderColor='gray.300'
+      bgColor={boxColor}
+      boxShadow='md' borderRadius='full' padding='0.5em'
+      cursor='pointer'>
+        <HStack spacing='1em' pr='1em'>
+          { switcher.isLoading && switcher.pendingChainId === network.id ? 
+            <Spinner size='lg'/> : network.icon({size: 32}) }
+          <Text>{ network.label }</Text>
+          <Spacer/>
+          <AnimatePresence>
+            { isConnected &&
+              <motion.div 
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0 }}
+                transition={{ duration: 0.3, ease: 'linear'}}>
+              <Text
+                fontSize='sm' color="gray" fontStyle='italic'>Connected</Text>
+              </motion.div>
+            }
+          </AnimatePresence>
+        </HStack>
+    </ListItem>
+    </AttentionSeeker>
+  </ChakraBox>)
 }

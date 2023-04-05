@@ -18,14 +18,14 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import { Link, useNavigate } from 'react-router-dom';
 import { useNetwork } from 'wagmi';
-
+import {Link, useNavigate } from 'react-router-dom';
 // Navigation components
 import { NetworkSwitcher } from './navigation/NetworkSwitcher';
 import { WalletConnector } from "./navigation/WalletConnector";
 
 // Animations
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { AttentionSeeker, Fade } from 'react-awesome-reveal';
 
 // Icons
@@ -70,7 +70,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
       h="full"
       {...rest}>
       <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
-        <HStack spacing={0} onClick={() => {navigate('/');}} cursor='pointer'>
+        <HStack onClick={() => {navigate('/');}} spacing={0} cursor='pointer'>
           <Fade direction='left'>
             <Text fontSize='2xl'><b>L</b></Text>
           </Fade>
@@ -83,11 +83,11 @@ const SidebarContent = ({ onClose, ...rest }) => {
         </HStack>
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose}/>
       </Flex>
-      {LinkItems.map((link) => (
+      { LinkItems.map((link) => (
         <NavItem onClick={onClose} mt='0.4em' href={link.href} key={link.name} icon={link.icon} fontSize='lg'>
           {link.name}
         </NavItem>
-      ))}
+      )) }
     </Box>
   );
 };
@@ -133,21 +133,35 @@ const MobileNav = ({ onOpen, ...rest }) => {
       alignItems="center"
       justifyContent={{ base: 'space-between', md: 'flex-end' }}
       {...rest}>
-      <IconButton
-        size='sm'
-        boxShadow='lg'
-        display={{ base: 'flex', md: 'none' }}
-        onClick={onOpen}
-        aria-label="open menu"
-        icon={<FiMenu />}/>
+      <Fade direction='left'>
+        <IconButton
+          size='sm'
+          boxShadow='lg'
+          display={{ base: 'flex', md: 'none' }}
+          onClick={onOpen}
+          aria-label="open menu"
+          icon={<FiMenu />}/>
+      </Fade>
       <Flex alignItems={'center'}>
         <HStack spacing='1em'>
-          <Fade direction='right'>
-            <WalletConnector/>
-          </Fade>
-          { network && network.chain && <Fade direction='right'>
-            <NetworkSwitcher/>
-          </Fade> }
+          <LayoutGroup>
+          <motion.div layout transition={{layout: {duration: 0.5}}}>
+            <Fade direction='right'>
+              <WalletConnector/>
+            </Fade>
+          </motion.div>
+          <AnimatePresence>
+            { network && network.chain && (
+              <motion.div key='network-switcher-tracker'
+                exit={{opacity: 0, x: 100}}
+                transition={{ duration: 0.5, ease: 'easeOut'}}>
+                <Fade direction='right'>
+                  <NetworkSwitcher/> 
+                </Fade>
+              </motion.div>)
+            }
+          </AnimatePresence>
+          </LayoutGroup>
         </HStack>
       </Flex>
     </Flex>
