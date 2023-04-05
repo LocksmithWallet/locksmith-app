@@ -16,7 +16,6 @@ import { RiLock2Fill } from 'react-icons/ri';
 
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { Fade, AttentionSeeker } from 'react-awesome-reveal';
-import { HiOutlineKey } from 'react-icons/Hi';
 import { BiLink } from 'react-icons/bi';
 
 export function Home() {
