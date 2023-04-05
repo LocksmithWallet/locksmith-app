@@ -39,7 +39,7 @@ export const NetworkSwitcher = () => {
         setLabel(config.label);
       }
     }
-  })
+  }, [network.chain]);
 
   // if we aren't connected, show nothing at all
   if (!(network && network.chain)) {

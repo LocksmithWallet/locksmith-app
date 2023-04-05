@@ -133,7 +133,11 @@ const MobileNav = ({ onOpen, ...rest }) => {
       alignItems="center"
       justifyContent={{ base: 'space-between', md: 'flex-end' }}
       {...rest}>
-      <Fade direction='left'>
+      <motion.div
+        initial={{opacity: 0, x: -100}}
+        animate={{opacity: 1, x: 0}}
+        exit={{opacity: 0, x: -100}}
+        transition={{type: 'spring'}}>
         <IconButton
           size='sm'
           boxShadow='lg'
@@ -141,23 +145,27 @@ const MobileNav = ({ onOpen, ...rest }) => {
           onClick={onOpen}
           aria-label="open menu"
           icon={<FiMenu />}/>
-      </Fade>
+      </motion.div>
       <Flex alignItems={'center'}>
         <HStack spacing='1em'>
           <LayoutGroup>
-          <motion.div layout transition={{layout: {duration: 0.5}}}>
-            <Fade direction='right'>
+            <motion.div layout 
+              initial={{opacity: 0, y: -100}}
+              animate={{opacity: 1, y: 0}}
+              exit={{opacity: 0, y: -100}}
+              transition={{
+                layout: {type: 'spring'},
+                type: 'spring'}}>
               <WalletConnector/>
-            </Fade>
           </motion.div>
           <AnimatePresence>
             { network && network.chain && (
               <motion.div key='network-switcher-tracker'
+                initial={{opacity: 0, x: 100}}
+                animate={{opacity: 1, x: 0}}
                 exit={{opacity: 0, x: 100}}
-                transition={{ duration: 0.5, ease: 'easeOut'}}>
-                <Fade direction='right'>
+                transition={{ type: 'spring' }}>
                   <NetworkSwitcher/> 
-                </Fade>
               </motion.div>)
             }
           </AnimatePresence>
