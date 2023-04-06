@@ -82,10 +82,10 @@ const CreateAccount = ({}) => {
 }
 
 const CreateAccountKey = ({delay, ... rest}) => {
-  const x = useMotionValue(-180);
-  const rotateY = useTransform(x, [-180, 150], [90, -90])
-  const opacity = useTransform(x, [-180, -30, 150], [0, 1, 0]);
-  const scale = useTransform(x, [-180, -30, -150], [0.8, 1, 0.8]);
+  const x = useMotionValue(-220);
+  const rotateY = useTransform(x, [-220, 150], [90, -90])
+  const opacity = useTransform(x, [-220, -60, 150], [0, 1, 0]);
+  const scale = useTransform(x, [-220, -60, -150], [0.5, 1.4, 0.5]);
   return <motion.div 
       style={{
       display: 'inline-block',
