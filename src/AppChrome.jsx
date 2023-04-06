@@ -134,9 +134,9 @@ const MobileNav = ({ onOpen, ...rest }) => {
       justifyContent={{ base: 'space-between', md: 'flex-end' }}
       {...rest}>
       <motion.div
-        initial={{opacity: 0, x: -100}}
-        animate={{opacity: 1, x: 0}}
-        exit={{opacity: 0, x: -100}}
+        initial={{opacity: 0, y: -100}}
+        animate={{opacity: 1, y: 0}}
+        exit={{opacity: 0, y: -100}}
         transition={{type: 'spring'}}>
         <IconButton
           size='sm'
@@ -161,8 +161,8 @@ const MobileNav = ({ onOpen, ...rest }) => {
             <AnimatePresence>
             { network && network.chain && (
               <motion.div 
-                initial={{opacity: 0, x: 100}}
-                animate={{opacity: 1, x: 0}}
+                initial={{opacity: 0, y: -100}}
+                animate={{opacity: 1, y: 0}}
                 transition={{ type: 'spring'}}>
                   <NetworkSwitcher/> 
               </motion.div>)}
