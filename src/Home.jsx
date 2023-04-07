@@ -1,7 +1,7 @@
 //////////////////////////////////////
 // React and UI Components
 //////////////////////////////////////
-import React from 'react';
+import { React, useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -22,13 +22,14 @@ import {
   LayoutGroup,
   useMotionValue,
   useTransform,
+  useAnimation,
 } from 'framer-motion';
 import { Fade, AttentionSeeker } from 'react-awesome-reveal';
 import { BiLink } from 'react-icons/bi';
 
 export function Home() {
   const account = useAccount();
-  return (<VStack>
+  return (<VStack> 
     <HStack spacing='0' mt='1em'>
       <Fade direction='left' duration='500'><Heading fontSize='6xl'>L</Heading></Fade>
       <Fade>
@@ -69,44 +70,118 @@ export function Home() {
 }
 
 const CreateAccount = ({}) => {
-  return <motion.div>
-    <CreateAccountKey delay={0}/>
-    <CreateAccountKey delay={1}/>
-    <CreateAccountKey delay={2}/>
-    <CreateAccountKey delay={3}/>
-    <CreateAccountKey delay={4}/>
-    <CreateAccountKey delay={5}/>
-    <CreateAccountKey delay={6}/>
-    <CreateAccountKey delay={7}/>
-  </motion.div>
+  const [choice, setChoice] = useState(-1);
+  const controls = useAnimation();
+
+  useEffect(() => {
+    if(choice >= 0) {
+      controls.start({opacity: 0, y: -80, transition: {type: 'spring'}}); 
+    } else {
+      controls.start({opacity: 1, y: 0, transition: {type: 'spring'}});
+    }
+  }, [choice]);
+
+  return ( 
+    <VStack spacing='1em'>
+      <motion.div initial={{y: 80}} animate={controls}>
+        <Text fontWeight='bold' size='lg'>Pick a Key to Start</Text>
+      </motion.div>
+    <HStack spacing='0'>
+      <Box m='0' p='0' onClick={() => {setChoice(0);}}>
+        <CreateAccountKey delay={0} choice={choice}/>
+      </Box>
+      <Box m='0' p='0' onClick={() => {setChoice(1);}}>
+        <CreateAccountKey delay={1} choice={choice}/>
+      </Box>
+      <Box m='0' p='0' onClick={() => {setChoice(2);}}>
+        <CreateAccountKey delay={2} choice={choice}/>
+      </Box>
+      <Box m='0' p='0' onClick={() => {setChoice(3);}}>
+        <CreateAccountKey delay={3} choice={choice}/>
+      </Box> 
+      <Box m='0' p='0' onClick={() => {setChoice(4);}}>
+        <CreateAccountKey delay={4} choice={choice}/>
+      </Box> 
+      <Box m='0' p='0' onClick={() => {setChoice(5);}}>
+        <CreateAccountKey delay={5} choice={choice}/>
+      </Box> 
+      <Box m='0' p='0' onClick={() => {setChoice(6);}}>
+        <CreateAccountKey delay={6} choice={choice}/>
+      </Box> 
+      <Box m='0' p='0' onClick={() => {setChoice(7);}}>
+        <CreateAccountKey delay={7} choice={choice}/>
+      </Box> 
+    </HStack>
+  </VStack>)
 }
 
-const CreateAccountKey = ({delay, ... rest}) => {
+const CreateAccountKey = ({delay, onChoose, choice, ... rest}) => {
+  const [isClicked, setClicked] = useState(false);
+  const [isStopped, stop] = useState(false);
+  const controls = useAnimation();
   const x = useMotionValue(-220);
+  useEffect(() => {
+    if (!isClicked) {
+      // starting 
+      controls.start({
+        x: 150,
+        transition: { duration: 8 - delay }
+      });
+    /*} else if (choice && choice !== delay) { 
+      // not-clicked, so flies away
+      controls.stop();
+      controls.start({
+        opacity: 0,
+      });*/
+    } else {
+      // clicked
+      controls.start({
+        scale: 14,
+        rotateY: 0,
+        opacity: 1, 
+        x: -20,
+        y: 260,
+        transition: {
+          type: 'linear',
+          duration: 1,
+        }
+      });
+    }
+  }, [isClicked]);
+
   const rotateY = useTransform(x, [-220, 150], [90, -90])
   const opacity = useTransform(x, [-220, -60, 150], [0, 1, 0]);
   const scale = useTransform(x, [-220, -60, -150], [0.5, 1.4, 0.5]);
-  return <motion.div 
+  return !isClicked ? <motion.div
+      id={"select-key"+delay}
       style={{
       display: 'inline-block',
       width: 60,
       height: 60,
-      x: x,
-      scale: scale,
+      x, 
+      scale, 
       position: 'absolute', 
-      rotateY: rotateY,
-      opacity: opacity,
+      rotateY, 
+      opacity,
       cursor: 'grab'
     }}
-    animate={{
-      x: 150, 
-      transition: {
-        duration: 8,
-        repeat: Infinity,
-        delay: delay
-      },
-    }}
-    whileTap={{ cursor: 'grabbing'}}>
+    initial={{x: -220 + (delay*60)}}
+    animate={controls}
+    onUpdate={() => { if(choice >=0) { controls.stop(); controls.start({opacity: 0, x: 150, transition: {duration: 1}}); } }}
+    onAnimationComplete={ (definition) => {if(choice >= 0) { return; } controls.set({x: -220}); controls.start({
+      x: 150,
+      transition: { duration: 8 } 
+    });}}
+    onClick={() => {setClicked(true);}}> 
       <FcKey size='60px'/>
-  </motion.div>
+  </motion.div> : 
+    <motion.div
+      style={{
+        display: 'inline-block',
+        position: 'absolute',
+        x, 
+        width: 60,
+        height: 60,
+      }}
+      animate={controls}><FcKey size='60px'/></motion.div>
 }
