@@ -82,37 +82,37 @@ const CreateAccount = ({}) => {
   }, [choice]);
 
   return ( 
-    <VStack spacing='1em'>
+    <VStack spacing='3em'>
       <motion.div initial={{y: 80}} animate={controls}>
         <Text fontWeight='bold' size='lg'>Pick a Key to Start</Text>
       </motion.div>
-    <HStack spacing='0'>
-      <Box m='0' p='0' onClick={() => {setChoice(0);}}>
-        <CreateAccountKey delay={0} choice={choice}/>
-      </Box>
-      <Box m='0' p='0' onClick={() => {setChoice(1);}}>
-        <CreateAccountKey delay={1} choice={choice}/>
-      </Box>
-      <Box m='0' p='0' onClick={() => {setChoice(2);}}>
-        <CreateAccountKey delay={2} choice={choice}/>
-      </Box>
-      <Box m='0' p='0' onClick={() => {setChoice(3);}}>
-        <CreateAccountKey delay={3} choice={choice}/>
-      </Box> 
-      <Box m='0' p='0' onClick={() => {setChoice(4);}}>
-        <CreateAccountKey delay={4} choice={choice}/>
-      </Box> 
-      <Box m='0' p='0' onClick={() => {setChoice(5);}}>
-        <CreateAccountKey delay={5} choice={choice}/>
-      </Box> 
-      <Box m='0' p='0' onClick={() => {setChoice(6);}}>
-        <CreateAccountKey delay={6} choice={choice}/>
-      </Box> 
-      <Box m='0' p='0' onClick={() => {setChoice(7);}}>
-        <CreateAccountKey delay={7} choice={choice}/>
-      </Box> 
-    </HStack>
-  </VStack>)
+      <HStack spacing='0'>
+        <Box m='0' p='0' onClick={() => {setChoice(0);}}>
+          <CreateAccountKey delay={0} choice={choice}/>
+        </Box>
+        <Box m='0' p='0' onClick={() => {setChoice(1);}}>
+          <CreateAccountKey delay={1} choice={choice}/>
+        </Box>
+        <Box m='0' p='0' onClick={() => {setChoice(2);}}>
+          <CreateAccountKey delay={2} choice={choice}/>
+        </Box>
+        <Box m='0' p='0' onClick={() => {setChoice(3);}}>
+          <CreateAccountKey delay={3} choice={choice}/>
+        </Box> 
+        <Box m='0' p='0' onClick={() => {setChoice(4);}}>
+          <CreateAccountKey delay={4} choice={choice}/>
+        </Box> 
+        <Box m='0' p='0' onClick={() => {setChoice(5);}}>
+          <CreateAccountKey delay={5} choice={choice}/>
+        </Box> 
+        <Box m='0' p='0' onClick={() => {setChoice(6);}}>
+          <CreateAccountKey delay={6} choice={choice}/>
+        </Box> 
+        <Box m='0' p='0' onClick={() => {setChoice(7);}}>
+          <CreateAccountKey delay={7} choice={choice}/>
+        </Box> 
+      </HStack>
+    </VStack>)
 }
 
 const CreateAccountKey = ({delay, onChoose, choice, ... rest}) => {
@@ -127,25 +127,24 @@ const CreateAccountKey = ({delay, onChoose, choice, ... rest}) => {
         x: 150,
         transition: { duration: 8 - delay }
       });
-    /*} else if (choice && choice !== delay) { 
-      // not-clicked, so flies away
-      controls.stop();
-      controls.start({
-        opacity: 0,
-      });*/
     } else {
       // clicked
-      controls.start({
-        scale: 14,
-        rotateY: 0,
-        opacity: 1, 
-        x: -20,
-        y: 260,
-        transition: {
-          type: 'linear',
-          duration: 1,
-        }
-      });
+      var go = async() => {
+        await controls.stop();
+        await controls.start({
+          scale: 10,
+          rotateY: 0,
+          opacity: 1, 
+          x: 0,
+          y: 210,
+          transition: {
+            type: 'linear',
+            duration: 0.5,
+          }
+        }); 
+        controls.set({position: 'relative'});
+      };
+      go();
     }
   }, [isClicked]);
 
@@ -153,11 +152,10 @@ const CreateAccountKey = ({delay, onChoose, choice, ... rest}) => {
   const opacity = useTransform(x, [-220, -60, 150], [0, 1, 0]);
   const scale = useTransform(x, [-220, -60, -150], [0.5, 1.4, 0.5]);
   return !isClicked ? <motion.div
-      id={"select-key"+delay}
-      style={{
-      display: 'inline-block',
-      width: 60,
-      height: 60,
+    id={"select-key"+delay}
+    style={{
+      width: 80,
+      height: 80,
       x, 
       scale, 
       position: 'absolute', 
@@ -167,21 +165,33 @@ const CreateAccountKey = ({delay, onChoose, choice, ... rest}) => {
     }}
     initial={{x: -220 + (delay*60)}}
     animate={controls}
-    onUpdate={() => { if(choice >=0) { controls.stop(); controls.start({opacity: 0, x: 150, transition: {duration: 1}}); } }}
-    onAnimationComplete={ (definition) => {if(choice >= 0) { return; } controls.set({x: -220}); controls.start({
-      x: 150,
-      transition: { duration: 8 } 
-    });}}
+    onUpdate={() => { if(choice >=0) { 
+        controls.stop();
+        controls.start({
+          opacity: 0, 
+          y: -100,
+          transition: {duration: 0.5}
+        }); 
+      } 
+    }}
+    onAnimationComplete={ (definition) => {
+      if(choice >= 0) { return; } 
+      controls.set({x: -220}); 
+      controls.start({
+        x: 150,
+        transition: { duration: 8 } 
+      });
+    }}
     onClick={() => {setClicked(true);}}> 
-      <FcKey size='60px'/>
+      <FcKey size='80px'/>
   </motion.div> : 
     <motion.div
       style={{
-        display: 'inline-block',
-        position: 'absolute',
         x, 
-        width: 60,
-        height: 60,
+        width: 80,
+        height: 80,
       }}
-      animate={controls}><FcKey size='60px'/></motion.div>
+      animate={controls}>
+        <FcKey size='80px'/>
+    </motion.div>
 }

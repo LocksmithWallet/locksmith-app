@@ -41,7 +41,7 @@ const LinkItems = [
 
 export default function SidebarWithHeader({children}) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  return <Box minH="100vh" bg={useColorModeValue('gray.200', 'gray.900')}>
+  return <Box minH="100vh" bg={useColorModeValue('gray.200', 'gray.900')} style={{'overflow': 'hidden'}}>
     <SidebarContent onClose={() => onClose} display={{ base: 'none', md: 'block' }}/>
     <Drawer autoFocus={false} isOpen={isOpen} placement="left" onClose={onClose}
       returnFocusOnClose={false} onOverlayClick={onClose} size="full">
