@@ -7,6 +7,7 @@ import {
   Button,
   Heading,
   HStack,
+  Input,
   Text,
   VStack,
   useColorModeValue,
@@ -81,7 +82,7 @@ const CreateAccount = ({}) => {
     }
   }, [choice]);
 
-  return ( 
+  return (<> 
     <VStack spacing='3em'>
       <motion.div initial={{y: 80}} animate={controls}>
         <Text fontWeight='bold' size='lg'>Pick a Key to Start</Text>
@@ -112,7 +113,21 @@ const CreateAccount = ({}) => {
           <CreateAccountKey delay={7} choice={choice}/>
         </Box> 
       </HStack>
-    </VStack>)
+    </VStack>
+    <VStack>
+      { choice >= 0 && <Box 
+          as={motion.div} 
+          initial={{opacity: 0}} 
+          animate={{opacity: 1, transition: {delay: 0.25, duration: 0.25}}} 
+          style={{
+            position: 'relative',
+            top: -115
+          }}
+        >
+        <Input border='0' bgColor='white' textAlign='center' placeholder='My Treasury' width='10em' size='lg'/>
+      </Box> }
+    </VStack>
+    </>)
 }
 
 const CreateAccountKey = ({delay, onChoose, choice, ... rest}) => {
@@ -132,11 +147,11 @@ const CreateAccountKey = ({delay, onChoose, choice, ... rest}) => {
       var go = async() => {
         await controls.stop();
         await controls.start({
-          scale: 10,
+          scale: 5.8,
           rotateY: 0,
           opacity: 1, 
           x: 0,
-          y: 210,
+          y: 80,
           transition: {
             type: 'linear',
             duration: 0.5,
@@ -182,7 +197,7 @@ const CreateAccountKey = ({delay, onChoose, choice, ... rest}) => {
         transition: { duration: 8 } 
       });
     }}
-    onClick={() => {setClicked(true);}}> 
+    onClick={() => {if(choice < 0) {setClicked(true);}}}> 
       <FcKey size='80px'/>
   </motion.div> : 
     <motion.div
