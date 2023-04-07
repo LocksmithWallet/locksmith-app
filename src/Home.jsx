@@ -121,7 +121,7 @@ const CreateAccount = ({}) => {
           animate={{opacity: 1, transition: {delay: 0.25, duration: 0.25}}} 
           style={{
             position: 'relative',
-            top: -115
+            top: -114
           }}
         >
         <Input border='0' bgColor='white' textAlign='center' placeholder='My Treasury' width='10em' size='lg'/>
@@ -183,9 +183,9 @@ const CreateAccountKey = ({delay, onChoose, choice, ... rest}) => {
     onUpdate={() => { if(choice >=0) { 
         controls.stop();
         controls.start({
-          opacity: 0, 
+          opacity: 0,
           y: -100,
-          transition: {duration: 0.5}
+          transition: {type: 'linear', duration: 0.5}
         }); 
       } 
     }}
