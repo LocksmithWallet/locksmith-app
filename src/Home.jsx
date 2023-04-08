@@ -9,6 +9,7 @@ import {
   HStack,
   Input,
   Text,
+  Spinner,
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react';
@@ -28,6 +29,8 @@ import {
 } from 'framer-motion';
 import { Fade, AttentionSeeker } from 'react-awesome-reveal';
 import { BiLink } from 'react-icons/bi';
+
+import { useMintTrust } from './hooks/contracts/TrustCreator.jsx';
 
 export function Home() {
   const account = useAccount();
@@ -87,7 +90,14 @@ const CreateAccount = ({}) => {
 
   // form state and transaction
   const [name, setName] = useState('');
+  const mintTrust = useMintTrust(name, (error) => {
+
+  }, (data) => {
+
+  });
   const nameTooShort = name.length < 3;
+  const calculatingGas = !nameTooShort && !mintTrust.write;
+  const disabled = nameTooShort || calculatingGas;
 
   useEffect(() => {
     if(choice >= 0) {
@@ -96,6 +106,15 @@ const CreateAccount = ({}) => {
       controls.start('start');
     }
   }, [choice]);
+
+  useEffect(() => {
+    if(!nameTooShort && !calculatingGas) {
+      buttonControls.start({
+        y: [-6, -2, 0],
+        scale: [ 1.02, 1.05, 1],
+      }); 
+    }
+  }, [nameTooShort, calculatingGas]);
 
   return (<> 
     <VStack spacing='3em'>
@@ -106,7 +125,7 @@ const CreateAccount = ({}) => {
           'start': {opacity: 1, y: 0, transition: {type: 'spring'}} 
         }}
         initial={{y: 80}} animate={controls}>
-        <Text fontWeight='bold' size='lg'>Pick a Key to Start</Text>
+        <Text fontWeight='bold' size='lg'>Tap Any Key to Start</Text>
       </motion.div>
       { choice >= 0 && <motion.div
         variants={{
@@ -155,32 +174,27 @@ const CreateAccount = ({}) => {
         }}>
         <Input border='1px' borderColor='yellow.300' bgColor='white' textAlign='center' 
           placeholder='My Treasury' width='10em' size='lg'
+          maxLength={31}
           onChange={(e) => { 
-            if(name.length < 3 && e.target.value.length >= 3) {
-              buttonControls.start({
-                y: [-6, -2, 0],
-                scale: [ 1.02, 1.05, 1],
-              });
-            }
-            
             setName(e.target.value); 
           }}
         />
       </Box>
       <motion.div animate={buttonControls}>
-      <Button {... {isDisabled: nameTooShort}} as={motion.button} 
+      <Button {... {isDisabled: disabled}} as={motion.button} 
         initial={{y: 100, opacity: 0, scale: 0}}
         animate={{y: 0, opacity: [0,0.1,0.2,0.4,1], scale: [0, 0.1, 0.3, 0.6, 1], transition: {duration: 0.3}}}
         color='gray.700' 
-        whileHover={!nameTooShort && {scale: 0.97}}
-        whileTap={!nameTooShort && {scale: 0.92}} 
+        whileHover={!disabled && {scale: 0.97}}
+        whileTap={!disabled && {scale: 0.92}} 
         colorScheme='yellow' 
         borderRadius='full' 
         boxShadow='lg'
         size='lg' 
-        border={!nameTooShort && '1px'}
-        borderColor={!nameTooShort && 'yellow.100'}
-        leftIcon={<HiOutlineKey/>}
+        border={!disabled && '1px'}
+        borderColor={!disabled && 'yellow.100'}
+        leftIcon={ calculatingGas ? <Spinner size='sm'/> : <HiOutlineKey/>}
+        onClick={() => { mintTrust.write?.(); } }
         style={{
           top: -80
         }}
