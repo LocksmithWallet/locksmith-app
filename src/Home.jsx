@@ -15,6 +15,7 @@ import {
 import { useAccount } from 'wagmi';
 import { ConnectKitButton } from "connectkit";
 import { FcKey } from 'react-icons/fc';
+import { HiOutlineKey } from 'react-icons/hi';
 import { RiLock2Fill } from 'react-icons/ri';
 
 import { 
@@ -45,10 +46,11 @@ export function Home() {
         Turn your wallet into a bank.
       </Text>
     </Fade>
-    <Box pt='3em'>
+    <VStack pt='3em'>
       <ConnectKitButton.Custom>
       {({ isConnected, isConnecting, show, hide, address, ensName, chain }) => {
-        return <AnimatePresence>{!isConnected ? (<motion.div
+        return <><AnimatePresence>{!isConnected ? (<motion.div
+          style={{position: 'absolute'}}
           initial={{opacity: 0}}
           animate={{opacity: 1}}
           exit={{opacity: 0, transition: {delay: 0}}}
@@ -63,30 +65,58 @@ export function Home() {
             border='1px' borderColor='blue.500'
             boxShadow='dark-lg'
             leftIcon={<BiLink/>}>Connect</Button>
-        </motion.div>) : <CreateAccount/> }</AnimatePresence>
+        </motion.div>) : ''
+          }</AnimatePresence>
+          <AnimatePresence>
+            {isConnected && (<motion.div exit={{opacity: 0, y: 600, transition: {type: 'spring'}}}> 
+              <CreateAccount/>
+            </motion.div>) }
+          </AnimatePresence>
+        </>
         }}
       </ConnectKitButton.Custom>
-    </Box>
+    </VStack>
   </VStack>)
 }
 
 const CreateAccount = ({}) => {
+  // Animations
   const [choice, setChoice] = useState(-1);
   const controls = useAnimation();
+  const buttonControls = useAnimation();
+
+  // form state and transaction
+  const [name, setName] = useState('');
+  const nameTooShort = name.length < 3;
 
   useEffect(() => {
     if(choice >= 0) {
-      controls.start({opacity: 0, y: -80, transition: {type: 'spring'}}); 
+      controls.start('choice');
     } else {
-      controls.start({opacity: 1, y: 0, transition: {type: 'spring'}});
+      controls.start('start');
     }
   }, [choice]);
 
   return (<> 
     <VStack spacing='3em'>
-      <motion.div initial={{y: 80}} animate={controls}>
+      <VStack>
+      <motion.div 
+        variants={{
+          'choice': {opacity: 0, y: -80, transition: {type: 'spring'}},
+          'start': {opacity: 1, y: 0, transition: {type: 'spring'}} 
+        }}
+        initial={{y: 80}} animate={controls}>
         <Text fontWeight='bold' size='lg'>Pick a Key to Start</Text>
       </motion.div>
+      { choice >= 0 && <motion.div
+        variants={{
+          'choice': {opacity: 1, y: -40, transition: {type: 'spring'}},
+          'start': {}
+        }}
+        initial={{visiblility: 'hidden', y: 80}} animate={controls}>
+        <Text fontWeight='bold' size='lg'>Name Your Treasury</Text>
+      </motion.div> }
+      </VStack>
       <HStack spacing='0'>
         <Box m='0' p='0' onClick={() => {setChoice(0);}}>
           <CreateAccountKey delay={0} choice={choice}/>
@@ -114,27 +144,59 @@ const CreateAccount = ({}) => {
         </Box> 
       </HStack>
     </VStack>
-    <VStack>
-      { choice >= 0 && <Box 
-          as={motion.div} 
-          initial={{opacity: 0}} 
-          animate={{opacity: 1, transition: {delay: 0.25, duration: 0.25}}} 
-          style={{
-            position: 'relative',
-            top: -114
+    { choice >= 0 && <VStack>
+      <Box 
+        as={motion.div} 
+        initial={{opacity: 0}} 
+        animate={{opacity: 1, transition: {delay: 0.25, duration: 0.25}}} 
+        style={{
+          position: 'relative',
+          top: -94
+        }}>
+        <Input border='1px' borderColor='yellow.300' bgColor='white' textAlign='center' 
+          placeholder='My Treasury' width='10em' size='lg'
+          onChange={(e) => { 
+            if(name.length < 3 && e.target.value.length >= 3) {
+              buttonControls.start({
+                y: [-6, -2, 0],
+                scale: [ 1.02, 1.05, 1],
+              });
+            }
+            
+            setName(e.target.value); 
           }}
-        >
-        <Input border='0' bgColor='white' textAlign='center' placeholder='My Treasury' width='10em' size='lg'/>
-      </Box> }
-    </VStack>
+        />
+      </Box>
+      <motion.div animate={buttonControls}>
+      <Button {... {isDisabled: nameTooShort}} as={motion.button} 
+        initial={{y: 100, opacity: 0, scale: 0}}
+        animate={{y: 0, opacity: [0,0.1,0.2,0.4,1], scale: [0, 0.1, 0.3, 0.6, 1], transition: {duration: 0.3}}}
+        color='gray.700' 
+        whileHover={!nameTooShort && {scale: 0.97}}
+        whileTap={!nameTooShort && {scale: 0.92}} 
+        colorScheme='yellow' 
+        borderRadius='full' 
+        boxShadow='lg'
+        size='lg' 
+        border={!nameTooShort && '1px'}
+        borderColor={!nameTooShort && 'yellow.100'}
+        leftIcon={<HiOutlineKey/>}
+        style={{
+          top: -80
+        }}
+        >Mint Key</Button>
+      </motion.div>
+    </VStack> }
     </>)
 }
 
 const CreateAccountKey = ({delay, onChoose, choice, ... rest}) => {
+  // animations
   const [isClicked, setClicked] = useState(false);
   const [isStopped, stop] = useState(false);
   const controls = useAnimation();
   const x = useMotionValue(-220);
+  
   useEffect(() => {
     if (!isClicked) {
       // starting 
@@ -151,13 +213,12 @@ const CreateAccountKey = ({delay, onChoose, choice, ... rest}) => {
           rotateY: 0,
           opacity: 1, 
           x: 0,
-          y: 80,
+          y: 100,
           transition: {
             type: 'linear',
             duration: 0.5,
           }
         }); 
-        controls.set({position: 'relative'});
       };
       go();
     }
@@ -202,7 +263,8 @@ const CreateAccountKey = ({delay, onChoose, choice, ... rest}) => {
   </motion.div> : 
     <motion.div
       style={{
-        x, 
+        x,
+        rotateY,
         width: 80,
         height: 80,
       }}
