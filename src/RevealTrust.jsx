@@ -107,6 +107,9 @@ export function RevealTrust() {
           </Box> } 
           { trust && key && 
             <motion.div 
+              whileHover={ trust && key && {scale: 1.1}}
+              whileTap={ trust && key && {scale: 0.95}}
+              style={{cursor: 'pointer'}} 
               initial={{scale: 0, opacity: 0}}
               animate={{
                 rotate: -360,
@@ -115,11 +118,11 @@ export function RevealTrust() {
                 filter: ['drop-shadow(0 0 0 rgba(255,200,0, 0.0))','drop-shadow(0 0 50px rgba(255,200,0, 0.5))',
                   'drop-shadow(0 0 15px rgba(255,200,0, 0.5))']
               }}>
-              <FcKey size='150px'/>
+              <FcKey size='150px'/><VStack>
+              { key && <Text as={motion.div} initial={{opacity: 0, y: 30}} animate={{opacity: 1, y: 0}}
+                pos='relative' top='-108' fontWeight='bold' color='yellow.800'>
+                  {ethers.utils.parseBytes32String(key.keyName)}</Text> }</VStack>
             </motion.div> }
-          { key && <Text as={motion.div} initial={{opacity: 0, y: 30}} animate={{opacity: 1, y: 0}}
-            pos='relative' top='-113' fontWeight='bold' color='yellow.800'>
-              {ethers.utils.parseBytes32String(key.keyName)}</Text> }
           { trust && key && <HStack pos='relative' top='-10' width='270px'>
             <Text {... textIntro } 
               color='gray.200' fontStyle='italic'>Trust #{trust.trustId.toString()}</Text>
