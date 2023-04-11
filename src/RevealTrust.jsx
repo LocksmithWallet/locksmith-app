@@ -55,10 +55,12 @@ export function RevealTrust() {
   const textIntro = {
     as: motion.div,
     initial: {
+      y: 100,
       opacity: 0,
       scale: 0,
     },
     animate: {
+      y: 0,
       opacity: 1,
       scale: [0,2,1],
       filter: ['drop-shadow(0 0 0 rgba(255,255,255, 0.0))',
@@ -90,7 +92,7 @@ export function RevealTrust() {
           <RiLock2Fill size='400px'/>
         <VStack pos='relative' top='-245'>
           <Skeleton isLoaded={trust} fadeDuration={1} width='16em' height='1.5em' borderRadius='lg'>
-            <Text color='yellow.300' fontSize='32px' fontWeight='bold' 
+            <Text as={motion.div} initial={{scale: 0}} animate={{scale: [0, 1.2, 1]}} color='yellow.300' fontSize='32px' fontWeight='bold' 
               fontFamily='Copperplate' pos='relative' top='-3' textAlign='center'>
               {trust && ethers.utils.parseBytes32String(trust.trustName)}
             </Text>
@@ -119,7 +121,7 @@ export function RevealTrust() {
                   'drop-shadow(0 0 15px rgba(255,200,0, 0.5))']
               }}>
               <FcKey size='150px'/><VStack>
-              { key && <Text as={motion.div} initial={{opacity: 0, y: 30}} animate={{opacity: 1, y: 0}}
+              { key && <Text as={motion.div} initial={{opacity: 0, y: 30, scale: 0 }} animate={{opacity: 1, y: 0, scale: [0, 1.2, 1]}}
                 pos='relative' top='-108' fontWeight='bold' color='yellow.800'>
                   {ethers.utils.parseBytes32String(key.keyName)}</Text> }</VStack>
             </motion.div> }
