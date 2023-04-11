@@ -1,6 +1,7 @@
 //////////////////////////////////////
 // React and UI Components
 //////////////////////////////////////
+import { useNavigate } from 'react-router-dom';
 import { React, useState, useEffect } from 'react';
 import {
   Box,
@@ -83,17 +84,22 @@ export function Home() {
 }
 
 const CreateAccount = ({}) => {
+  const navigate = useNavigate();
+
   // Animations
   const [choice, setChoice] = useState(-1);
   const controls = useAnimation();
   const buttonControls = useAnimation();
-
+  
   // form state and transaction
   const [name, setName] = useState('');
+  const [transaction, setTransaction] = useState(null);
   const mintTrust = useMintTrust(name, (error) => {
-
+    // error toast
   }, (data) => {
-
+    // track pending transaction
+    setTransaction(data);
+    setTimeout(()=> {navigate('/reveal/'+data.hash);}, 500);
   });
   const nameTooShort = name.length < 3;
   const calculatingGas = !nameTooShort && !mintTrust.write;
@@ -116,7 +122,8 @@ const CreateAccount = ({}) => {
     }
   }, [nameTooShort, calculatingGas]);
 
-  return (<> 
+  return (<LayoutGroup><AnimatePresence>
+    { !transaction && <motion.div layout exit={{y: 600, opacity: 0}}>
     <VStack spacing='3em'>
       <VStack>
       <motion.div 
@@ -174,14 +181,19 @@ const CreateAccount = ({}) => {
         }}>
         <Input border='1px' borderColor='yellow.300' bgColor='white' textAlign='center' 
           placeholder='My Treasury' width='10em' size='lg'
-          maxLength={31}
+          maxLength={15}
           onChange={(e) => { 
             setName(e.target.value); 
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && !nameTooShort) {
+              mintTrust.write?.(); 
+            }
           }}
         />
       </Box>
       <motion.div animate={buttonControls}>
-      <Button {... {isDisabled: disabled}} as={motion.button} 
+      <Button {... {isDisabled: disabled}} isLoading={mintTrust.isLoading} as={motion.button} 
         initial={{y: 100, opacity: 0, scale: 0}}
         animate={{y: 0, opacity: [0,0.1,0.2,0.4,1], scale: [0, 0.1, 0.3, 0.6, 1], transition: {duration: 0.3}}}
         color='gray.700' 
@@ -197,11 +209,11 @@ const CreateAccount = ({}) => {
         onClick={() => { mintTrust.write?.(); } }
         style={{
           top: -80
-        }}
-        >Mint Key</Button>
+        }}>{mintTrust.isLoading ? 'Signing' : 'Mint Key'}</Button>
       </motion.div>
     </VStack> }
-    </>)
+    </motion.div> } </AnimatePresence>
+    </LayoutGroup>)
 }
 
 const CreateAccountKey = ({delay, onChoose, choice, ... rest}) => {

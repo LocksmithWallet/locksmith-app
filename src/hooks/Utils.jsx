@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { 
+import { ethers } from 'ethers';
+import {
+  useAccount,
   useNetwork,
   usePrepareContractWrite,
   useContractWrite
@@ -7,6 +9,29 @@ import {
 
 import { Networks } from '../configuration/Networks';
 import { LocksmithInterface } from '../configuration/LocksmithInterface';
+
+export function getReceiptEvents(receipt, contract, eventName) {
+  // grab the event definition from the ABI
+  const definition = LocksmithInterface.getEventDefinition(contract, eventName);
+
+  // translate this into the ethers topic signature
+  const eventTopics = definition.inputs.map((i) => i.internalType);
+  const eventSignature = ethers.utils.id(
+    [eventName, '(', eventTopics.join(','), ')'].join('')
+  );
+
+  // translate the events into named hashes
+  return receipt.logs.filter((log) => log.topics[0] === eventSignature).map((e) => {
+    // decode the event data based on the event topics.
+    const parsedEvent = ethers.utils.defaultAbiCoder.decode(eventTopics, e.data);
+
+    // build a hash of the actual topic names and values
+    return definition.inputs.reduce((memo, next, index) => {
+      memo[next.name] = parsedEvent[index]; 
+      return memo
+    }, {});
+  });
+}
 
 export function useDebounce(value, delay) {
   // State and setters for debounced value
@@ -30,14 +55,15 @@ export function useDebounce(value, delay) {
 }
 
 export function useLocksmithWrite(contract, method, args, enabled, errorFunc, successFunc) {
+  const account = useAccount();
   const network = useNetwork();
-  const config = Networks.getNetwork(network.chain.id);
+  const config = Networks.getNetwork(account.isConnected ? network.chain.id : null);
   const preparation = usePrepareContractWrite({
-    address: config.contracts[contract].address, 
+    address: account.isConnected ? config.contracts[contract].address : ethers.constants.AddressZero,
     abi: LocksmithInterface.getAbi(contract).abi, 
     functionName: method,
     args: args,
-    enabled: enabled,
+    enabled: enabled && account.isConnected,
     onError(error) {
       console.log("There was an error prepping a contract write on: " + contract + "::" + method);
       console.log(args);

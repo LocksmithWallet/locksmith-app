@@ -18,6 +18,15 @@ export const Networks = (function() {
       return networks[networkId];
     },
     //////////////////////////
+    // getContractAddress
+    //
+    // For a given network id, will return
+    // the contract address.
+    //////////////////////////
+    getContractAddress: function(networkId, contract) {
+      return networks[networkId].contracts[contract].address;
+    },
+    //////////////////////////
     // getSupportedNetworks
     //
     // Returns a list of all supported networks.

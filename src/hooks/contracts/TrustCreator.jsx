@@ -16,7 +16,7 @@ import {ethers} from 'ethers';
  */
 export function useMintTrust(trustName, errorFunc, successFunc) {
   return useLocksmithWrite('TrustCreator', 'spawnTrust',
-      [ethers.utils.formatBytes32String(useDebounce(trustName.trim(), 20)), [], [], []],
+      [ethers.utils.formatBytes32String(trustName.trim()), [], [], []],
       true, 
       errorFunc, successFunc);
 }
