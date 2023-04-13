@@ -20,7 +20,6 @@ import { Networks } from './configuration/Networks';
 import { ConnectKitButton } from "connectkit";
 import { FcKey } from 'react-icons/fc';
 import { HiOutlineKey } from 'react-icons/hi';
-import { RiLock2Fill } from 'react-icons/ri';
 
 import { 
   motion, 

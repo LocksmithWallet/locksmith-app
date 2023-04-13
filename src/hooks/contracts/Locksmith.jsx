@@ -65,6 +65,8 @@ export function useTrustInfo(trustId) {
   const trust = useLocksmithRead('Locksmith', 'getTrustInfo', [trustId], trustId !== null, true);
 
   useEffect(() => {
+    if (!trust.data) { return; }
+
     setTrustData({
       trustId: trust.data[0],
       name: ethers.utils.parseBytes32String(trust.data[1]),

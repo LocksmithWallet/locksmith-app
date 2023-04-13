@@ -1,7 +1,7 @@
 //////////////////////////////////////
 // React and UI Components
 //////////////////////////////////////
-import { React, useState, useEffect, useRef } from 'react';
+import { React, useState, useEffect } from 'react';
 import {
   useParams
 } from 'react-router-dom';
@@ -12,12 +12,8 @@ import {
   HStack,
   Image,
   Input,
-  Tag,
-  TagLabel,
   Text,
-  Skeleton,
   Spacer,
-  Spinner,
   VStack,
 } from '@chakra-ui/react';
 import { ethers } from 'ethers';
@@ -31,8 +27,6 @@ import { getReceiptEvents } from './hooks/Utils';
 
 import { BsHammer } from 'react-icons/bs';
 import { FcKey } from 'react-icons/fc';
-import { RiLock2Fill } from 'react-icons/ri';
-
 import { 
   motion, 
   AnimatePresence, 
@@ -89,7 +83,7 @@ export function RevealTrust() {
 
   return (<VStack>
     <AnimatePresence>
-      <motion.div initial={{opacity: 0, y: -2000, filter: 'drop-shadow(0 10px 5px rgba(0,0,0,0.5))'}} animate={{opacity: 1, y: 100}} transition={{type: 'spring'}}>
+      <motion.div initial={{filter: 'drop-shadow(0 10px 5px rgba(0,0,0,0.5))'}} transition={{type: 'spring'}}>
         <Image src='/gold-lock-large.png'/>
         <VStack pos='relative' top='-245'>
           { trust &&  
@@ -135,7 +129,7 @@ export function RevealTrust() {
             <Text {... textIntro } 
               color='gray.200' fontStyle='italic'>Key #{key.keyId.toString()}</Text> 
           </HStack></div> }
-          { (!key || !trust) && <Text as={motion.div} animate={{scale: [1, 1.1], transition: {repeat: Infinity, repeatType: 'mirror'}}}
+          { (!key || !trust) && <Text as={motion.div} animate={{scale: [1, 1.1], transition: {repeat: Infinity, repeatType: 'mirror', duration: 0.5}}}
             pos='relative' top='-10' color='gray.100' fontStyle='italic'>Minting Key...</Text> }
         </VStack>
       </motion.div>

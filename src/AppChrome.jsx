@@ -36,7 +36,6 @@ import { AttentionSeeker, Fade } from 'react-awesome-reveal';
 import { FiMenu } from 'react-icons/fi';
 import { BiCoinStack } from 'react-icons/bi';
 import { HiOutlineKey } from 'react-icons/hi';
-import { RiLock2Fill } from 'react-icons/ri';
 
 export default function SidebarWithHeader({children}) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -50,7 +49,7 @@ export default function SidebarWithHeader({children}) {
     </Drawer>
     {/* mobilenav */}
     <MobileNav onOpen={onOpen}/>
-    <Box ml={{ base: 0, md: 60 }}> 
+    <Box ml={{ base: 0, md: 72}}> 
       {children}
     </Box>
   </Box>
