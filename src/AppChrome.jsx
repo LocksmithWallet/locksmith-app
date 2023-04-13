@@ -30,7 +30,7 @@ import { KeyNavigator } from './navigation/KeyNavigator';
 
 // Animations
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { AttentionSeeker, Fade } from 'react-awesome-reveal';
+import { AttentionSeeker } from 'react-awesome-reveal';
 
 // Icons
 import { FiMenu } from 'react-icons/fi';
@@ -72,17 +72,17 @@ const SidebarContent = ({ onClose, ...rest }) => {
       {...rest}>
       <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
         <HStack onClick={() => {navigate('/');}} spacing={0} cursor='pointer'>
-          <Fade direction='left'>
-            <Text fontSize='4xl'><b>L</b></Text>
-          </Fade>
-          <Fade direction='down'> 
-            <Image src='/gold-lock-tiny.png' style={{filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.5))'}}/> 
-          </Fade>
-          <Fade direction='right'>
-              <Text fontSize='4xl'>
-                <b>cksmith</b>
-              </Text>
-          </Fade>
+          <motion.div  initial={{x: -100}} animate={{x: 0}} transition={{duration: 0.5}}>
+            <Heading fontSize='4xl'>L</Heading>
+          </motion.div>
+          <AttentionSeeker effect='bounce'>
+            <Image style={{filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))'}} src='/gold-lock-tiny.png'/>
+          </AttentionSeeker>
+          <motion.div  initial={{x: 100}} animate={{x: 0}} transition={{duration: 0.5}}>
+            <Heading fontSize="4xl" data-text="cksmith">
+              cksmith
+            </Heading>
+          </motion.div>
         </HStack>
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose}/>
       </Flex>

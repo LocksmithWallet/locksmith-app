@@ -42,7 +42,7 @@ export const AnimatedRoutes = () => {
     }/> }
     { account.isConnected && <Route path='/key/:keyId' element={<Key/>}/> }
     <Route path='*' element={
-      <motion.div key='home' initial={{opacity: 1}} animate={{opacity: 1}} exit={{opacity: 0, transition: pageTransition}}>
+      <motion.div key='home' initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0, transition: pageTransition}}>
         <Home/>
       </motion.div>
     }/>

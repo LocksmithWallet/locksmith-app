@@ -29,7 +29,7 @@ import {
   useTransform,
   useAnimation,
 } from 'framer-motion';
-import { Fade, AttentionSeeker } from 'react-awesome-reveal';
+import { AttentionSeeker } from 'react-awesome-reveal';
 import { BiLink } from 'react-icons/bi';
 
 import { useMintTrust } from './hooks/contracts/TrustCreator.jsx';
@@ -41,23 +41,23 @@ export function Home() {
 
   return (<VStack> 
     <HStack spacing='0' mt='1em'>
-      <Fade direction='left' duration='500'><Heading fontSize='6xl'>L</Heading></Fade>
-      <Fade>
-        <AttentionSeeker effect='bounce'>
-          <Image style={{filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))'}} src='/gold-lock-small.png'/>
-        </AttentionSeeker>
-      </Fade>
-      <Fade direction='right' duration='500'>
+      <motion.div  initial={{x: -100}} animate={{x: 0}} transition={{duration: 0.5}}>
+        <Heading fontSize='6xl'>L</Heading>
+      </motion.div>
+      <AttentionSeeker effect='bounce'>
+        <Image style={{filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))'}} src='/gold-lock-small.png'/>
+      </AttentionSeeker>
+      <motion.div  initial={{x: 100}} animate={{x: 0}} transition={{duration: 0.5}}>
         <Heading fontSize="6xl" data-text="cksmith">
           cksmith
         </Heading>
-      </Fade>
+      </motion.div>
     </HStack>
-    <Fade direction='up' duration='500'>
+    <motion.div  initial={{y: 50}} animate={{y: 0}} transition={{duration: 0.5}}>
       <Text color={'gray.600'} fontSize={'xl'}>
         Turn your wallet into a bank.
       </Text>
-    </Fade>
+    </motion.div>
     <VStack pt='3em'>
       <ConnectKitButton.Custom>
       {({ isConnected, isConnecting, show, hide, address, ensName, chain }) => {
