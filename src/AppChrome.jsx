@@ -12,6 +12,7 @@ import {
   Heading,
   HStack,
   Icon,
+  Image,
   useColorModeValue,
   Drawer,
   DrawerContent,
@@ -19,10 +20,13 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { useNetwork } from 'wagmi';
+import { Networks } from './configuration/Networks';
 import {Link, useNavigate } from 'react-router-dom';
+
 // Navigation components
 import { NetworkSwitcher } from './navigation/NetworkSwitcher';
 import { WalletConnector } from "./navigation/WalletConnector";
+import { KeyNavigator } from './navigation/KeyNavigator';
 
 // Animations
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
@@ -33,11 +37,6 @@ import { FiMenu } from 'react-icons/fi';
 import { BiCoinStack } from 'react-icons/bi';
 import { HiOutlineKey } from 'react-icons/hi';
 import { RiLock2Fill } from 'react-icons/ri';
-
-const LinkItems = [
-  { name: 'Keys', icon: HiOutlineKey, href: '/keys'},
-  { name: 'Assets', icon: BiCoinStack, href: '/assets'}
-];
 
 export default function SidebarWithHeader({children}) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -58,68 +57,39 @@ export default function SidebarWithHeader({children}) {
 }
 
 const SidebarContent = ({ onClose, ...rest }) => {
+  const network = useNetwork(); 
   const navigate = useNavigate();
+  
   return (
     <Box
       transition="3s ease"
       bg={useColorModeValue('white', 'gray.900')}
       borderRight="1px"
       borderRightColor={useColorModeValue('gray.200', 'gray.700')}
-      w={{ base: 'full', md: 60 }}
+      w={{ base: 'full', md: 72}}
       pos="fixed"
+      overflowY='scroll'
       h="full"
       {...rest}>
       <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
         <HStack onClick={() => {navigate('/');}} spacing={0} cursor='pointer'>
           <Fade direction='left'>
-            <Text fontSize='2xl'><b>L</b></Text>
+            <Text fontSize='4xl'><b>L</b></Text>
           </Fade>
           <Fade direction='down'> 
-            <RiLock2Fill size='22px'/>
+            <Image src='/gold-lock-tiny.png' style={{filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.5))'}}/> 
           </Fade>
           <Fade direction='right'>
-            <Text fontSize='2xl'><b>cksmith</b></Text>
+              <Text fontSize='4xl'>
+                <b>cksmith</b>
+              </Text>
           </Fade>
         </HStack>
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose}/>
       </Flex>
-      { LinkItems.map((link) => (
-        <NavItem onClick={onClose} mt='0.4em' href={link.href} key={link.name} icon={link.icon} fontSize='lg'>
-          {link.name}
-        </NavItem>
-      )) }
+      { network && network.chain && network.chain.id && 
+          Networks.getNetwork(network.chain.id) && <KeyNavigator onClose={onClose}/> }
     </Box>
-  );
-};
-
-const NavItem = ({ href, icon, children, ...rest }) => {
-  return (
-    <Link to={href} style={{ textDecoration: 'none' }} _focus={{ boxShadow: 'none' }}>
-      <Flex
-        align="center"
-        p="4"
-        mx="4"
-        borderRadius="lg"
-        role="group"
-        cursor="pointer"
-        _hover={{
-          bg: useColorModeValue('gray.500','gray.700'),
-          color: 'white',
-        }}
-        {...rest}>
-        {icon && (
-          <Icon
-            mr="4"
-            fontSize='1.4em'
-            _groupHover={{
-              color: 'white',
-            }}
-            as={icon}
-          />
-        )}
-        {children}
-      </Flex>
-    </Link>
   );
 };
 

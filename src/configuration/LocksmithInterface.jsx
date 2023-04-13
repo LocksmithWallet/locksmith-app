@@ -1,9 +1,11 @@
+import * as KeyVault from './interfaces/KeyVault.json';
 import * as Locksmith from './interfaces/Locksmith.json';
 import * as TrustCreator from './interfaces/agents/TrustCreator.json';
 import { ethers } from 'ethers';
 
 export const LocksmithInterface = (function() {
   var interfaces = {
+    'KeyVault': KeyVault,
     'Locksmith': Locksmith,
     'TrustCreator': TrustCreator 
   };

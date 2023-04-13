@@ -8,13 +8,15 @@ import {
   Button,
   Heading,
   HStack,
+  Image,
   Input,
   Text,
   Spinner,
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { useAccount } from 'wagmi';
+import { useAccount, useNetwork } from 'wagmi';
+import { Networks } from './configuration/Networks';
 import { ConnectKitButton } from "connectkit";
 import { FcKey } from 'react-icons/fc';
 import { HiOutlineKey } from 'react-icons/hi';
@@ -35,15 +37,22 @@ import { useMintTrust } from './hooks/contracts/TrustCreator.jsx';
 
 export function Home() {
   const account = useAccount();
+  const network = useNetwork();
+  const isSupported = account.isConnected && Networks.getNetwork(network.chain.id);
+
   return (<VStack> 
     <HStack spacing='0' mt='1em'>
       <Fade direction='left' duration='500'><Heading fontSize='6xl'>L</Heading></Fade>
       <Fade>
         <AttentionSeeker effect='bounce'>
-        <RiLock2Fill size='52px'/>
+          <Image style={{filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))'}} src='/gold-lock-small.png'/>
         </AttentionSeeker>
       </Fade>
-      <Fade direction='right' duration='500'><Heading fontSize={'6xl'}>cksmith</Heading></Fade>
+      <Fade direction='right' duration='500'>
+        <Heading fontSize="6xl" data-text="cksmith">
+          cksmith
+        </Heading>
+      </Fade>
     </HStack>
     <Fade direction='up' duration='500'>
       <Text color={'gray.600'} fontSize={'xl'}>
@@ -72,7 +81,7 @@ export function Home() {
         </motion.div>) : ''
           }</AnimatePresence>
           <AnimatePresence>
-            {isConnected && (<motion.div exit={{opacity: 0, y: 600, transition: {type: 'spring'}}}> 
+            {isConnected && isSupported && (<motion.div exit={{opacity: 0, y: 600, transition: {type: 'spring'}}}> 
               <CreateAccount/>
             </motion.div>) }
           </AnimatePresence>

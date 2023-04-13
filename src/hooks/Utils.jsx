@@ -4,9 +4,9 @@ import {
   useAccount,
   useNetwork,
   usePrepareContractWrite,
+  useContractRead,
   useContractWrite
 } from 'wagmi';
-
 import { Networks } from '../configuration/Networks';
 import { LocksmithInterface } from '../configuration/LocksmithInterface';
 
@@ -78,5 +78,19 @@ export function useLocksmithWrite(contract, method, args, enabled, errorFunc, su
     onSuccess(data) {
       successFunc(data);
     }
+  });
+}
+
+export function useLocksmithRead(contract, method, args, enabled = true, watch = false) {
+  const network = useNetwork();
+  const connected = network && network.chain && network.chain.id; 
+  const config = Networks.getNetwork(connected ? network.chain.id : null);    
+  return useContractRead({
+    address: connected ? config.contracts[contract].address : ethers.constants.AddressZero,
+    abi: LocksmithInterface.getAbi(contract).abi,
+    functionName: method,
+    args: args,
+    enabled: enabled && connected, 
+    watch: watch
   });
 }

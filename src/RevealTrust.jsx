@@ -10,6 +10,7 @@ import {
   Button,
   Heading,
   HStack,
+  Image,
   Input,
   Tag,
   TagLabel,
@@ -88,16 +89,18 @@ export function RevealTrust() {
 
   return (<VStack>
     <AnimatePresence>
-      <motion.div initial={{opacity: 0, y: -2000}} animate={{opacity: 1, y: 100}} transition={{type: 'spring'}}>
-          <RiLock2Fill size='400px'/>
+      <motion.div initial={{opacity: 0, y: -2000, filter: 'drop-shadow(0 10px 5px rgba(0,0,0,0.5))'}} animate={{opacity: 1, y: 100}} transition={{type: 'spring'}}>
+        <Image src='/gold-lock-large.png'/>
         <VStack pos='relative' top='-245'>
-          <Skeleton isLoaded={trust} fadeDuration={1} width='16em' height='1.5em' borderRadius='lg'>
+          { trust &&  
             <Text as={motion.div} initial={{scale: 0}} animate={{scale: [0, 1.2, 1]}} color='yellow.300' fontSize='32px' fontWeight='bold' 
               fontFamily='Copperplate' pos='relative' top='-3' textAlign='center'>
               {trust && ethers.utils.parseBytes32String(trust.trustName)}
-            </Text>
-          </Skeleton>
-          { (!trust || !key) && <Box as={motion.div} pos='absolute' top="45" 
+            </Text> }
+          { (!trust || !key) && <Box as={motion.div}
+            style={{
+              y: 57
+            }}
             animate={{
               opacity: 1,
               rotate: [380, -70, -50, -70, 30],
@@ -105,34 +108,35 @@ export function RevealTrust() {
                 repeat: Infinity,
               }
           }}> 
-            <BsHammer size='50px'/>
+            <BsHammer size='38px' color='#EFEFEF'/>
           </Box> } 
           { trust && key && 
             <motion.div 
               whileHover={ trust && key && {scale: 1.1}}
               whileTap={ trust && key && {scale: 0.95}}
-              style={{cursor: 'pointer'}} 
+              style={{cursor: 'pointer', y: -30}} 
               initial={{scale: 0, opacity: 0}}
               animate={{
                 rotate: -360,
                 scale: 1, 
                 opacity: 1,
-                filter: ['drop-shadow(0 0 0 rgba(255,200,0, 0.0))','drop-shadow(0 0 50px rgba(255,200,0, 0.5))',
-                  'drop-shadow(0 0 15px rgba(255,200,0, 0.5))']
+                filter: ['drop-shadow(0 0 0 rgba(255,200,0, 0.0))','drop-shadow(0 0 50px rgba(255,255,0, 0.9))',
+                  'drop-shadow(0 0 15px rgba(255,215,0, 0.6))']
               }}>
               <FcKey size='150px'/><VStack>
               { key && <Text as={motion.div} initial={{opacity: 0, y: 30, scale: 0 }} animate={{opacity: 1, y: 0, scale: [0, 1.2, 1]}}
                 pos='relative' top='-108' fontWeight='bold' color='yellow.800'>
                   {ethers.utils.parseBytes32String(key.keyName)}</Text> }</VStack>
             </motion.div> }
-          { trust && key && <HStack pos='relative' top='-10' width='270px'>
+          { trust && key && <div style={{position: 'relative', top: -120}}><HStack width='220px'>
             <Text {... textIntro } 
               color='gray.200' fontStyle='italic'>Trust #{trust.trustId.toString()}</Text>
             <Spacer/>
             <Text {... textIntro } 
               color='gray.200' fontStyle='italic'>Key #{key.keyId.toString()}</Text> 
-          </HStack> }
-          { (!key || !trust) && <Text pos='relative' top='-8' color='gray.700' fontStyle='italic'>Minting Key...</Text> }`
+          </HStack></div> }
+          { (!key || !trust) && <Text as={motion.div} animate={{scale: [1, 1.1], transition: {repeat: Infinity, repeatType: 'mirror'}}}
+            pos='relative' top='-10' color='gray.100' fontStyle='italic'>Minting Key...</Text> }
         </VStack>
       </motion.div>
     </AnimatePresence>
