@@ -50,6 +50,10 @@ export const KeyNavigator = (onClose) => {
 
   // when a key get's its data back
   const sortKey = function(keyId, inspection) {
+    // the key came back as invalid in hardhat,
+    // what do we do if we throw away the result?
+    if (!inspection.isValid) { return; }
+
     // remove the key from unsorted
     setUnsortedKeys((previous) => {
       return previous.filter((k) => k !== keyId);
