@@ -19,6 +19,7 @@
     "react-awesome-reveal": "^4.2.3",
     "react-dom": "^18.2.0",
     "react-icons": "^4.8.0",
+    "react-qrcode-logo": "^2.9.0",
     "react-router-dom": "^6.10.0",
     "wagmi": "^0.12.8"
   },

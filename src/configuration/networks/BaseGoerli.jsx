@@ -12,6 +12,9 @@ export const BaseGoerli = (function() {
       return <BaseIcon {...props}/>
     },
     contracts: contracts, 
-    assets: null
+    assets: null,
+    getAddressExplorerUrl: function(address) {
+      return "https://goerli.basescan.org/address/" + address;
+    }
   };
 })();

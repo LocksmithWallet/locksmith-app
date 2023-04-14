@@ -12,6 +12,9 @@ export const Filecoin = (function() {
       return <FIL color='#0090FF' {...props}/>; 
     },
     contracts: contracts,
-    assets: null
+    assets: null,
+    getAddressExplorerUrl: function(address) {
+      return "https://filfox.info/en/address/" + address;
+    }
   };
 })();

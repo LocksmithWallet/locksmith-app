@@ -1,4 +1,5 @@
 import { React, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -122,11 +123,13 @@ export const TrustNavigationBox = ({trustId, keys}) => {
 
 export const KeyListItem = ({k, i, ...rest}) => {
   const [isHover, setHover] = useState(false);
+  const navigate = useNavigate();
 
   return <ListItem key={'kl'+k.keyId.toString()} pos='relative'>
     <motion.div layout
       onMouseEnter={() => { setHover(true); }}
       onMouseLeave={() => { setHover(false); }}
+      onClick={() => { navigate('/key/' + k.keyId); }}
       style={{cursor: 'pointer'}}
       initial={{opacity: 0, y: 50}}
       animate={{opacity: 1, y: 0}}
@@ -147,7 +150,7 @@ export const KeyListItem = ({k, i, ...rest}) => {
           }}/>}
       </AnimatePresence>
       <HStack px='0.5em'>
-        <KeyIcon keyInfo={k} size='30px' props={{style: {zIndex: 1}}}/>
+        <KeyIcon keyInfo={k} size='30px' style={{zIndex: 1}}/>
         <Text fontSize='lg' style={{zIndex: 1}}>{k.alias}</Text>
         <Spacer/>
         <Text style={{zIndex: 1}} fontSize='sm' fontStyle='italic' textColor='gray.400'>#{k.keyId}</Text>

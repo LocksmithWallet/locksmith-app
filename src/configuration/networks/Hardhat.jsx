@@ -12,6 +12,9 @@ export const HardHat = (function() {
       return <FaHardHat {...props} color='#ffa600'/>
     },
     contracts: contracts, 
-    assets: null
+    assets: null,
+    getAddressExplorerUrl: function(address) {
+      return "https://etherscan.io"; // nothing locally right now?
+    }
   };
 })();
