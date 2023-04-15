@@ -78,7 +78,7 @@ export const KeyNavigator = (onClose) => {
           key={'tn'+tid} 
           initial={{opacity: 0, x: -100}}
           animate={{opacity: 1, x: 0}}
-          transition={{type: 'spring', delay: i * 0.25}}>
+          transition={{type: 'spring', delay: i * 0.05}}>
             <TrustNavigationBox trustId={tid} keys={sortedKeys[tid]}/>
         </motion.div>
       )}
@@ -131,9 +131,9 @@ export const KeyListItem = ({k, i, ...rest}) => {
       onMouseLeave={() => { setHover(false); }}
       onClick={() => { navigate('/key/' + k.keyId); }}
       style={{cursor: 'pointer'}}
-      initial={{opacity: 0, y: 50}}
+      initial={{opacity: 0, y: -50}}
       animate={{opacity: 1, y: 0}}
-      transition={{delay: i * 0.25, transition: {layout: {duration: 0.5}}}}>
+      transition={{delay: i * 0.05, transition: {layout: {duration: 0.1}}}}>
       <AnimatePresence>
         { isHover && <motion.div
           layoutId={'key-selection-'+k.trustId}

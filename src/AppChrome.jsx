@@ -2,7 +2,9 @@
 import React, { 
   ReactNode, 
   ReactText,
-  useState
+  useEffect,
+  useState,
+  useRef,
 } from 'react';
 import {
   IconButton,
@@ -58,9 +60,44 @@ export default function SidebarWithHeader({children}) {
 const SidebarContent = ({ onClose, ...rest }) => {
   const network = useNetwork(); 
   const navigate = useNavigate();
-  
+  const ref = useRef();
+  const [zIndex, setZIndex] = useState(0);
+
+  const handleMouseMove = (event) => {
+    const { clientX, clientY } = event;
+    const elements = document.elementsFromPoint(clientX, clientY);
+    const targetElement = elements.find(
+      (element) => ref.current && ref.current.contains(element)
+    );
+
+    if (targetElement) {
+      const blurry = elements.find(
+        (element) => element.getAttribute('data-blurry') === 'blurry'
+      );
+      if (blurry) {return;}
+
+      // Hover is over the target element
+      setZIndex(9);
+    } else {
+      // Hover is not over the target element
+      setZIndex(0);
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+
   return (
     <Box
+      ref={ref}
+      zIndex={zIndex}
+      onMouseEnter={() => {setZIndex(3);}}
+      onMouseLeave={() => {setZIndex(0);}}
       transition="3s ease"
       bg={useColorModeValue('white', 'gray.900')}
       borderRight="1px"
