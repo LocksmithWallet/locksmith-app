@@ -12,6 +12,9 @@ import {
   HStack,
   Image,
   Flex,
+  Modal,
+  ModalOverlay,
+  Portal,
   Text,
   Spacer,
   VStack,
@@ -61,7 +64,25 @@ export function Key() {
 
   // processing
 
-  return (key && <motion.div key={"key-"+keyId}><Box ml={{base: 0, md: 72}}>
+  return (key && <motion.div key={"key-"+keyId}>
+    <AnimatePresence>
+    { qrModal.isOpen && <Box as={motion.div} 
+      initial={{opacity: 0}}
+      animate={{opacity: 0.6, transition: {duration: 1}}}
+      exit={{opacity: 0, transition: {duration: 1}}}
+      style={{
+        position: 'fixed',
+        left: 0,
+        width: '500vw',
+        top: -200,
+        height: '500vh',
+        background: '#000',
+        backdropFilter: 'blur(10px)',
+        zIndex: 5,
+      }}/> 
+    }
+    </AnimatePresence>
+    <Box ml={{base: 0, md: 72}}>
     <motion.div key={'key-detail-'+keyId} initial={{y: -500}} animate={{y: 0}} transition={{delay: 0.5}}>
       <VStack pos='absolute' top='-25px'>
         <KeyIcon keyInfo={key} size='140px' style={{filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5))'}}/> 
@@ -106,23 +127,31 @@ export function Key() {
         { qrModal.isOpen && <motion.a 
             layoutId={"layout-key-" + keyId}
             initial={{
-              opacity: 0,
               right: '2em',
               top: '1.2em',
             }}
             animate={{
-              opacity: 1,
               marginLeft: marginAnimate,
             }}
-            exit={{opacity: 0}}
             onClick={qrModal.onToggle}
             style={{
               position: 'absolute',
+              zIndex: 10000,
               left: '50%',
               cursor: 'pointer'}}>
-                <QRCode size='350' ecLevel='H' value={keyInboxAddress.data}/>
-        </motion.a>}
+                <QRCode size='350' ecLevel='H' value={keyInboxAddress.data} qrStyle='dots'
+                  logoImage='/gold-lock-large.png' logoWidth='80' logoHeight='108'
+                  eyeColor={{
+                    outer: '#FFD700',
+                    inner: '#E6C200'
+                  }}
+                  eyeRadius={[
+                    [20,20,0,20],
+                    [20,20,20,0],
+                    [20,0,20,20]
+                  ]}/>
+        </motion.a> }
       </AnimatePresence>
     </LayoutGroup>
-  </Box></motion.div> ) 
+  </Box></motion.div> )
 }
