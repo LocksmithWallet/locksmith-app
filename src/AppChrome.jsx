@@ -57,7 +57,7 @@ export default function SidebarWithHeader({children}) {
   </Box>
 }
 
-const SidebarContent = ({ onClose, ...rest }) => {
+const SidebarContent = ({onClose, ...rest }) => {
   const network = useNetwork(); 
   const navigate = useNavigate();
   const ref = useRef();
@@ -108,7 +108,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
       h="full"
       {...rest}>
       <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
-        <HStack onClick={() => {navigate('/');}} spacing={0} cursor='pointer'>
+        <HStack onClick={() => { onClose(); navigate('/');}} spacing={0} cursor='pointer'>
           <motion.div  initial={{x: -100}} animate={{x: 0}} transition={{duration: 0.5}}>
             <Heading fontSize='4xl'>L</Heading>
           </motion.div>

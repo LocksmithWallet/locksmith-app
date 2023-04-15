@@ -79,7 +79,7 @@ export const KeyNavigator = (onClose) => {
           initial={{opacity: 0, x: -100}}
           animate={{opacity: 1, x: 0}}
           transition={{type: 'spring', delay: i * 0.05}}>
-            <TrustNavigationBox trustId={tid} keys={sortedKeys[tid]}/>
+            <TrustNavigationBox trustId={tid} keys={sortedKeys[tid]} onClose={onClose}/>
         </motion.div>
       )}
     </LayoutGroup>
@@ -96,7 +96,7 @@ export const KeyInspector = ({keyId, sortKey}) => {
   return '';
 }
 
-export const TrustNavigationBox = ({trustId, keys}) => {
+export const TrustNavigationBox = ({trustId, keys, onClose}) => {
   const trust = useTrustInfo(trustId);
   const hasRoot = trust && keys.filter(
     (k) => k.keyId === trust.rootKeyId.toString()).length > 0;
@@ -115,13 +115,13 @@ export const TrustNavigationBox = ({trustId, keys}) => {
       </HStack>
       <List mt='0.5em' pb='0.5em' spacing='1em'>
         { keys.sort((a, b) => a.isRoot ? -1 : (b.isRoot ? 1 : 0)).
-          map((k, i) => <KeyListItem key={'kl'+k.keyId.toString()} k={k} i={i}/>)}
+          map((k, i) => <KeyListItem key={'kl'+k.keyId.toString()} k={k} i={i} onClose={onClose}/>)}
       </List>
     </Box>
   )
 }
 
-export const KeyListItem = ({k, i, ...rest}) => {
+export const KeyListItem = ({k, i, onClose, ...rest}) => {
   const [isHover, setHover] = useState(false);
   const navigate = useNavigate();
 
@@ -129,7 +129,7 @@ export const KeyListItem = ({k, i, ...rest}) => {
     <motion.div layout
       onMouseEnter={() => { setHover(true); }}
       onMouseLeave={() => { setHover(false); }}
-      onClick={() => { navigate('/key/' + k.keyId); }}
+      onClick={() => { onClose.onClose(); navigate('/key/' + k.keyId); }}
       style={{cursor: 'pointer'}}
       initial={{opacity: 0, y: -50}}
       animate={{opacity: 1, y: 0}}
