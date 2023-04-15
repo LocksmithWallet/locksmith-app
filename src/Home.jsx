@@ -39,7 +39,7 @@ export function Home() {
   const network = useNetwork();
   const isSupported = account.isConnected && Networks.getNetwork(network.chain.id);
 
-  return (<VStack> 
+  return (<VStack ml={{base: 0, md: 72}}> 
     <HStack spacing='0' mt='1em'>
       <motion.div  initial={{x: -100}} animate={{x: 0}} transition={{duration: 0.5}}>
         <Heading fontSize='6xl'>L</Heading>

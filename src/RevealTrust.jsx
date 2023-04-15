@@ -81,7 +81,7 @@ export function RevealTrust() {
       }, 5000);
   }, []);
 
-  return (<VStack>
+  return (<VStack ml={{base: 0, md: 72}}>
     <AnimatePresence>
       <motion.div initial={{filter: 'drop-shadow(0 10px 5px rgba(0,0,0,0.5))'}} transition={{type: 'spring'}}>
         <Image src='/gold-lock-large.png'/>
