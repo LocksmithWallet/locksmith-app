@@ -70,6 +70,7 @@ export function Key() {
       initial={{opacity: 0}}
       animate={{opacity: 0.6, transition: {duration: 1}}}
       exit={{opacity: 0, transition: {duration: 1}}}
+      onClick={qrModal.onClose}
       style={{
         position: 'fixed',
         left: 0,
@@ -77,6 +78,7 @@ export function Key() {
         top: -200,
         height: '500vh',
         background: '#000',
+        cursor: 'pointer',
         backdropFilter: 'blur(10px)',
         zIndex: 5,
       }}/> 
