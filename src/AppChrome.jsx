@@ -29,6 +29,7 @@ import {Link, useNavigate } from 'react-router-dom';
 import { NetworkSwitcher } from './navigation/NetworkSwitcher';
 import { WalletConnector } from "./navigation/WalletConnector";
 import { KeyNavigator } from './navigation/KeyNavigator';
+import { SupportedNetworkCheck } from './components/SupportedNetworkCheck';
 
 // Animations
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
@@ -52,7 +53,9 @@ export default function SidebarWithHeader({children}) {
     {/* mobilenav */}
     <MobileNav onOpen={onOpen}/>
     <Box ml={{ base: 0, md: 0}}> 
-      {children}
+      <SupportedNetworkCheck>
+        {children}
+      </SupportedNetworkCheck>
     </Box>
   </Box>
 }

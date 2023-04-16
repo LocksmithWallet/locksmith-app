@@ -54,9 +54,19 @@ import { DisplayAddress } from './components/Address';
 import { ImQrcode } from 'react-icons/im';
 
 export function Key() {
-  // state
   const { keyId } = useParams();
   const key = useInspectKey(keyId);
+  return (key && <motion.div key={"key-"+keyId}>
+    <KeyHeader keyInfo={key}/>
+    <Box ml={{base: 0, md: 72}}>
+    <BalanceBox keyInfo={key}/>
+    </Box>
+  </motion.div>)
+}
+
+export function KeyHeader({keyInfo}) {
+  // state
+  const { keyId } = useParams();
   const keyInboxAddress = useKeyInboxAddress(keyId);
   const qrModal = useDisclosure();
   const qrAnimation = useAnimation();
@@ -66,7 +76,7 @@ export function Key() {
 
   // processing
 
-  return (key && <motion.div key={"key-"+keyId}>
+  return (keyInfo && <motion.div key={"key-"+keyId}>
     <AnimatePresence>
     { qrModal.isOpen && <Box as={motion.div}
       data-blurry='blurry'
@@ -88,17 +98,17 @@ export function Key() {
     }
     </AnimatePresence>
     <Box ml={{base: 0, md: 72}}>
-    <motion.div key={'key-detail-'+keyId} initial={{y: -500}} animate={{y: 0}} transition={{delay: 0.5}}>
+    <motion.div key={'key-detail-'+keyId} initial={{y: -250}} animate={{y: 0}} transition={{delay: 0.25}}>
       <VStack pos='absolute' top='-25px'>
-        <KeyIcon keyInfo={key} size='140px' style={{filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5))'}}/> 
-        <Text pos='relative' top='-105px' zIndex='2' fontWeight='bold'>#{key.keyId}</Text>
+        <KeyIcon keyInfo={keyInfo} size='140px' style={{filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5))'}}/> 
+        <Text pos='relative' top='-105px' fontWeight='bold'>#{keyInfo.keyId}</Text>
       </VStack>
     </motion.div>
     <Box m='1em' mt='2em' bg='white' borderRadius='lg' boxShadow='lg' p='0.8em' pl='7em'>
       <HStack>
         <VStack align='stretch'> 
           <HStack>
-            <Heading fontSize='2xl'>{key.alias}</Heading>
+            <Heading fontSize='2xl'>{keyInfo.alias}</Heading>
             <AddressExplorerButton address={keyInboxAddress.data}/> 
           </HStack>
           { keyInboxAddress.data && 
@@ -161,4 +171,26 @@ export function Key() {
       </AnimatePresence>
     </LayoutGroup>
   </Box></motion.div> )
+}
+
+const BalanceBox = ({keyInfo, ...rest}) => {
+  return (
+    <motion.div initial={{x: '100vw'}} animate={{x: 0}} transition={{delay: 0.25}}>
+      <Box m='1em' mt='2em' bg='white' borderRadius='lg' boxShadow='lg' p='0.8em'>
+        <VStack>
+          <Heading>$1,353,354.05</Heading>
+        </VStack>
+      </Box>
+    </motion.div>
+  )
+}
+
+const ViewCarousel = ({keyInfo, ...rest}) => {
+  return (
+    <motion.div initial={{x: '100vw'}} animate={{x: 0}} transition={{delay: 0.50}}>
+      <Box m='1em' mt='2em' bg='white' borderRadius='lg' boxShadow='lg' p='0.8em'>
+        Assets
+      </Box>
+    </motion.div>
+  )
 }
