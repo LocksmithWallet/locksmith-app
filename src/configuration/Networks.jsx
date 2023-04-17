@@ -35,6 +35,14 @@ export const Networks = (function() {
       return Object.values(networks);
     },
     //////////////////////////
+    // getAsset
+    //
+    // Equivalent to Networks.getNetwork(chainId).assets[arn]
+    //////////////////////////
+    getAsset: function(networkId, arn) {
+      return networks[networkId].assets[arn];
+    },
+    //////////////////////////
     // wagmiChains
     //
     // Returns a prioritized list of chain infos
