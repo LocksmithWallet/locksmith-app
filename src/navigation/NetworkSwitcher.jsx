@@ -1,4 +1,5 @@
 import { React, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Button,
   HStack,
@@ -59,6 +60,7 @@ export const NetworkSwitcher = () => {
 
 const NetworkDialog = ({disclosure, ...rest}) => {
   const network = useNetwork();
+  const navigate = useNavigate();
   const [isClosing, setClosing] = useState(false);
   
   const closeModal = function(confirm) {
@@ -67,7 +69,10 @@ const NetworkDialog = ({disclosure, ...rest}) => {
   }
 
   const switcher = useSwitchNetwork({
-    onSuccess(data) { closeModal(true); } 
+    onSuccess(data) { 
+      closeModal(true); 
+      navigate('/');
+    } 
   });
 
   return (
