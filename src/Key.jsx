@@ -39,6 +39,10 @@ import {
   KEY_CONTEXT,
   useContextBalanceSheet
 } from './hooks/contracts/Ledger';
+import {
+  USDFormatter,
+  useCoinCapPrice,
+} from './hooks/Prices';
 
 // animations
 import { 
@@ -55,6 +59,7 @@ import {
   KeyIcon
 } from './components/Key';
 import { DisplayAddress } from './components/Address';
+import { ContextBalanceUSD } from './components/Ledger';
 
 // icons
 import { ImQrcode } from 'react-icons/im';
@@ -76,7 +81,7 @@ export function BalanceContextInformation({keyInfo, ...rest}) {
 
   return (<>
       <BalanceBox keyInfo={keyInfo}/>
-      <ViewCarousel keyInfo={keyInfo}/>
+      <ViewCarousel keyInfo={keyInfo} balanceSheet={balanceSheet}/>
   </>)
 }
 
@@ -195,24 +200,33 @@ const BalanceBox = ({keyInfo, ...rest}) => {
     <motion.div initial={{x: initialX}} animate={{x: 0}} transition={{delay: 0.125}}>
       <Box m='1em' mt='2em' bg='white' borderRadius='lg' boxShadow='lg' p='0.8em'>
         <VStack>
-          <Heading>$1,353,354.05</Heading>
+          <ContextBalanceUSD contextId={KEY_CONTEXT} identifier={keyInfo.keyId}
+            skeletonProps={{}} 
+            textProps={{
+              fontSize: '2xl',
+              fontWeight: 'bold'
+          }}/>
         </VStack>
       </Box>
     </motion.div>
   )
 }
 
-const ViewCarousel = ({keyInfo, ...rest}) => {
+const ViewCarousel = ({keyInfo, balanceSheet, ...rest}) => {
   const initialX = useBreakpointValue({base: '140vw', md: '100vw'});
   const network = useNetwork();
   const assets = Networks.getNetwork(network.chain.id).assets;
 
-  return (
+  return balanceSheet.data && (
     <motion.div initial={{x: initialX}} animate={{x: 0}} transition={{delay: 0.25}}>
       <List>
-        { Object.keys(assets).map((arn) => (
+        { Object.keys(assets).map((arn) => balanceSheet.data[0].indexOf(arn) >= 0 && (
           <ListItem key={'asset-view-'+arn}>
-            <AssetView keyInfo={keyInfo} arn={arn} asset={assets[arn]}/>
+            <AssetView 
+              keyInfo={keyInfo} 
+              arn={arn}
+              balance={balanceSheet.data[1][balanceSheet.data[0].indexOf(arn)]} 
+              asset={assets[arn]}/>
           </ListItem>
         )) }
       </List>
@@ -220,8 +234,10 @@ const ViewCarousel = ({keyInfo, ...rest}) => {
   )
 }
 
-const AssetView = ({ keyInfo, arn, asset, ...rest }) => {
-
+const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
+  const assetPrice = useCoinCapPrice(asset.coinCapId);
+  const formatted = ethers.utils.formatUnits(balance, asset.decimals);
+  const assetValue = assetPrice.isSuccess ? USDFormatter.format(assetPrice.data * formatted) : null
   return (<Box m='1em' mt='2em' bg='white' borderRadius='lg' boxShadow='lg' p='0'>
     <HStack position='relative' overflow='hidden' p='0.8em' borderRadius='lg'> 
       <motion.div 
@@ -235,8 +251,8 @@ const AssetView = ({ keyInfo, arn, asset, ...rest }) => {
       <Text pl='3.5em' fontWeight='bold' zIndex={1}>{asset.name}</Text>
       <Spacer />
       <VStack align="stretch">
-        <HStack><Spacer/><Text>$1,453</Text></HStack>
-        <HStack><Spacer/><Text fontSize="sm" color="gray">0.8 {asset.symbol}</Text></HStack>
+        <HStack><Spacer/><Text>{assetValue}</Text></HStack>
+        <HStack><Spacer/><Text fontSize="sm" color="gray">{formatted} {asset.symbol}</Text></HStack>
       </VStack>
     </HStack>
   </Box>);
