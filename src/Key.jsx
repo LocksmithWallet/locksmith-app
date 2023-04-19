@@ -122,64 +122,58 @@ export function KeyHeader({keyInfo}) {
           }
         </VStack>
         <Spacer/>
+        <LayoutGroup>
+          <AnimatePresence>
+            { keyInboxAddress.data && !qrModal.isOpen && <motion.a
+                layoutId={"layout-key-" + keyId}
+                initial={{color: '#808080'}}
+                animate={qrAnimation}
+                onClick={() => {
+                  qrAnimation.start({color: '#808080', scale: 1});
+                  qrModal.onToggle();
+                }}
+                onMouseEnter={() => {
+                  qrAnimation.start({color: '#FFD700', scale: 1.3});
+                }}
+                onMouseLeave={() => {
+                  qrAnimation.start({color: '#808080', scale: 1});
+                }}
+                style={{
+                  cursor: 'pointer',
+                  zIndex: qrZIndex,
+                }}> 
+                  <ImQrcode size='40px'/>
+            </motion.a> }
+            { qrModal.isOpen && <motion.a 
+                layoutId={"layout-key-" + keyId}
+                animate={{
+                  marginLeft: marginAnimate,
+                  top: '25%',
+                }}
+                onClick={() => {
+                  setQrZIndex(501);
+                  qrModal.onToggle();
+                  setTimeout(() => { 
+                    setQrZIndex(null); 
+                  }, 400);
+                }}
+                style={{
+                  position: 'absolute',
+                  zIndex: 501,
+                  left: '50%',
+                  cursor: 'pointer'}}>
+                    <QRCode size='350' ecLevel='H' value={keyInboxAddress.data} qrStyle='dots'
+                      logoImage='/gold-lock-large.png' logoWidth='80' logoHeight='108'
+                        eyeRadius={[
+                          [20,20,0,20],
+                          [20,20,20,0],
+                          [20,0,20,20]
+                    ]}/>
+            </motion.a> }
+          </AnimatePresence>
+        </LayoutGroup>
       </HStack>
     </Box>
-    <LayoutGroup>
-      <AnimatePresence>
-        { keyInboxAddress.data && !qrModal.isOpen && <motion.a
-            layoutId={"layout-key-" + keyId}
-            initial={{color: '#808080'}}
-            animate={qrAnimation}
-            onClick={() => {
-              qrAnimation.start({color: '#808080', scale: 1});
-              qrModal.onToggle();
-            }}
-            onMouseEnter={() => {
-              qrAnimation.start({color: '#FFD700', scale: 1.3});
-            }}
-            onMouseLeave={() => {
-              qrAnimation.start({color: '#808080', scale: 1});
-            }}
-            style={{
-              cursor: 'pointer',
-              position: 'absolute',
-              right: '2em',
-              top: '1.3em',
-              zIndex: qrZIndex,
-            }}> 
-              <ImQrcode size='40px'/>
-        </motion.a> }
-        { qrModal.isOpen && <motion.a 
-            layoutId={"layout-key-" + keyId}
-            initial={{
-              right: '2em',
-              top: '1.2em',
-            }}
-            animate={{
-              marginLeft: marginAnimate
-            }}
-            onClick={() => {
-              setQrZIndex(501);
-              qrModal.onToggle();
-              setTimeout(() => { 
-                setQrZIndex(null); 
-              }, 1000);
-            }}
-            style={{
-              position: 'absolute',
-              zIndex: 501,
-              left: '50%',
-              cursor: 'pointer'}}>
-                <QRCode size='350' ecLevel='H' value={keyInboxAddress.data} qrStyle='dots'
-                  logoImage='/gold-lock-large.png' logoWidth='80' logoHeight='108'
-                  eyeRadius={[
-                    [20,20,0,20],
-                    [20,20,20,0],
-                    [20,0,20,20]
-                   ]}/>
-        </motion.a> }
-      </AnimatePresence>
-    </LayoutGroup>
   </motion.div> )
 }
 
