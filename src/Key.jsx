@@ -280,7 +280,7 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
         y: -1 * (rect.y),
         marginTop: '10vh',
         height: '80vh',
-        zIndex: 500
+        zIndex: 500,
       }
     },
     close: {
@@ -289,6 +289,26 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
       marginTop: 0,
       height: null,
       zIndex: 0 
+    }
+  };
+
+  const balanceVariants = {
+    open: function() {
+      const rect = ref.current.getBoundingClientRect();
+      return {
+        y: 100,
+        x: -1 * (rect.width / 2) + 12,
+        translateX: '50%',
+        scale: 1,
+        transition: {duration: 0.25}
+      };
+    },
+    close: {
+      y: 0,
+      x: 0,
+      translateX: '0%',
+      scale: 1,
+      transition: {duration: 0.25}
     }
   };
 
@@ -317,11 +337,12 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
           backgroundColor: 'white', borderRadius: '10px', 
           padding: 0, 
           cursor: 'pointer',
+          overflow: 'hidden',
         }}
         animate={animate}
         variants={boxVariants}
         onClick={toggleDetail}>
-        <HStack position='relative' overflow='hidden' p='0.8em' borderRadius='lg'> 
+        <HStack position='relative' p='0.8em' borderRadius='lg'> 
           <motion.div
             initial={{opacity: 0, left: '100vw', scale: 2, position: 'absolute'}}
             animate={animate}
@@ -332,10 +353,26 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
             <Text pl='3.5em' fontWeight='bold'>{asset.name}</Text>
           </motion.div>
           <Spacer />
-          <VStack align="stretch">
-            <HStack><Spacer/><Text>{assetValue}</Text></HStack>
-            <HStack><Spacer/><Text fontSize="sm" color="gray">{formatted} {asset.symbol}</Text></HStack>
-          </VStack>
+          <AnimatePresence>
+            { !detailDisclosure.isOpen && (<motion.div animate={animate} variants={balanceVariants}
+              transition={{layout: {duration: 0}}}
+              exit={{transition: {duration: 5}}}>
+              <VStack align="stretch">
+                <HStack><Spacer/><Text>{assetValue}</Text></HStack>
+                <HStack><Spacer/><Text fontSize="sm" color="gray">{formatted} {asset.symbol}</Text></HStack>
+              </VStack>
+            </motion.div>) }
+            { detailDisclosure.isOpen && (<motion.div animate={animate} variants={balanceVariants}>
+              <VStack>
+                <motion.div initial={{scale: 1}} animate={{scale: 2}}>
+                  <Text fontWeight='bold'>{assetValue}</Text>
+                </motion.div>
+                <motion.div initial={{scale: 1}} animate={{scale: 1.5}}>
+                  <Text fontSize="sm" color="gray">{formatted} {asset.symbol}</Text>
+                </motion.div>
+              </VStack>
+            </motion.div>) }
+          </AnimatePresence>
         </HStack>
       </Box>
     </AnimatePresence>)
