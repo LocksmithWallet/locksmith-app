@@ -241,6 +241,14 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
       transition: {
         duration: 0.3
       }
+    },
+    close: {
+      opacity: 0.4,
+      left: -30,
+      scale: 1,
+      transition: {
+        duration: 0.3
+      }
     }
   };
 
@@ -248,6 +256,9 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
     start: {},
     open: {
       scale: 1.5
+    },
+    close: {
+      scale: 1
     }
   }
 
@@ -271,6 +282,13 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
         height: '80vh',
         zIndex: 500
       }
+    },
+    close: {
+      position: null,
+      y: 0,
+      marginTop: 0,
+      height: null,
+      zIndex: 0 
     }
   };
 
@@ -279,14 +297,18 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
     animate.start('start');
   }, [animate]);
 
-  const openDetail = function() {
-    detailDisclosure.onOpen();
-    animate.set('click');
-    animate.start('open');
+  const toggleDetail = function() {
+    if (!detailDisclosure.isOpen) {
+      detailDisclosure.onOpen();
+      animate.set('click');
+      animate.start('open');
+    } else {
+      detailDisclosure.onClose();
+      animate.start('close');
+    }
   };
 
   return (<AnimatePresence>
-    <OverlayBlur disclosure={detailDisclosure}/> 
     <Box as={motion.div}
         key={'arn-box' + arn}
         ref={ref}
@@ -298,7 +320,7 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
         }}
         animate={animate}
         variants={boxVariants}
-        onClick={openDetail}>
+        onClick={toggleDetail}>
         <HStack position='relative' overflow='hidden' p='0.8em' borderRadius='lg'> 
           <motion.div
             initial={{opacity: 0, left: '100vw', scale: 2, position: 'absolute'}}
