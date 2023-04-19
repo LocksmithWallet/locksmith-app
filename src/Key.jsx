@@ -94,13 +94,19 @@ export function KeyHeader({keyInfo}) {
   const qrModal = useDisclosure();
   const qrAnimation = useAnimation();
   const marginAnimate = useBreakpointValue({base: '-185px', md: 0});
-
-  // animations
   
+  // animations
+  const qrZoomBack = () => {
+    setQrZIndex(501);
+    qrModal.onToggle();
+    setTimeout(() => {
+      setQrZIndex(null);
+    }, 400);
+  }; 
   // processing
 
   return (keyInfo && <motion.div key={"key-"+keyId}>
-    <OverlayBlur disclosure={qrModal}/>
+    <OverlayBlur disclosure={qrModal} onClose={qrZoomBack}/>
     <motion.div key={'key-detail-'+keyId} initial={{y: -250}} animate={{y: 0}} transition={{delay: 0.25}}>
       <VStack pos='absolute' top='-25px'>
         <KeyIcon keyInfo={keyInfo} size='140px' style={{filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5))'}}/> 
@@ -150,13 +156,7 @@ export function KeyHeader({keyInfo}) {
                   marginLeft: marginAnimate,
                   top: '25%',
                 }}
-                onClick={() => {
-                  setQrZIndex(501);
-                  qrModal.onToggle();
-                  setTimeout(() => { 
-                    setQrZIndex(null); 
-                  }, 400);
-                }}
+                onClick={qrZoomBack}
                 style={{
                   position: 'absolute',
                   zIndex: 501,
@@ -286,6 +286,7 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
   };
 
   return (<AnimatePresence>
+    <OverlayBlur disclosure={detailDisclosure}/> 
     <Box as={motion.div}
         key={'arn-box' + arn}
         ref={ref}

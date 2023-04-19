@@ -21,14 +21,14 @@ export const HeadShakeMotion = {
   }
 };
 
-export const OverlayBlur = ({disclosure, ...rest}) => {
+export const OverlayBlur = ({disclosure, onClose, ...rest}) => {
   return (<AnimatePresence>
     { disclosure.isOpen && <Box as={motion.div}
       data-blurry='blurry'
       initial={{opacity: 0}}
       animate={{opacity: 0.6}}
       exit={{opacity: 0}}
-      onClick={disclosure.onClose}
+      onClick={onClose || disclosure.onClose}
       style={{
         position: 'fixed',
         left: 0,
