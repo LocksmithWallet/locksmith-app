@@ -1,5 +1,9 @@
-import { chakra, shouldForwardProp } from '@chakra-ui/react';
-import { motion, isValidMotionProp } from 'framer-motion';
+import { chakra, Box, shouldForwardProp } from '@chakra-ui/react';
+import { 
+  motion,
+  AnimatePresence,
+  isValidMotionProp
+} from 'framer-motion';
 
 export const ChakraBox = chakra(motion.div, {
   /**
@@ -16,3 +20,26 @@ export const HeadShakeMotion = {
     times: [0, 0.065, 0.185, 0.315, 0.435, 0.5] 
   }
 };
+
+export const OverlayBlur = ({disclosure, ...rest}) => {
+  return (<AnimatePresence>
+    { disclosure.isOpen && <Box as={motion.div}
+      data-blurry='blurry'
+      initial={{opacity: 0}}
+      animate={{opacity: 0.6}}
+      exit={{opacity: 0}}
+      onClick={disclosure.onClose}
+      style={{
+        position: 'fixed',
+        left: 0,
+        width: '500vw',
+        top: -200,
+        height: '500vh',
+        cursor: 'pointer',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        backdropFilter: 'blur(5px)',
+        zIndex: 500,
+      }}/>
+    }
+    </AnimatePresence>)
+}

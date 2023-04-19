@@ -51,6 +51,7 @@ import {
   LayoutGroup,
   useAnimation,
 } from 'framer-motion';
+import { OverlayBlur } from './components/Animations';
 
 // components
 import { 
@@ -89,37 +90,19 @@ export function KeyHeader({keyInfo}) {
   // state
   const { keyId } = useParams();
   const keyInboxAddress = useKeyInboxAddress(keyId);
+  const [qrZIndex, setQrZIndex] = useState(null);
   const qrModal = useDisclosure();
   const qrAnimation = useAnimation();
   const marginAnimate = useBreakpointValue({base: '-185px', md: 0});
 
   // animations
-
+  
   // processing
 
   return (keyInfo && <motion.div key={"key-"+keyId}>
-    <AnimatePresence>
-    { qrModal.isOpen && <Box as={motion.div}
-      data-blurry='blurry'
-      initial={{opacity: 0}}
-      animate={{opacity: 0.6}}
-      exit={{opacity: 0}}
-      onClick={qrModal.onClose}
-      style={{
-        position: 'fixed',
-        left: 0,
-        width: '500vw',
-        top: -200,
-        height: '500vh',
-        cursor: 'pointer',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        backdropFilter: 'blur(5px)',
-        zIndex: 500,
-      }}/> 
-    }
-    </AnimatePresence>
+    <OverlayBlur disclosure={qrModal}/>
     <motion.div key={'key-detail-'+keyId} initial={{y: -250}} animate={{y: 0}} transition={{delay: 0.25}}>
-      <VStack pos='absolute' top='-25px' zIndex='100'>
+      <VStack pos='absolute' top='-25px'>
         <KeyIcon keyInfo={keyInfo} size='140px' style={{filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5))'}}/> 
         <Text pos='relative' top='-105px' fontWeight='bold'>#{keyInfo.keyId}</Text>
       </VStack>
@@ -145,7 +128,7 @@ export function KeyHeader({keyInfo}) {
       <AnimatePresence>
         { keyInboxAddress.data && !qrModal.isOpen && <motion.a
             layoutId={"layout-key-" + keyId}
-            initial={{color: '#808080', transition: {layout: {duration: 0}}}}
+            initial={{color: '#808080'}}
             animate={qrAnimation}
             onClick={() => {
               qrAnimation.start({color: '#808080', scale: 1});
@@ -160,9 +143,9 @@ export function KeyHeader({keyInfo}) {
             style={{
               cursor: 'pointer',
               position: 'absolute',
-              zIndex: 100,
               right: '2em',
-              top: '1.3em'
+              top: '1.3em',
+              zIndex: qrZIndex,
             }}> 
               <ImQrcode size='40px'/>
         </motion.a> }
@@ -175,10 +158,16 @@ export function KeyHeader({keyInfo}) {
             animate={{
               marginLeft: marginAnimate
             }}
-            onClick={qrModal.onToggle}
+            onClick={() => {
+              setQrZIndex(501);
+              qrModal.onToggle();
+              setTimeout(() => { 
+                setQrZIndex(null); 
+              }, 1000);
+            }}
             style={{
               position: 'absolute',
-              zIndex: 10000,
+              zIndex: 501,
               left: '50%',
               cursor: 'pointer'}}>
                 <QRCode size='350' ecLevel='H' value={keyInboxAddress.data} qrStyle='dots'
@@ -219,7 +208,7 @@ const ViewCarousel = ({keyInfo, balanceSheet, ...rest}) => {
 
   return balanceSheet.data && (
     <motion.div initial={{x: initialX}} animate={{x: 0}} transition={{delay: 0.25}}>
-      <List>
+      <List m='1em' mt='2em' spacing='2em'>
         { Object.keys(assets).map((arn) => balanceSheet.data[0].indexOf(arn) >= 0 && (
           <ListItem key={'asset-view-'+arn}>
             <AssetView 
@@ -236,24 +225,101 @@ const ViewCarousel = ({keyInfo, balanceSheet, ...rest}) => {
 
 const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
   const assetPrice = useCoinCapPrice(asset.coinCapId);
+  const detailDisclosure = useDisclosure();
+  const animate = useAnimation();
   const formatted = ethers.utils.formatUnits(balance, asset.decimals);
-  const assetValue = assetPrice.isSuccess ? USDFormatter.format(assetPrice.data * formatted) : null
-  return (<Box m='1em' mt='2em' bg='white' borderRadius='lg' boxShadow='lg' p='0'>
-    <HStack position='relative' overflow='hidden' p='0.8em' borderRadius='lg'> 
-      <motion.div 
-        initial={{opacity: 0, left: '100vw', scale: 2}}
-        animate={{opacity: 0.4, left: -30, scale: 1}}
-        transition={{delay: 0.1, duration: 0.5}}
-        zIndex={0}
-        style={{position: 'absolute'}}>
-          {asset.icon({ size: 100})}
-      </motion.div>
-      <Text pl='3.5em' fontWeight='bold' zIndex={1}>{asset.name}</Text>
-      <Spacer />
-      <VStack align="stretch">
-        <HStack><Spacer/><Text>{assetValue}</Text></HStack>
-        <HStack><Spacer/><Text fontSize="sm" color="gray">{formatted} {asset.symbol}</Text></HStack>
-      </VStack>
-    </HStack>
-  </Box>);
+  const assetValue = assetPrice.isSuccess ? USDFormatter.format(assetPrice.data * formatted) : null;
+  const ref = useRef(null);
+
+  const logoVariants = {
+    start: {
+      opacity: 0.4,
+      left: -30,
+      scale: 1, 
+      transition: {
+        delay: 0.1, duration: 0.5
+      }
+    },
+    open: {
+      opacity: 1,
+      left: -15,
+      scale: 0.35,
+      transition: {
+        duration: 0.3
+      }
+    }
+  };
+
+  const nameVariants = {
+    start: {},
+    open: {
+      scale: 1.5
+    }
+  }
+
+  const boxVariants = {
+    start: {
+    },
+    click: function() {
+      const rect = ref.current.getBoundingClientRect();
+      return {
+        position: 'fixed',
+        width: rect.width,
+        height: rect.height,
+        zIndex: 101,
+      };
+    },
+    open: function() {
+      const rect = ref.current.getBoundingClientRect();
+      return {
+        y: -1 * (rect.y),
+        marginTop: '10vh',
+        height: '80vh',
+        zIndex: 500
+      }
+    }
+  };
+
+  useEffect(() => {
+    // intro
+    animate.start('start');
+  }, [animate]);
+
+  const openDetail = function() {
+    detailDisclosure.onOpen();
+    animate.set('click');
+    animate.start('open');
+  };
+
+  return (<AnimatePresence>
+    <Box as={motion.div}
+        key={'arn-box' + arn}
+        ref={ref}
+        boxShadow='lg'
+        initial={{
+          backgroundColor: 'white', borderRadius: '10px', 
+          padding: 0, 
+          cursor: 'pointer',
+        }}
+        animate={animate}
+        variants={boxVariants}
+        onClick={openDetail}>
+        <HStack position='relative' overflow='hidden' p='0.8em' borderRadius='lg'> 
+          <motion.div
+            initial={{opacity: 0, left: '100vw', scale: 2, position: 'absolute'}}
+            animate={animate}
+            variants={logoVariants}>
+              {asset.icon({ size: 100})}
+          </motion.div>
+          <motion.div animate={animate} variants={nameVariants}>
+            <Text pl='3.5em' fontWeight='bold'>{asset.name}</Text>
+          </motion.div>
+          <Spacer />
+          <VStack align="stretch">
+            <HStack><Spacer/><Text>{assetValue}</Text></HStack>
+            <HStack><Spacer/><Text fontSize="sm" color="gray">{formatted} {asset.symbol}</Text></HStack>
+          </VStack>
+        </HStack>
+      </Box>
+    </AnimatePresence>)
 };
