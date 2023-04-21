@@ -347,7 +347,6 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
 
   const swipeProps = {
     drag: true,
-    dragConstraints: {top: 10, bottom: 10},
     onDragEnd: function(event, info) {
       if (Math.abs(info.offset.y) >= 10 ||
           Math.abs(info.offset.x) >= 10) {
