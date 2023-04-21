@@ -17,6 +17,12 @@ import {
   Modal,
   ModalOverlay,
   Portal,
+  Tabs,
+  TabList,
+  TabIndicator,
+  TabPanels,
+  Tab,
+  TabPanel,
   Text,
   Spacer,
   VStack,
@@ -280,12 +286,13 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
         y: -1 * (rect.y),
         marginTop: '10vh',
         height: '80vh',
-        zIndex: 500,
+        zIndex: 500
       }
     },
     close: {
       position: null,
       y: 0,
+      x: 0,
       marginTop: 0,
       height: null,
       zIndex: 0 
@@ -312,6 +319,12 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
     }
   };
 
+  const detailVariants = {
+    open: {
+      marginTop: '8em'
+    }
+  };
+
   useEffect(() => {
     // intro
     animate.start('start');
@@ -320,17 +333,33 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
   const toggleDetail = function() {
     if (!detailDisclosure.isOpen) {
       detailDisclosure.onOpen();
-      animate.set('click');
-      animate.start('open');
+      setTimeout(() => {
+        animate.set('click');
+        animate.start('open');
+      }, 1);
     } else {
       detailDisclosure.onClose();
-      animate.start('close');
+      // maybe if I wait just two ticks,
+      // it will render enough to get the right final height
+      setTimeout(() => { animate.start('close'); }, 25);
+    }
+  };
+
+  const swipeProps = {
+    drag: true,
+    dragConstraints: {top: 10, bottom: 10},
+    onDragEnd: function(event, info) {
+      if (Math.abs(info.offset.y) >= 10 ||
+          Math.abs(info.offset.x) >= 10) {
+        toggleDetail(); 
+      }
     }
   };
 
   return (<AnimatePresence>
     <Box as={motion.div}
         key={'arn-box' + arn}
+        {... (detailDisclosure.isOpen ? swipeProps : {})}
         ref={ref}
         boxShadow='lg'
         initial={{
@@ -341,7 +370,7 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
         }}
         animate={animate}
         variants={boxVariants}
-        onClick={toggleDetail}>
+        onClick={!detailDisclosure.isOpen ? toggleDetail : () => { }}>
         <HStack position='relative' p='0.8em' borderRadius='lg'> 
           <motion.div
             initial={{opacity: 0, left: '100vw', scale: 2, position: 'absolute'}}
@@ -354,9 +383,7 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
           </motion.div>
           <Spacer />
           <AnimatePresence>
-            { !detailDisclosure.isOpen && (<motion.div animate={animate} variants={balanceVariants}
-              transition={{layout: {duration: 0}}}
-              exit={{transition: {duration: 5}}}>
+            { !detailDisclosure.isOpen && (<motion.div animate={animate} variants={balanceVariants}>
               <VStack align="stretch">
                 <HStack><Spacer/><Text>{assetValue}</Text></HStack>
                 <HStack><Spacer/><Text fontSize="sm" color="gray">{formatted} {asset.symbol}</Text></HStack>
@@ -374,6 +401,31 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
             </motion.div>) }
           </AnimatePresence>
         </HStack>
+        <AnimatePresence>
+        { detailDisclosure.isOpen && (
+          <motion.div animate={animate} variants={detailVariants}>
+            <Tabs align='center' position='relative' variant='enclosed' size='lg'> 
+              <TabList>
+                <Tab>Send</Tab>
+                <Tab>Deposit</Tab>
+              </TabList>
+              <TabIndicator
+                mt="-1.5px"
+                height="5px"
+                bg="white"
+                borderRadius="1px"/>
+              <TabPanels>
+                <TabPanel>
+                  <p>one!</p>
+                </TabPanel>
+                <TabPanel>
+                  <p>two!</p>
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
+          </motion.div>
+        ) }
+        </AnimatePresence>
       </Box>
     </AnimatePresence>)
 };
