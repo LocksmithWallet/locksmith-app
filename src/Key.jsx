@@ -355,7 +355,7 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
     }
   };
 
-  const swipeProps = {
+  const swipeProps = useBreakpointValue({base: {
     drag: true,
     onDragEnd: function(event, info) {
       if (Math.abs(info.offset.y) >= 10 ||
@@ -363,7 +363,7 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
         toggleDetail(); 
       }
     }
-  };
+  }, md: {}});
 
   return (<AnimatePresence>
     <Box as={motion.div}
@@ -458,15 +458,19 @@ export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, ...rest}) 
     transition: {duration: 0.25}
   };
 
-  return (<VStack mt='1em' spacing='1em'>
+  const cleanSymbolAmount = ("" + (amount / price)).length >= 8 ? (amount/price).toPrecision(8) :
+    amount/price;
+
+
+  return (<VStack mt='2em' spacing='2em'>
     <HStack width='100%'>
-      <Button size='xs'>Max</Button>
+      <Button size='sm' onClick={() => {setAmount(maximumAmount);}}>Max</Button>
       <Spacer/>
-      <Text fontSize='xs' {... (!isSendDollars ? {fontWeight: 'bold'} : {})}>{asset.symbol}</Text>
+      <Text fontSize='sm' {... (!isSendDollars ? {fontWeight: 'bold'} : {})}>{asset.symbol}</Text>
       <Switch size='lg' onChange={(e) => {
         setSendDollars(e.target.checked);
       }}/>
-      <Text fontSize='xs' {... (isSendDollars ? {fontWeight: 'bold'} : {})}>USD</Text>
+      <Text fontSize='sm' {... (isSendDollars ? {fontWeight: 'bold'} : {})}>USD</Text>
     </HStack>
     <NumberInput
       min={0}
@@ -489,6 +493,8 @@ export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, ...rest}) 
           style ={{
             paddingTop: '30px',
             paddingBottom: '30px',
+            paddingLeft: '10px',
+            paddingRight: '10px',
             boxShadow: '0 1px 3px inset rgba(0,0,0,0.4)',
             textAlign: 'center',
             fontWeight: 'bold',
@@ -503,7 +509,18 @@ export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, ...rest}) 
             </motion.div>) }
           </AnimatePresence>
     </NumberInput>
-    { isSendDollars && <Text fontSize='xl' color='gray.500' fontWeight='bold'>{(amount / price).toPrecision(8)} {asset.symbol}</Text> }
-    { !isSendDollars && <Text fontSize='xl' color='gray.500' fontWeight='bold'>{USDFormatter.format(amount * price)}</Text> }
+    <AnimatePresence mode='wait'>
+      { isSendDollars && <motion.div key='asset-fade' initial={{opacity: 0, x: -100}} animate={{opacity: 1, x: 1}} exit={{opacity: 0, x: 100}}
+        transition={{duration: 0.1}}>
+        <Text fontSize='xl' color='gray.500' fontWeight='bold'>{cleanSymbolAmount} {asset.symbol}</Text>
+      </motion.div>}
+      { !isSendDollars && <motion.div key='dollar-fade' initial={{opacity: 0, x: -100}} animate={{opacity: 1, x: 1}} exit={{opacity: 0, x: 100}}
+        transition={{duration: 0.1}}>
+        <Text fontSize='xl' color='gray.500' fontWeight='bold'>{USDFormatter.format(amount * price)}</Text> 
+      </motion.div>}
+    </AnimatePresence>
+    <Box width='100%' pt='4em'>
+      <Button size='lg' width='100%' boxShadow='md'>Next</Button>
+    </Box>
   </VStack>)
 }
