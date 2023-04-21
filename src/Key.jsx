@@ -11,6 +11,8 @@ import {
   Heading,
   HStack,
   Image,
+  NumberInput,
+  NumberInputField,
   Flex,
   List,
   ListItem,
@@ -25,6 +27,7 @@ import {
   TabPanel,
   Text,
   Spacer,
+  Switch,
   VStack,
   useBreakpointValue,
   useDisclosure,
@@ -70,6 +73,7 @@ import { ContextBalanceUSD } from './components/Ledger';
 
 // icons
 import { ImQrcode } from 'react-icons/im';
+import { BiDollarCircle } from 'react-icons/bi';
 
 export function Key() {
   const { keyId } = useParams();
@@ -295,7 +299,10 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
       x: 0,
       marginTop: 0,
       height: null,
-      zIndex: 0 
+      zIndex: 0,
+    },
+    final: {
+      width: null
     }
   };
 
@@ -341,7 +348,10 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
       detailDisclosure.onClose();
       // maybe if I wait just two ticks,
       // it will render enough to get the right final height
-      setTimeout(() => { animate.start('close'); }, 25);
+      setTimeout(async () => { 
+        await animate.start('close'); 
+        animate.start('final');
+      }, 25);
     }
   };
 
@@ -414,8 +424,13 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
                 bg="white"
                 borderRadius="1px"/>
               <TabPanels>
-                <TabPanel>
-                  <p>one!</p>
+                <TabPanel maxWidth='20em'>
+                  <AssetSendDetail
+                    keyInfo={keyInfo}
+                    arn={arn}
+                    balance={balance}
+                    asset={asset}
+                    price={assetPrice.data}/>
                 </TabPanel>
                 <TabPanel>
                   <p>two!</p>
@@ -428,3 +443,67 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
       </Box>
     </AnimatePresence>)
 };
+
+export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, ...rest}) => {
+  const [isSendDollars, setSendDollars] = useState(false);
+  const [amount, setAmount] = useState(0); 
+  const formattedBalance = ethers.utils.formatUnits(balance, asset.decimals);
+
+  const maximumAmount = isSendDollars ? price * formattedBalance : formattedBalance; 
+ 
+  const inputIconProps = {
+    initial: {opacity: 0, y: 0, x: -100, position: 'absolute'},
+    animate: {opacity: 0.4, y: -75, x: -30},
+    exit:    {opacity: 0, y: -150, x: -100, position: 'absolute'},
+    transition: {duration: 0.25}
+  };
+
+  return (<VStack mt='1em' spacing='1em'>
+    <HStack width='100%'>
+      <Button size='xs'>Max</Button>
+      <Spacer/>
+      <Text fontSize='xs' {... (!isSendDollars ? {fontWeight: 'bold'} : {})}>{asset.symbol}</Text>
+      <Switch size='lg' onChange={(e) => {
+        setSendDollars(e.target.checked);
+      }}/>
+      <Text fontSize='xs' {... (isSendDollars ? {fontWeight: 'bold'} : {})}>USD</Text>
+    </HStack>
+    <NumberInput
+      min={0}
+      value={amount}
+      max={maximumAmount}
+      onChange={(value) => {
+        var cleaned = value.trim();
+        if (cleaned[0] === '0') {
+          cleaned = cleaned.substring(1);
+        }
+        setAmount(cleaned.length > 0 ? cleaned : 0);
+      }}
+      style={{
+        overflow: 'hidden',
+        borderRadius: '8px'
+      }}
+      keepWithinRange={true}
+      clampValueOnBlur={true}>
+        <NumberInputField 
+          style ={{
+            paddingTop: '30px',
+            paddingBottom: '30px',
+            boxShadow: '0 1px 3px inset rgba(0,0,0,0.4)',
+            textAlign: 'center',
+            fontWeight: 'bold',
+            fontSize:'30px'
+          }}/>
+          <AnimatePresence>
+            { !isSendDollars && (<motion.div key='input-as-asset' {... inputIconProps}>
+                {asset.icon({ size: 90})}
+            </motion.div>) }
+            { isSendDollars && (<motion.div key='input-as-dollars' {... inputIconProps}>
+              <BiDollarCircle size='90px' color='#118C4F'/>
+            </motion.div>) }
+          </AnimatePresence>
+    </NumberInput>
+    { isSendDollars && <Text fontSize='xl' color='gray.500' fontWeight='bold'>{(amount / price).toPrecision(8)} {asset.symbol}</Text> }
+    { !isSendDollars && <Text fontSize='xl' color='gray.500' fontWeight='bold'>{USDFormatter.format(amount * price)}</Text> }
+  </VStack>)
+}
