@@ -14,6 +14,7 @@ import {
   NumberInput,
   NumberInputField,
   Flex,
+  IconButton,
   List,
   ListItem,
   Modal,
@@ -74,6 +75,7 @@ import { ContextBalanceUSD } from './components/Ledger';
 // icons
 import { ImQrcode } from 'react-icons/im';
 import { BiDollarCircle } from 'react-icons/bi';
+import { IoMdArrowRoundBack } from 'react-icons/io';
 
 export function Key() {
   const { keyId } = useParams();
@@ -228,6 +230,7 @@ const ViewCarousel = ({keyInfo, balanceSheet, ...rest}) => {
 }
 
 const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
+  const isDesktop = useBreakpointValue({base: false, md: true});
   const assetPrice = useCoinCapPrice(asset.coinCapId);
   const detailDisclosure = useDisclosure();
   const animate = useAnimation();
@@ -408,6 +411,9 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
                 </motion.div>
               </VStack>
             </motion.div>) }
+            { detailDisclosure.isOpen && isDesktop && <motion.div key='asset-detail-back'>
+              <IconButton icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'/>
+            </motion.div> } 
           </AnimatePresence>
         </HStack>
         <AnimatePresence>
@@ -448,7 +454,10 @@ export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, ...rest}) 
   const [isSendDollars, setSendDollars] = useState(false);
   const [amount, setAmount] = useState(0); 
   const formattedBalance = ethers.utils.formatUnits(balance, asset.decimals);
-
+  const layoutMargin = useBreakpointValue({
+    base: '0.5em',
+    md: '2em',
+  });
   const maximumAmount = isSendDollars ? price * formattedBalance : formattedBalance; 
  
   const inputIconProps = {
@@ -462,7 +471,7 @@ export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, ...rest}) 
     amount/price;
 
 
-  return (<VStack mt='2em' spacing='2em'>
+  return (<VStack mt={layoutMargin} spacing={layoutMargin}>
     <HStack width='100%'>
       <Button size='sm' onClick={() => {setAmount(maximumAmount);}}>Max</Button>
       <Spacer/>
@@ -519,7 +528,7 @@ export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, ...rest}) 
         <Text fontSize='xl' color='gray.500' fontWeight='bold'>{USDFormatter.format(amount * price)}</Text> 
       </motion.div>}
     </AnimatePresence>
-    <Box width='100%' pt='4em'>
+    <Box width='100%' pt={layoutMargin}>
       <Button size='lg' width='100%' boxShadow='md'>Next</Button>
     </Box>
   </VStack>)
