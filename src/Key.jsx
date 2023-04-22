@@ -291,12 +291,14 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
       const rect = ref.current.getBoundingClientRect();
       return {
         y: -1 * (rect.y),
-        marginTop: '10vh',
+        marginTop: '12vh',
         height: '80vh',
-        zIndex: 500
+        zIndex: 500,
+        overflow: 'scroll',
       }
     },
     close: {
+      overflow: 'hidden',
       position: null,
       y: 0,
       x: 0,
@@ -343,6 +345,7 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
   const toggleDetail = function() {
     if (!detailDisclosure.isOpen) {
       detailDisclosure.onOpen();
+      document.body.style.overflow = 'hidden';
       setTimeout(() => {
         animate.set('click');
         animate.start('open');
@@ -351,6 +354,7 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
       detailDisclosure.onClose();
       // maybe if I wait just two ticks,
       // it will render enough to get the right final height
+      document.body.style.overflow = 'scroll';
       setTimeout(async () => { 
         await animate.start('close'); 
         animate.start('final');
@@ -378,7 +382,7 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
           backgroundColor: 'white', borderRadius: '10px', 
           padding: 0, 
           cursor: 'pointer',
-          overflow: 'hidden',
+          overflow: 'hidden', 
         }}
         animate={animate}
         variants={boxVariants}
