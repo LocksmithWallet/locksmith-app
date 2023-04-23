@@ -372,6 +372,13 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
     }
   }, md: {}});
 
+  useEffect(() => {
+    const id = setInterval(() => {
+      ref.current.scrollTop = ref.current.scrollHeight;
+    }, 5);
+    return () => { clearInterval(id); }
+  }, [ref]);
+
   return (<AnimatePresence>
     <Box as={motion.div}
         key={'arn-box' + arn}
@@ -473,7 +480,6 @@ export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, ...rest}) 
 
   const cleanSymbolAmount = ("" + (amount / price)).length >= 8 ? (amount/price).toPrecision(8) :
     amount/price;
-
 
   return (<VStack mt={layoutMargin} spacing={layoutMargin}>
     <HStack width='100%'>
