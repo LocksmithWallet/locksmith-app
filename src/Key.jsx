@@ -493,7 +493,7 @@ export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, container,
             top:  container.current.scrollHeight,
             behavior: 'smooth'
           });
-        }, 200);
+        }, 500);
       }}
       value={amount}
       max={maximumAmount}
