@@ -489,7 +489,7 @@ export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, container,
       min={0}
       onClick={() => {
         setTimeout(() => {container.current.scrollTop = container.current.scrollHeight;},
-          15);
+          500);
       }}
       value={amount}
       max={maximumAmount}
