@@ -488,7 +488,8 @@ export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, container,
     <NumberInput
       min={0}
       onClick={() => {
-        container.current.scrollTop = container.current.scrollHeight;
+        setTimeout(() => {container.current.scrollTop = container.current.scrollHeight;},
+          15);
       }}
       value={amount}
       max={maximumAmount}
