@@ -372,13 +372,6 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
     }
   }, md: {}});
 
-  useEffect(() => {
-    const id = setInterval(() => {
-      ref.current.scrollTop = ref.current.scrollHeight;
-    }, 5);
-    return () => { clearInterval(id); }
-  }, [ref]);
-
   return (<AnimatePresence>
     <Box as={motion.div}
         key={'arn-box' + arn}
@@ -447,7 +440,8 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
                     arn={arn}
                     balance={balance}
                     asset={asset}
-                    price={assetPrice.data}/>
+                    price={assetPrice.data}
+                    container={ref}/>
                 </TabPanel>
                 <TabPanel>
                   <p>two!</p>
@@ -461,7 +455,7 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
     </AnimatePresence>)
 };
 
-export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, ...rest}) => {
+export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, container, ...rest}) => {
   const [isSendDollars, setSendDollars] = useState(false);
   const [amount, setAmount] = useState(0); 
   const formattedBalance = ethers.utils.formatUnits(balance, asset.decimals);
@@ -493,6 +487,9 @@ export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, ...rest}) 
     </HStack>
     <NumberInput
       min={0}
+      onClick={() => {
+        container.current.scrollTop = container.current.scrollHeight;
+      }}
       value={amount}
       max={maximumAmount}
       onChange={(value) => {
