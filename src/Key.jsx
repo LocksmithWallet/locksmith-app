@@ -291,8 +291,9 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
       const rect = ref.current.getBoundingClientRect();
       return {
         y: -1 * (rect.y),
-        marginTop: '12vh',
-        height: '80vh',
+        marginTop: '3vh',
+        minWidth: isDesktop ? '0' : '92vw',
+        height: '90vh',
         zIndex: 500,
         overflow: 'scroll',
       }
@@ -363,10 +364,9 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
   };
 
   const swipeProps = useBreakpointValue({base: {
-    drag: true,
+    drag: 'y',
     onDragEnd: function(event, info) {
-      if (Math.abs(info.offset.y) >= 10 ||
-          Math.abs(info.offset.x) >= 10) {
+      if (Math.abs(info.offset.y) >= 10 ) { 
         toggleDetail(); 
       }
     }
@@ -416,7 +416,8 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
               </VStack>
             </motion.div>) }
             { detailDisclosure.isOpen && isDesktop && <motion.div key='asset-detail-back'>
-              <IconButton icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'/>
+              <IconButton pos='absolute' top='1em' right='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
+                onClick={toggleDetail}/>
             </motion.div> } 
           </AnimatePresence>
         </HStack>
