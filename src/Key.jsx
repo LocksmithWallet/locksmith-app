@@ -73,6 +73,7 @@ import { DisplayAddress } from './components/Address';
 import { ContextBalanceUSD } from './components/Ledger';
 
 // icons
+import { FiEdit2 } from 'react-icons/fi';
 import { ImQrcode } from 'react-icons/im';
 import { BiDollarCircle } from 'react-icons/bi';
 import { IoMdArrowRoundBack } from 'react-icons/io';
@@ -290,7 +291,7 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
     open: function() {
       const rect = ref.current.getBoundingClientRect();
       return {
-        y: -1 * (rect.y),
+        y: -1 * (rect.y) - window.scrollY,
         marginTop: '3vh',
         minWidth: isDesktop ? '0' : '92vw',
         height: '90vh',
@@ -382,7 +383,7 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
           backgroundColor: 'white', borderRadius: '10px', 
           padding: 0, 
           cursor: 'pointer',
-          overflow: 'hidden', 
+          overflow: 'hidden',
         }}
         animate={animate}
         variants={boxVariants}
@@ -436,7 +437,7 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
                 borderRadius="1px"/>
               <TabPanels>
                 <TabPanel maxWidth='20em'>
-                  <AssetSendDetail
+                  <AssetSendFlow
                     keyInfo={keyInfo}
                     arn={arn}
                     balance={balance}
@@ -456,16 +457,114 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
     </AnimatePresence>)
 };
 
-export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, container, ...rest}) => {
+export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, ...rest}) => {
+  const [step, setStep] = useState(0);
+  const stepZeroAnimate = useAnimation();
+  const stepOneAnimate = useAnimation();
+  const stepAnimations = [stepZeroAnimate, stepOneAnimate];
+
+  const stepInitial = {
+    x: 800,
+    opacity: 0,
+  };
+
+  const stepVariants = {
+    'in-next': {
+      x: [800, 0], 
+      opacity: [0,1],
+    },
+    'out-next': {
+      x: [0, -800],
+      opacity: [1,0],
+    },
+    'in-prev': {
+      x: [-800, 0],
+      opacity: [0,1],
+    },
+    'out-prev': {
+      x: [0, 800],
+      opacity: [1,0],
+    }
+  };
+
+  useEffect(() => {
+    stepZeroAnimate.start('in-next');
+  }, []);
+
+  const processStep = (newStep) => {
+    // determine if we are going up or down
+    const direction = newStep > step ? 'next' : 'prev';
+
+    // play the appropriate directional outro
+    // on the active step.
+    stepAnimations[step].start('out-'+direction);
+    
+    // once completed, set the step
+    setTimeout(() => { setStep(newStep); }, 100);
+
+    // to ensure its mounted, wait a little
+    // longer, then play the intro on the new step
+    setTimeout(() => {
+      stepAnimations[newStep].start('in-'+direction);
+    }, 125);
+  };
+
+  // step 1: amount
   const [isSendDollars, setSendDollars] = useState(false);
-  const [amount, setAmount] = useState(0); 
+  const [amount, setAmount] = useState(0);
+
+  // step 2: destination
+  const [isSendKey, setSendKey] = useState(true);
+  const [destination, setDestination] = useState(null);
+
+  // step 3: confirmation
+
+  return (<AnimatePresence>
+    { step === 0 && <motion.div key='send-step-0' animate={stepZeroAnimate} initial={stepInitial} variants={stepVariants}>
+      <AssetSendDetail
+        keyInfo={keyInfo}
+        arn={arn}
+        balance={balance}
+        asset={asset}
+        price={price}
+        container={container}
+        isSendDollars={isSendDollars}
+        setSendDollars={setSendDollars}
+        amount={amount}
+        setAmount={setAmount}
+        step={step}
+        setStep={processStep}/>
+    </motion.div> }
+    { step === 1 && <motion.div key='send-step-1' animate={stepOneAnimate} initial={stepInitial} variants={stepVariants}>
+      <HStack>
+        {asset.icon()}
+        <VStack align='stretch' spacing='0em'>
+          <HStack fontWeight='bold' fontSize='0.8em'>
+            { isSendDollars && <Text>{ amount / price } {asset.symbol}</Text> }
+            { !isSendDollars && <Text>{amount} {asset.symbol}</Text> }
+          </HStack>
+          <HStack fontSize='0.8em' textColor='gray.600' fontStyle='italic' spacing='0.5em'>
+            { isSendDollars && <Text>{USDFormatter.format(amount)}</Text> }
+            { !isSendDollars && <Text>{USDFormatter.format(amount * price)}</Text> }
+          </HStack>
+        </VStack>
+        <Spacer/>
+        <Button borderRadius='full' onClick={() => {processStep(0);}}><FiEdit2/></Button>
+      </HStack>
+    </motion.div> }
+  </AnimatePresence>)
+}
+
+export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, container, isSendDollars, setSendDollars, amount, setAmount, step, setStep, ...rest}) => {
+  const animate = useAnimation();
   const formattedBalance = ethers.utils.formatUnits(balance, asset.decimals);
   const layoutMargin = useBreakpointValue({
     base: '0.5em',
     md: '2em',
   });
   const maximumAmount = isSendDollars ? price * formattedBalance : formattedBalance; 
- 
+  const tooMuch = parseFloat(amount) > maximumAmount || parseFloat(amount) <= 0;
+
   const inputIconProps = {
     initial: {opacity: 0, y: 0, x: -100, position: 'absolute'},
     animate: {opacity: 0.4, y: -75, x: -30},
@@ -475,6 +574,13 @@ export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, container,
 
   const cleanSymbolAmount = ("" + (amount / price)).length >= 8 ? (amount/price).toPrecision(8) :
     amount/price;
+
+  const inputVariants = {
+    tooMuch: {
+      x: [-5, 5, -3, 3, -1, 0],
+      transition: {type: 'linear'}
+    }
+  };
 
   return (<VStack mt={layoutMargin} spacing={layoutMargin}>
     <HStack width='100%'>
@@ -486,6 +592,7 @@ export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, container,
       }}/>
       <Text fontSize='sm' {... (isSendDollars ? {fontWeight: 'bold'} : {})}>USD</Text>
     </HStack>
+    <motion.div variants={inputVariants} animate={animate}>
     <NumberInput
       min={0}
       onClick={() => {
@@ -504,6 +611,9 @@ export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, container,
           cleaned = cleaned.substring(1);
         }
         setAmount(cleaned.length > 0 ? cleaned : 0);
+        if (parseFloat(cleaned) > maximumAmount) {
+          animate.start('tooMuch');
+        }
       }}
       style={{
         overflow: 'hidden',
@@ -522,15 +632,16 @@ export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, container,
             fontWeight: 'bold',
             fontSize:'30px'
           }}/>
-          <AnimatePresence>
+        <AnimatePresence>
             { !isSendDollars && (<motion.div key='input-as-asset' {... inputIconProps}>
                 {asset.icon({ size: 90})}
             </motion.div>) }
             { isSendDollars && (<motion.div key='input-as-dollars' {... inputIconProps}>
               <BiDollarCircle size='90px' color='#118C4F'/>
             </motion.div>) }
-          </AnimatePresence>
+        </AnimatePresence>
     </NumberInput>
+    </motion.div>
     <AnimatePresence mode='wait'>
       { isSendDollars && <motion.div key='asset-fade' initial={{opacity: 0, x: -100}} animate={{opacity: 1, x: 1}} exit={{opacity: 0, x: 100}}
         transition={{duration: 0.1}}>
@@ -542,7 +653,8 @@ export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, container,
       </motion.div>}
     </AnimatePresence>
     <Box width='100%' pt={layoutMargin}>
-      <Button size='lg' width='100%' boxShadow='md'>Next</Button>
+      <Button { ...(tooMuch ? {isDisabled: true} : {})}size='lg' width='100%' boxShadow='md'
+        onClick={() => {setStep(1);}}>Next</Button>
     </Box>
   </VStack>)
 }
