@@ -15,6 +15,7 @@ import {
   NumberInputField,
   Flex,
   IconButton,
+  Input,
   List,
   ListItem,
   Modal,
@@ -27,6 +28,7 @@ import {
   Tab,
   TabPanel,
   Text,
+  Select,
   Spacer,
   Switch,
   VStack,
@@ -64,7 +66,8 @@ import {
 import { OverlayBlur } from './components/Animations';
 
 // components
-import { 
+import {
+  KeySelectOption,
   AddressExplorerButton,
   CopyButton,
   KeyIcon
@@ -460,8 +463,12 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
 export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, ...rest}) => {
   const [step, setStep] = useState(0);
   const stepZeroAnimate = useAnimation();
+  const stepZeroReview = useAnimation();
+
   const stepOneAnimate = useAnimation();
+  
   const stepAnimations = [stepZeroAnimate, stepOneAnimate];
+  const reviewAnimations = [stepZeroReview];
 
   const stepInitial = {
     x: 800,
@@ -494,9 +501,13 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, .
   const processStep = (newStep) => {
     // determine if we are going up or down
     const direction = newStep > step ? 'next' : 'prev';
+    const oldStep = step;
 
     // play the appropriate directional outro
     // on the active step.
+    if(direction === 'prev') {
+      reviewAnimations[newStep].start('out-'+direction);
+    }
     stepAnimations[step].start('out-'+direction);
     
     // once completed, set the step
@@ -505,6 +516,8 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, .
     // to ensure its mounted, wait a little
     // longer, then play the intro on the new step
     setTimeout(() => {
+      // also do it for the review of the previous step
+      reviewAnimations[oldStep]?.start('in-'+direction);
       stepAnimations[newStep].start('in-'+direction);
     }, 125);
   };
@@ -514,7 +527,7 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, .
   const [amount, setAmount] = useState(0);
 
   // step 2: destination
-  const [isSendKey, setSendKey] = useState(true);
+  const [isSendKey, setSendKey] = useState(false);
   const [destination, setDestination] = useState(null);
 
   // step 3: confirmation
@@ -535,7 +548,7 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, .
         step={step}
         setStep={processStep}/>
     </motion.div> }
-    { step === 1 && <motion.div key='send-step-1' animate={stepOneAnimate} initial={stepInitial} variants={stepVariants}>
+    { step >= 1 && <motion.div key='send-step-1' animate={stepZeroReview} initial={stepInitial} variants={stepVariants}>
       <HStack>
         {asset.icon()}
         <VStack align='stretch' spacing='0em'>
@@ -551,8 +564,40 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, .
         <Spacer/>
         <Button borderRadius='full' onClick={() => {processStep(0);}}><FiEdit2/></Button>
       </HStack>
+    </motion.div> 
+    }
+    { step === 1 && <motion.div key='step-one-destination' 
+      animate={stepOneAnimate} initial={stepInitial} variants={stepVariants}>
+        <SelectSendDestination
+          keyInfo={keyInfo}
+          isSendKey={isSendKey}
+          setSendKey={setSendKey}
+          destination={destination}
+          setDestination={setDestination}/>
     </motion.div> }
   </AnimatePresence>)
+}
+
+export const SelectSendDestination = ({keyInfo, isSendKey, setSendKey, destination, setDestination, ...rest}) => {
+  return (<VStack align='stretch' mt='2em'>
+    <HStack>
+      <Spacer/>
+      <Text fontSize='sm' {... (!isSendKey ? {fontWeight: 'bold'} : {})}>EOA</Text>
+      <Switch size='md' onChange={(e) => {
+        setSendKey(e.target.checked);
+      }}/>
+      <Text fontSize='sm' {... (isSendKey ? {fontWeight: 'bold'} : {})}>Key</Text>
+    </HStack>
+    { !isSendKey && <Input size='md' placeholder='0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+      onChange={(e) => {
+        setDestination(e.target.value);
+      }}
+    /> }
+    { !isSendKey && <Text><DisplayAddress address={destination || ''}/></Text> }
+    { isSendKey && <Select placeholder='Select Treasury Key'>
+      { keyInfo.trustKeys.map((k) => <KeySelectOption key={'kso-'+k} keyId={k}/> ) }
+    </Select> }
+  </VStack>)
 }
 
 export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, container, isSendDollars, setSendDollars, amount, setAmount, step, setStep, ...rest}) => {

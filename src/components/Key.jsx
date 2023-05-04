@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useNetwork } from 'wagmi';
 import { Networks } from '../configuration/Networks';
+import { useInspectKey } from '../hooks/contracts/Locksmith';
 import { DisplayAddress } from './Address';
 import { useToast } from '@chakra-ui/react';
 import { 
@@ -8,6 +9,13 @@ import {
   FiExternalLink
 } from 'react-icons/fi';
 
+export const KeySelectOption = ({keyId, ...rest}) => {
+  const keyInfo = useInspectKey(keyId);
+
+  return keyInfo && (
+    <option value={keyId}>{keyId.toString()}: {keyInfo.alias}</option>
+  )
+}
 
 export const AddressExplorerButton = ({address, ...rest}) => {
   const network = useNetwork();
