@@ -632,7 +632,7 @@ export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, container,
       <Button size='sm' onClick={() => {setAmount(maximumAmount);}}>Max</Button>
       <Spacer/>
       <Text fontSize='sm' {... (!isSendDollars ? {fontWeight: 'bold'} : {})}>{asset.symbol}</Text>
-      <Switch size='lg' onChange={(e) => {
+      <Switch size='lg' {... isSendDollars ? {isChecked: true} : {}}onChange={(e) => {
         setSendDollars(e.target.checked);
       }}/>
       <Text fontSize='sm' {... (isSendDollars ? {fontWeight: 'bold'} : {})}>USD</Text>
