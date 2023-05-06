@@ -579,24 +579,48 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, .
 }
 
 export const SelectSendDestination = ({keyInfo, isSendKey, setSendKey, destination, setDestination, ...rest}) => {
-  return (<VStack align='stretch' mt='2em'>
+  const isValidAddress = !isSendKey && ethers.utils.isAddress(destination);
+  const isValidKey = isSendKey && /[0-9]+/.test(destination);
+
+  return (<VStack align='stretch' mt='2em' spacing='1em'>
     <HStack>
       <Spacer/>
       <Text fontSize='sm' {... (!isSendKey ? {fontWeight: 'bold'} : {})}>EOA</Text>
-      <Switch size='md' onChange={(e) => {
+      <Switch size='lg' onChange={(e) => {
         setSendKey(e.target.checked);
       }}/>
       <Text fontSize='sm' {... (isSendKey ? {fontWeight: 'bold'} : {})}>Key</Text>
     </HStack>
-    { !isSendKey && <Input size='md' placeholder='0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
-      onChange={(e) => {
-        setDestination(e.target.value);
-      }}
-    /> }
-    { !isSendKey && <Text><DisplayAddress address={destination || ''}/></Text> }
-    { isSendKey && <Select placeholder='Select Treasury Key'>
-      { keyInfo.trustKeys.map((k) => <KeySelectOption key={'kso-'+k} keyId={k}/> ) }
-    </Select> }
+    <AnimatePresence mode='wait'>
+    { !isSendKey && 
+      <motion.div key='send-address-motion' 
+          initial={{opacity: 0, x: 500}} 
+          transition={{duration: 0.2}}
+          animate={{opacity: 1, x: 0}}
+          exit={{opacity: 0, x: 500}}> 
+        <Input value={destination} size='md' mb='0.5em' placeholder='0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+          onChange={(e) => {
+            setDestination(e.target.value);
+        }}/>
+        { isValidAddress && <Text fontWeight='bold' textColor='green.600' fontSize='sm'><DisplayAddress address={destination || ''}/></Text> }
+        { !isValidAddress && <Text textColor='red.600' fontStyle='italic' fontSize='sm'>Enter valid destination address</Text> }
+      </motion.div>
+    }
+    { isSendKey && 
+      <motion.div key='send-key-motion'
+          initial={{opacity: 0, x: -500}} 
+          transition={{duration: 0.2}}
+          animate={{opacity: 1, x: 0}}
+          exit={{opacity: 0, x: -500}}> 
+        <Select placeholder='Select Treasury Key' mb='1.6em' onChange={(e) => { setDestination(e.target.value); }}>
+          { keyInfo.trustKeys.map((k) => <KeySelectOption key={'kso-'+k} keyId={k}/> ) }
+        </Select> 
+      </motion.div>}
+    </AnimatePresence>
+    <Box width='100%'>
+      <Button { ...(isValidAddress || isValidKey ? {} : {isDisabled: true})}size='lg' width='100%' boxShadow='md'
+        onClick={() => {setStep(2);}}>Next</Button>
+    </Box>
   </VStack>)
 }
 
