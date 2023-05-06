@@ -466,9 +466,12 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, .
   const stepZeroReview = useAnimation();
 
   const stepOneAnimate = useAnimation();
-  
-  const stepAnimations = [stepZeroAnimate, stepOneAnimate];
-  const reviewAnimations = [stepZeroReview];
+  const stepOneReview = useAnimation();
+
+  const stepTwoAnimate = useAnimation();
+
+  const stepAnimations = [stepZeroAnimate, stepOneAnimate, stepTwoAnimate];
+  const reviewAnimations = [stepZeroReview, stepOneReview];
 
   const stepInitial = {
     x: 800,
@@ -579,6 +582,10 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, .
           setKey={setKey}
           setStep={processStep}/>
     </motion.div> }
+    { step === 2 && <motion.div key='step-two-looksie'
+        animate={stepTwoAnimate} initial={stepInitial} variants={stepVariants}>
+      <Text>Hi</Text>
+    </motion.div> }
   </AnimatePresence>)
 }
 
@@ -590,7 +597,7 @@ export const SelectSendDestination = ({keyInfo, isSendKey, setSendKey, destinati
     <HStack>
       <Spacer/>
       <Text fontSize='sm' {... (!isSendKey ? {fontWeight: 'bold'} : {})}>EOA</Text>
-      <Switch size='lg' onChange={(e) => {
+      <Switch size='lg' {... isSendKey ? {isChecked: true} : {}} onChange={(e) => {
         setSendKey(e.target.checked);
       }}/>
       <Text fontSize='sm' {... (isSendKey ? {fontWeight: 'bold'} : {})}>Key</Text>
