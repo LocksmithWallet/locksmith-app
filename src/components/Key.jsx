@@ -9,11 +9,11 @@ import {
   FiExternalLink
 } from 'react-icons/fi';
 
-export const KeySelectOption = ({keyId, ...rest}) => {
+export const KeySelectOption = ({keyId, selected, ...rest}) => {
   const keyInfo = useInspectKey(keyId);
 
   return keyInfo && (
-    <option value={keyId}>{keyId.toString()}: {keyInfo.alias}</option>
+    <option value={keyId.toString()} {... selected ? {selected: true} : {}}>{keyId.toString()}: {keyInfo.alias}</option>
   )
 }
 

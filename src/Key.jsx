@@ -528,7 +528,8 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, .
 
   // step 2: destination
   const [isSendKey, setSendKey] = useState(false);
-  const [destination, setDestination] = useState(null);
+  const [key, setKey] = useState(null);
+  const [destination, setDestination] = useState('');
 
   // step 3: confirmation
 
@@ -573,14 +574,17 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, .
           isSendKey={isSendKey}
           setSendKey={setSendKey}
           destination={destination}
-          setDestination={setDestination}/>
+          setDestination={setDestination}
+          keyDest={key}
+          setKey={setKey}
+          setStep={processStep}/>
     </motion.div> }
   </AnimatePresence>)
 }
 
-export const SelectSendDestination = ({keyInfo, isSendKey, setSendKey, destination, setDestination, ...rest}) => {
+export const SelectSendDestination = ({keyInfo, isSendKey, setSendKey, destination, setDestination, keyDest, setKey, setStep, ...rest}) => {
   const isValidAddress = !isSendKey && ethers.utils.isAddress(destination);
-  const isValidKey = isSendKey && /[0-9]+/.test(destination);
+  const isValidKey = isSendKey && /[0-9]+/.test(keyDest);
 
   return (<VStack align='stretch' mt='2em' spacing='1em'>
     <HStack>
@@ -612,8 +616,12 @@ export const SelectSendDestination = ({keyInfo, isSendKey, setSendKey, destinati
           transition={{duration: 0.2}}
           animate={{opacity: 1, x: 0}}
           exit={{opacity: 0, x: -500}}> 
-        <Select placeholder='Select Treasury Key' mb='1.6em' onChange={(e) => { setDestination(e.target.value); }}>
-          { keyInfo.trustKeys.map((k) => <KeySelectOption key={'kso-'+k} keyId={k}/> ) }
+        <Select placeholder='Select Treasury Key' mb='1.75em' 
+            value={(keyDest||'').toString()}
+            onChange={(e) => { setKey(e.target.value); }}>
+          { keyInfo.trustKeys.filter((k) => k.toString() !== keyInfo.keyId.toString()).map((k) => <KeySelectOption 
+            key={'kso-'+k} keyId={k.toString()} selected={(keyDest||'').toString() === k.toString()}
+          /> ) }
         </Select> 
       </motion.div>}
     </AnimatePresence>
