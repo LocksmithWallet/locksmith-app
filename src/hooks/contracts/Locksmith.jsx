@@ -27,7 +27,7 @@ export function useWalletKeys(address) {
  */
 export function useInspectKey(keyId) {
   const [keyData, setKeyData] = useState(null);
-  const inspectKey = useLocksmithRead('Locksmith', 'inspectKey', [keyId], keyId !== null, false); 
+  const inspectKey = useLocksmithRead('Locksmith', 'inspectKey', [keyId], keyId !== null || keyId !== '', false); 
   
   useEffect(() => {
     if (!inspectKey.data) { return; }

@@ -70,7 +70,8 @@ import {
   KeySelectOption,
   AddressExplorerButton,
   CopyButton,
-  KeyIcon
+  KeyIcon,
+  KeyTrustName,
 } from './components/Key';
 import { DisplayAddress } from './components/Address';
 import { ContextBalanceUSD } from './components/Ledger';
@@ -532,6 +533,7 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, .
   // step 2: destination
   const [isSendKey, setSendKey] = useState(false);
   const [key, setKey] = useState(null);
+  const selectedKeyInfo = useInspectKey(key);
   const [destination, setDestination] = useState('');
 
   // step 3: confirmation
@@ -570,6 +572,19 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, .
       </HStack>
     </motion.div> 
     }
+    { step >= 2 && <motion.div key='send-step-2-review' animate={stepOneReview} initial={stepInitial} variants={stepVariants}>
+      <HStack mt='1em'>
+        { isSendKey && selectedKeyInfo && <KeyIcon keyInfo={selectedKeyInfo} size={32}/> }
+        { isSendKey && selectedKeyInfo && <VStack align='stretch' fontSize='0.8em' spacing='0em'>
+          <HStack><Text fontWeight='bold'>#{selectedKeyInfo.keyId}: {selectedKeyInfo.alias}</Text></HStack>
+          <HStack><KeyTrustName keyInfo={selectedKeyInfo} fontStyle='italic' textColor='gray.600'/></HStack>
+        </VStack> }
+        { !isSendKey && <ImQrcode size={32}/> }
+        { !isSendKey && <Text fontWeight='bold' fontSize='0.8em'><DisplayAddress address={destination}/></Text> }
+        <Spacer/>
+        <Button borderRadius='full' onClick={() => {processStep(1);}}><FiEdit2/></Button>
+      </HStack>
+    </motion.div> }
     { step === 1 && <motion.div key='step-one-destination' 
       animate={stepOneAnimate} initial={stepInitial} variants={stepVariants}>
         <SelectSendDestination
@@ -584,7 +599,7 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, .
     </motion.div> }
     { step === 2 && <motion.div key='step-two-looksie'
         animate={stepTwoAnimate} initial={stepInitial} variants={stepVariants}>
-      <Text>Hi</Text>
+      <Text>Confirm Button Here</Text>
     </motion.div> }
   </AnimatePresence>)
 }

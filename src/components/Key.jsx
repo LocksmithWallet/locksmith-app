@@ -1,9 +1,15 @@
 import { motion } from 'framer-motion';
 import { useNetwork } from 'wagmi';
 import { Networks } from '../configuration/Networks';
-import { useInspectKey } from '../hooks/contracts/Locksmith';
+import { 
+  useInspectKey,
+  useTrustInfo
+} from '../hooks/contracts/Locksmith';
 import { DisplayAddress } from './Address';
-import { useToast } from '@chakra-ui/react';
+import { 
+  Text,
+  useToast
+} from '@chakra-ui/react';
 import { 
   FiCopy,
   FiExternalLink
@@ -15,6 +21,11 @@ export const KeySelectOption = ({keyId, selected, ...rest}) => {
   return keyInfo && (
     <option value={keyId.toString()} {... selected ? {selected: true} : {}}>{keyId.toString()}: {keyInfo.alias}</option>
   )
+}
+
+export const KeyTrustName = ({keyInfo, ...rest}) => {
+  const trustInfo = useTrustInfo(keyInfo.trustId);  
+  return trustInfo && <Text {... rest}>{trustInfo.name}</Text>
 }
 
 export const AddressExplorerButton = ({address, ...rest}) => {
