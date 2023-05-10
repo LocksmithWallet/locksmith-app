@@ -52,6 +52,9 @@ import {
   useContextBalanceSheet
 } from './hooks/contracts/Ledger';
 import {
+  useDistribute
+} from './hooks/contracts/Distributor';
+import {
   USDFormatter,
   useCoinCapPrice,
 } from './hooks/Prices';
@@ -599,9 +602,29 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, .
     </motion.div> }
     { step === 2 && <motion.div key='step-two-looksie'
         animate={stepTwoAnimate} initial={stepInitial} variants={stepVariants}>
-      <Text>Confirm Button Here</Text>
+      { isSendKey && <SendToKeyConfirmationButton
+        keyInfo={keyInfo}
+        destinationKey={key}
+        arn={arn}
+        asset={asset}
+        amount={isSendDollars ? amount / price : amount}/> }
     </motion.div> }
   </AnimatePresence>)
+}
+
+export const SendToKeyConfirmationButton = ({keyInfo, destinationKey, arn, asset, amount}) => {
+  const network = useNetwork();
+  // the assumption about which provider we are using is going to break at some point in the near
+  // future
+  const distribution = useDistribute(Networks.getContractAddress(network.chain.id, asset.standard === 0 ? 'EtherVault' : 'TokenVault'),
+    arn, keyInfo.keyId, [destinationKey], [ethers.utils.parseUnits(amount, asset.decimals)],
+    (error) => { 
+      console.log('error');
+      console.log(data);
+    }, (data) => {
+      console.log(data);
+    });
+  return <Button mt='1em' width='100%' isLoading={distribution.isLoading} onClick={() => {distribution.write?.();}}>Confirm</Button>
 }
 
 export const SelectSendDestination = ({keyInfo, isSendKey, setSendKey, destination, setDestination, keyDest, setKey, setStep, ...rest}) => {
