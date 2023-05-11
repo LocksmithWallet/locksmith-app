@@ -10,6 +10,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 // App Components
 import SidebarWithHeader from './AppChrome';
+import { TransactionContext } from './components/TransactionProvider';
 import { Home } from './Home';
 import { RevealTrust } from './RevealTrust';
 import { Key } from './Key';
@@ -18,9 +19,11 @@ function App() {
   return <ConnectKitProvider theme='auto' mode={useColorModeValue('light', 'dark')}
     options={{initialChainId: 0}}> 
     <Router>
-      <SidebarWithHeader>
-        <AnimatedRoutes/>
-      </SidebarWithHeader>
+      <TransactionContext>
+        <SidebarWithHeader>
+          <AnimatedRoutes/>
+        </SidebarWithHeader>
+      </TransactionContext>
     </Router>
   </ConnectKitProvider>
 }
