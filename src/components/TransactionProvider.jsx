@@ -8,12 +8,12 @@ export const TransactionListContext = createContext({});
 
 export const TransactionContext = ({children}) => {
   const [transactions, setTransactions] = useState([]);
+  
+  console.log(transactions);
   return (<TransactionListContext.Provider value={{
     transactions: transactions,
-    actions: {
-      addTransaction: useCallback((txn) =>{
-        setTransactions([... transactions, txn]);
-      })
-    }
+    addTransaction: useCallback((txn) =>{
+      setTransactions([... transactions, txn]);
+    })
   }}>{children}</TransactionListContext.Provider>)
 }

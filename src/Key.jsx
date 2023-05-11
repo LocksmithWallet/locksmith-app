@@ -1,7 +1,7 @@
 //////////////////////////////////////
 // React and UI Components
 //////////////////////////////////////
-import { React, useState, useEffect, useRef } from 'react';
+import { React, useState, useContext, useEffect, useRef } from 'react';
 import {
   useParams
 } from 'react-router-dom';
@@ -83,6 +83,9 @@ import {
 } from './components/Key';
 import { DisplayAddress } from './components/Address';
 import { ContextBalanceUSD } from './components/Ledger';
+import {
+  TransactionListContext
+} from './components/TransactionProvider';
 
 // icons
 import { FiEdit2 } from 'react-icons/fi';
@@ -650,14 +653,16 @@ export const SendToEOAConfirmationButton = ({keyInfo, destination, arn, asset, a
 
 export const SendGasButton = ({keyInfo, inbox, destination, arn, asset, amount, toggleDetail}) => {
   // we are making an assumption the token is in the ether vault right here
+  const transactions = useContext(TransactionListContext);
   const network = useNetwork();
   const sendToken = useSend(inbox, Networks.getContractAddress(network.chain.id, 'EtherVault'),
-    ethers.utils.parseUnits(amount, asset.decimals), destination,
+    ethers.utils.parseUnits(amount.toString(), asset.decimals), destination,
     (error) => {
       console.log('error');
       console.log(error);
     }, (data) => {
       console.log(data);
+      transactions.addTransaction(data);
       toggleDetail();
     });
   return <Button isLoading={sendToken.isLoading} colorScheme='blue' boxShadow='lg' width='100%' size='lg'
@@ -667,14 +672,16 @@ export const SendGasButton = ({keyInfo, inbox, destination, arn, asset, amount, 
 
 export const SendTokenButton = ({keyInfo, inbox, destination, arn, asset, amount, toggleDetail}) => {
   // we are making an assumption the token is in the token vault right here
+  const transactions = useContext(TransactionListContext);
   const network = useNetwork();
   const sendToken = useSendToken(inbox, Networks.getContractAddress(network.chain.id, 'TokenVault'),
     asset.contractAddress,
-    ethers.utils.parseUnits(amount, asset.decimals), destination,
+    ethers.utils.parseUnits(amount.toString(), asset.decimals), destination,
     (error) => {
       console.log('error');
       console.log(error);
     }, (data) => {
+      transactions.addTransaction(data);
       toggleDetail();
     });
   return <Button isLoading={sendToken.isLoading} colorScheme='blue' boxShadow='lg' width='100%' size='lg'
@@ -683,15 +690,17 @@ export const SendTokenButton = ({keyInfo, inbox, destination, arn, asset, amount
 
 export const SendToKeyConfirmationButton = ({keyInfo, destinationKey, arn, asset, amount, toggleDetail}) => {
   const network = useNetwork();
+  const transactions = useContext(TransactionListContext);
+  console.log(transactions);
   // the assumption about which provider we are using is going to break at some point in the near
   // future
   const distribution = useDistribute(Networks.getContractAddress(network.chain.id, asset.standard === 0 ? 'EtherVault' : 'TokenVault'),
-    arn, keyInfo.keyId, [destinationKey], [ethers.utils.parseUnits(amount, asset.decimals)],
+    arn, keyInfo.keyId, [destinationKey], [ethers.utils.parseUnits(amount.toString(), asset.decimals)],
     (error) => { 
       console.log('error');
       console.log(error);
     }, (data) => {
-      console.log(data);
+      transactions.addTransaction(data);
       toggleDetail();
     });
   return <Button size='lg' boxShadow='lg' colorScheme='blue' width='100%' isLoading={distribution.isLoading} onClick={() => {distribution.write?.();}}>Confirm</Button>
