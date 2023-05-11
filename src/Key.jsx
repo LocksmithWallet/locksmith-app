@@ -455,7 +455,8 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
                     balance={balance}
                     asset={asset}
                     price={assetPrice.data}
-                    container={ref}/>
+                    container={ref}
+                    toggleDetail={toggleDetail}/>
                 </TabPanel>
                 <TabPanel>
                   <p>two!</p>
@@ -469,7 +470,7 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
     </AnimatePresence>)
 };
 
-export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, ...rest}) => {
+export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, toggleDetail, ...rest}) => {
   const [step, setStep] = useState(0);
   const stepZeroAnimate = useAnimation();
   const stepZeroReview = useAnimation();
@@ -612,18 +613,20 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, .
         destinationKey={key}
         arn={arn}
         asset={asset}
-        amount={isSendDollars ? amount / price : amount}/> }
+        amount={isSendDollars ? amount / price : amount}
+        toggleDetail={toggleDetail}/> }
       { !isSendKey && <SendToEOAConfirmationButton
         keyInfo={keyInfo}
         destination={destination}
         arn={arn}
         asset={asset}
-        amount={isSendDollars ? amount / price : amount}/> }
+        amount={isSendDollars ? amount / price : amount}
+        toggleDetail={toggleDetail}/> }
     </motion.div> }
   </AnimatePresence>)
 }
 
-export const SendToEOAConfirmationButton = ({keyInfo, destination, arn, asset, amount}) => {
+export const SendToEOAConfirmationButton = ({keyInfo, destination, arn, asset, amount, toggleDetail}) => {
   // we need to get the inbox, and then determine if its gas or not, and make
   // a choice that is going to break when we add new collateral providers.
   const keyInboxAddress = useKeyInboxAddress(keyInfo.keyId);
@@ -633,17 +636,19 @@ export const SendToEOAConfirmationButton = ({keyInfo, destination, arn, asset, a
     destination={destination}
     arn={arn}
     asset={asset}
-    amount={amount}/> 
+    amount={amount}
+    toggleDetail={toggleDetail}/> 
   : <SendTokenButton
     keyInfo={keyInfo}
     inbox={keyInboxAddress.data}
     destination={destination}
     arn={arn}
     asset={asset}
-    amount={amount}/>)
+    amount={amount}
+    toggleDetail={toggleDetail}/>)
 }
 
-export const SendGasButton = ({keyInfo, inbox, destination, arn, asset, amount}) => {
+export const SendGasButton = ({keyInfo, inbox, destination, arn, asset, amount, toggleDetail}) => {
   // we are making an assumption the token is in the ether vault right here
   const network = useNetwork();
   const sendToken = useSend(inbox, Networks.getContractAddress(network.chain.id, 'EtherVault'),
@@ -653,13 +658,14 @@ export const SendGasButton = ({keyInfo, inbox, destination, arn, asset, amount})
       console.log(error);
     }, (data) => {
       console.log(data);
+      toggleDetail();
     });
   return <Button isLoading={sendToken.isLoading} colorScheme='blue' boxShadow='lg' width='100%' size='lg'
     onClick={() => {sendToken.write?.();}}>Confirm</Button>
 
 }
 
-export const SendTokenButton = ({keyInfo, inbox, destination, arn, asset, amount}) => {
+export const SendTokenButton = ({keyInfo, inbox, destination, arn, asset, amount, toggleDetail}) => {
   // we are making an assumption the token is in the token vault right here
   const network = useNetwork();
   const sendToken = useSendToken(inbox, Networks.getContractAddress(network.chain.id, 'TokenVault'),
@@ -669,13 +675,13 @@ export const SendTokenButton = ({keyInfo, inbox, destination, arn, asset, amount
       console.log('error');
       console.log(error);
     }, (data) => {
-      console.log(data);
+      toggleDetail();
     });
   return <Button isLoading={sendToken.isLoading} colorScheme='blue' boxShadow='lg' width='100%' size='lg'
     onClick={() => {sendToken.write?.();}}>Confirm</Button>
 }
 
-export const SendToKeyConfirmationButton = ({keyInfo, destinationKey, arn, asset, amount}) => {
+export const SendToKeyConfirmationButton = ({keyInfo, destinationKey, arn, asset, amount, toggleDetail}) => {
   const network = useNetwork();
   // the assumption about which provider we are using is going to break at some point in the near
   // future
@@ -686,6 +692,7 @@ export const SendToKeyConfirmationButton = ({keyInfo, destinationKey, arn, asset
       console.log(error);
     }, (data) => {
       console.log(data);
+      toggleDetail();
     });
   return <Button size='lg' boxShadow='lg' colorScheme='blue' width='100%' isLoading={distribution.isLoading} onClick={() => {distribution.write?.();}}>Confirm</Button>
 }
