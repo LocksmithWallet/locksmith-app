@@ -4,6 +4,7 @@ import * as Ledger from './interfaces/Ledger.json';
 import * as PostOffice from './interfaces/PostOffice.json';
 import * as Distributor from './interfaces/scribes/Distributor.json';
 import * as TrustCreator from './interfaces/agents/TrustCreator.json';
+import * as VirtualKeyAddress from './interfaces/agents/VirtualKeyAddress.json';
 import { ethers } from 'ethers';
 
 export const LocksmithInterface = (function() {
@@ -13,7 +14,8 @@ export const LocksmithInterface = (function() {
     'Ledger': Ledger,
     'Distributor': Distributor,
     'PostOffice': PostOffice,
-    'TrustCreator': TrustCreator 
+    'TrustCreator': TrustCreator,
+    'VirtualKeyAddress': VirtualKeyAddress,
   };
 
   return {

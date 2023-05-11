@@ -54,12 +54,13 @@ export function useDebounce(value, delay) {
   return debouncedValue;
 }
 
-export function useLocksmithWrite(contract, method, args, enabled, errorFunc, successFunc) {
+export function useLocksmithWrite(contract, method, args, enabled, errorFunc, successFunc, addressOverride = null) {
   const account = useAccount();
   const network = useNetwork();
   const config = Networks.getNetwork(account.isConnected ? network.chain.id : null);
   const preparation = usePrepareContractWrite({
-    address: account.isConnected ? config.contracts[contract].address : ethers.constants.AddressZero,
+    address: addressOverride !== null ? addressOverride : 
+      (account.isConnected ? config.contracts[contract].address : ethers.constants.AddressZero),
     abi: LocksmithInterface.getAbi(contract).abi, 
     functionName: method,
     args: args,

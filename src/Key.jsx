@@ -45,8 +45,13 @@ import { Networks } from './configuration/Networks';
 import { LocksmithInterface } from './configuration/LocksmithInterface';
 
 // hooks
+import { GAS_ARN } from './configuration/AssetResource';
 import { useInspectKey } from './hooks/contracts/Locksmith';
 import { useKeyInboxAddress } from './hooks/contracts/PostOffice';
+import {
+  useSend,
+  useSendToken,
+} from './hooks/contracts/VirtualKeyAddress';
 import { 
   KEY_CONTEXT,
   useContextBalanceSheet
@@ -600,7 +605,7 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, .
           setKey={setKey}
           setStep={processStep}/>
     </motion.div> }
-    { step === 2 && <motion.div key='step-two-looksie'
+    { step === 2 && <motion.div key='step-two-looksie' style={{marginTop: '2em'}} 
         animate={stepTwoAnimate} initial={stepInitial} variants={stepVariants}>
       { isSendKey && <SendToKeyConfirmationButton
         keyInfo={keyInfo}
@@ -608,8 +613,66 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, .
         arn={arn}
         asset={asset}
         amount={isSendDollars ? amount / price : amount}/> }
+      { !isSendKey && <SendToEOAConfirmationButton
+        keyInfo={keyInfo}
+        destination={destination}
+        arn={arn}
+        asset={asset}
+        amount={isSendDollars ? amount / price : amount}/> }
     </motion.div> }
   </AnimatePresence>)
+}
+
+export const SendToEOAConfirmationButton = ({keyInfo, destination, arn, asset, amount}) => {
+  // we need to get the inbox, and then determine if its gas or not, and make
+  // a choice that is going to break when we add new collateral providers.
+  const keyInboxAddress = useKeyInboxAddress(keyInfo.keyId);
+  return keyInboxAddress.isSuccess && (arn === GAS_ARN ? <SendGasButton
+    keyInfo={keyInfo}
+    inbox={keyInboxAddress.data}
+    destination={destination}
+    arn={arn}
+    asset={asset}
+    amount={amount}/> 
+  : <SendTokenButton
+    keyInfo={keyInfo}
+    inbox={keyInboxAddress.data}
+    destination={destination}
+    arn={arn}
+    asset={asset}
+    amount={amount}/>)
+}
+
+export const SendGasButton = ({keyInfo, inbox, destination, arn, asset, amount}) => {
+  // we are making an assumption the token is in the ether vault right here
+  const network = useNetwork();
+  const sendToken = useSend(inbox, Networks.getContractAddress(network.chain.id, 'EtherVault'),
+    ethers.utils.parseUnits(amount, asset.decimals), destination,
+    (error) => {
+      console.log('error');
+      console.log(error);
+    }, (data) => {
+      console.log(data);
+    });
+  return <Button isLoading={sendToken.isLoading} colorScheme='blue' boxShadow='lg' width='100%' size='lg'
+    onClick={() => {sendToken.write?.();}}>Confirm</Button>
+
+}
+
+export const SendTokenButton = ({keyInfo, inbox, destination, arn, asset, amount}) => {
+  // we are making an assumption the token is in the token vault right here
+  const network = useNetwork();
+  const sendToken = useSendToken(inbox, Networks.getContractAddress(network.chain.id, 'TokenVault'),
+    asset.contractAddress,
+    ethers.utils.parseUnits(amount, asset.decimals), destination,
+    (error) => {
+      console.log('error');
+      console.log(error);
+    }, (data) => {
+      console.log(data);
+    });
+  return <Button isLoading={sendToken.isLoading} colorScheme='blue' boxShadow='lg' width='100%' size='lg'
+    onClick={() => {sendToken.write?.();}}>Confirm</Button>
 }
 
 export const SendToKeyConfirmationButton = ({keyInfo, destinationKey, arn, asset, amount}) => {
@@ -620,11 +683,11 @@ export const SendToKeyConfirmationButton = ({keyInfo, destinationKey, arn, asset
     arn, keyInfo.keyId, [destinationKey], [ethers.utils.parseUnits(amount, asset.decimals)],
     (error) => { 
       console.log('error');
-      console.log(data);
+      console.log(error);
     }, (data) => {
       console.log(data);
     });
-  return <Button mt='1em' width='100%' isLoading={distribution.isLoading} onClick={() => {distribution.write?.();}}>Confirm</Button>
+  return <Button size='lg' boxShadow='lg' colorScheme='blue' width='100%' isLoading={distribution.isLoading} onClick={() => {distribution.write?.();}}>Confirm</Button>
 }
 
 export const SelectSendDestination = ({keyInfo, isSendKey, setSendKey, destination, setDestination, keyDest, setKey, setStep, ...rest}) => {
