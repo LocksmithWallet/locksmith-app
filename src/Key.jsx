@@ -545,7 +545,6 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, t
   // step 2: destination
   const [isSendKey, setSendKey] = useState(false);
   const [key, setKey] = useState(null);
-  const selectedKeyInfo = useInspectKey(key);
   const [destination, setDestination] = useState('');
 
   // step 3: confirmation
@@ -586,11 +585,7 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, t
     }
     { step >= 2 && <motion.div key='send-step-2-review' animate={stepOneReview} initial={stepInitial} variants={stepVariants}>
       <HStack mt='1em'>
-        { isSendKey && selectedKeyInfo && <KeyIcon keyInfo={selectedKeyInfo} size={32}/> }
-        { isSendKey && selectedKeyInfo && <VStack align='stretch' fontSize='0.8em' spacing='0em'>
-          <HStack><Text fontWeight='bold'>#{selectedKeyInfo.keyId}: {selectedKeyInfo.alias}</Text></HStack>
-          <HStack><KeyTrustName keyInfo={selectedKeyInfo} fontStyle='italic' textColor='gray.600'/></HStack>
-        </VStack> }
+        { isSendKey && <ReviewSelectedKeyInfo keyId={key}/> }
         { !isSendKey && <ImQrcode size={32}/> }
         { !isSendKey && <Text fontWeight='bold' fontSize='0.8em'><DisplayAddress address={destination}/></Text> }
         <Spacer/>
@@ -627,6 +622,17 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, t
         toggleDetail={toggleDetail}/> }
     </motion.div> }
   </AnimatePresence>)
+}
+
+export const ReviewSelectedKeyInfo = ({keyId, ...rest}) => {
+  const selectedKeyInfo = useInspectKey(keyId);
+  return selectedKeyInfo && (<>
+  <KeyIcon keyInfo={selectedKeyInfo} size={32}/>
+    <VStack align='stretch' fontSize='0.8em' spacing='0em'>
+      <HStack><Text fontWeight='bold'>#{selectedKeyInfo.keyId}: {selectedKeyInfo.alias}</Text></HStack>
+      <HStack><KeyTrustName keyInfo={selectedKeyInfo} fontStyle='italic' textColor='gray.600'/></HStack>
+    </VStack>
+  </>)
 }
 
 export const SendToEOAConfirmationButton = ({keyInfo, destination, arn, asset, amount, toggleDetail}) => {
