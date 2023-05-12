@@ -714,7 +714,7 @@ export const SelectSendDestination = ({keyInfo, isSendKey, setSendKey, destinati
     <HStack>
       <Spacer/>
       <Text fontSize='sm' {... (!isSendKey ? {fontWeight: 'bold'} : {})}>EOA</Text>
-      <Switch size='lg' {... isSendKey ? {isChecked: true} : {}} onChange={(e) => {
+      <Switch size='lg' {... isSendKey ? {defaultChecked: true} : {}} onChange={(e) => {
         setSendKey(e.target.checked);
       }}/>
       <Text fontSize='sm' {... (isSendKey ? {fontWeight: 'bold'} : {})}>Key</Text>
@@ -788,7 +788,7 @@ export const AssetSendDetail = ({keyInfo, arn, balance, asset, price, container,
       <Button size='sm' onClick={() => {setAmount(maximumAmount);}}>Max</Button>
       <Spacer/>
       <Text fontSize='sm' {... (!isSendDollars ? {fontWeight: 'bold'} : {})}>{asset.symbol}</Text>
-      <Switch size='lg' {... isSendDollars ? {isChecked: true} : {}}onChange={(e) => {
+      <Switch size='lg' {... isSendDollars ? {defaultChecked: true} : {}} onChange={(e) => {
         setSendDollars(e.target.checked);
       }}/>
       <Text fontSize='sm' {... (isSendDollars ? {fontWeight: 'bold'} : {})}>USD</Text>
