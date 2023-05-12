@@ -691,7 +691,7 @@ export const SendTokenButton = ({keyInfo, inbox, destination, arn, asset, amount
 export const SendToKeyConfirmationButton = ({keyInfo, destinationKey, arn, asset, amount, toggleDetail}) => {
   const network = useNetwork();
   const transactions = useContext(TransactionListContext);
-  console.log(transactions);
+  
   // the assumption about which provider we are using is going to break at some point in the near
   // future
   const distribution = useDistribute(Networks.getContractAddress(network.chain.id, asset.standard === 0 ? 'EtherVault' : 'TokenVault'),

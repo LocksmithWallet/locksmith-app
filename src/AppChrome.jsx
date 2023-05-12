@@ -29,6 +29,7 @@ import {Link, useNavigate } from 'react-router-dom';
 import { NetworkSwitcher } from './navigation/NetworkSwitcher';
 import { WalletConnector } from "./navigation/WalletConnector";
 import { KeyNavigator } from './navigation/KeyNavigator';
+import { TransactionHistoryButton } from './navigation/TransactionHistory';
 import { SupportedNetworkCheck } from './components/SupportedNetworkCheck';
 
 // Animations
@@ -156,9 +157,21 @@ const MobileNav = ({ onOpen, ...rest }) => {
           icon={<FiMenu />}/>
       </motion.div>
       <Flex alignItems={'center'}>
-        <HStack spacing='1em'>
+        <HStack spacing='0.9em'>
           <LayoutGroup>
+            { network && network.chain && <motion.div layout
+              key='transaction-history-chrome'
+              initial={{opacity: 0, y: -100}}
+              animate={{opacity: 1, y: 0}}
+              exit={{opacity: 0, y: -100}}
+              transition={{
+                layout: {type: 'spring'},
+                type: 'spring'
+              }}>
+              <TransactionHistoryButton/>
+            </motion.div> }
             <motion.div layout 
+              key='wallet-connector-chrome'
               initial={{opacity: 0, y: -100}}
               animate={{opacity: 1, y: 0}}
               exit={{opacity: 0, y: -100}}
@@ -169,7 +182,8 @@ const MobileNav = ({ onOpen, ...rest }) => {
             </motion.div>
             <AnimatePresence>
             { network && network.chain && (
-              <motion.div 
+              <motion.div
+                key='network-switcher-chrome'
                 initial={{opacity: 0, y: -100}}
                 animate={{opacity: 1, y: 0}}
                 transition={{ type: 'spring'}}>
