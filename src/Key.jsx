@@ -667,8 +667,11 @@ export const SendGasButton = ({keyInfo, inbox, destination, arn, asset, amount, 
       console.log('error');
       console.log(error);
     }, (data) => {
-      console.log(data);
-      transactions.addTransaction(data);
+      transactions.addTransaction({
+        type: 'SEND_ASSET',
+        title: 'Send ' + asset.symbol,
+        data: data
+      });
       toggleDetail();
     });
   return <Button isLoading={sendToken.isLoading} colorScheme='blue' boxShadow='lg' width='100%' size='lg'
@@ -687,7 +690,11 @@ export const SendTokenButton = ({keyInfo, inbox, destination, arn, asset, amount
       console.log('error');
       console.log(error);
     }, (data) => {
-      transactions.addTransaction(data);
+      transactions.addTransaction({
+        type: 'SEND_ASSET',
+        title: 'Send ' + asset.symbol,
+        data: data
+      });
       toggleDetail();
     });
   return <Button isLoading={sendToken.isLoading} colorScheme='blue' boxShadow='lg' width='100%' size='lg'
@@ -706,7 +713,11 @@ export const SendToKeyConfirmationButton = ({keyInfo, destinationKey, arn, asset
       console.log('error');
       console.log(error);
     }, (data) => {
-      transactions.addTransaction(data);
+      transactions.addTransaction({
+        type: 'SEND_ASSET',
+        title: 'Send ' + asset.symbol,
+        data: data
+      });
       toggleDetail();
     });
   return <Button size='lg' boxShadow='lg' colorScheme='blue' width='100%' isLoading={distribution.isLoading} onClick={() => {distribution.write?.();}}>Confirm</Button>

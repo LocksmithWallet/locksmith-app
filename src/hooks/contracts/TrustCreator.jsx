@@ -20,7 +20,7 @@ export function useMintTrust(trustName, errorFunc, successFunc) {
   const network = useNetwork();
   return useLocksmithWrite('TrustCreator', 'spawnTrust',
       [ethers.utils.formatBytes32String(trustName.trim()), [], [], [],
-        [Networks.getContractAddress(network.chain.id, 'Distributor')],
+        network && network.chain ? [Networks.getContractAddress(network.chain.id, 'Distributor')] : [],
         [ethers.utils.formatBytes32String('Distributor Scribe')],
         [],
         []

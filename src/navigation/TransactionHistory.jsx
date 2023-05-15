@@ -10,28 +10,39 @@ import {
   DrawerFooter,
   List,
   ListItem,
+  HStack,
   Text,
+  Spinner,
   useDisclosure,
 } from '@chakra-ui/react';
-import { useContext, useRef } from 'react';
-import { AiOutlineHistory, } from 'react-icons/ai';
+import { 
+  useEffect,
+  useContext,
+  useRef,
+  useState
+} from 'react';
+import { AiOutlineHistory, AiFillCheckCircle } from 'react-icons/ai';
 import { TransactionListContext } from '../components/TransactionProvider';
+import { useProvider } from 'wagmi';
 
 export const TransactionHistoryButton = () => {
   const transactions = useContext(TransactionListContext);
   const disclosure = useDisclosure();
 
   return transactions.transactions.length > 0 && (
-    <Button size='sm' boxShadow='lg' pos='relative' onClick={disclosure.onOpen}>
-      <Box 
+    <Button size='sm' boxShadow='lg' pos='relative' onClick={() => {
+        disclosure.onOpen();
+        transactions.clearNotificationCount();
+      }}>
+      { transactions.notificationCount > 0 && <Box 
         pos='absolute'
         bg='red.500'
-        top='-0.5em'
-        right='-0.5em'
+        top='-0.8em'
+        right='-0.8em'
         fontSize='0.9em'
         borderRadius='full' p='0.3em' pl='0.5em' pr='0.5em'>
         <Text textColor='white' fontWeight='bold'>{transactions.notificationCount}</Text>
-      </Box>
+      </Box> }
       <Box pos='absolute'>
         <AiOutlineHistory size='20px'/>
       </Box>
@@ -54,9 +65,9 @@ export const TransactionHistoryDrawer = ({disclosure}) => {
         <DrawerHeader>Transaction History</DrawerHeader>
         <DrawerBody>
           <List>
-            {transactions.transactions.map((txn) => (
+            {transactions.transactions.map((txn) => (<ListItem key={txn.data.hash}>
               <TransactionHistoryEntry txn={txn}/>
-            ))} 
+            </ListItem> ))} 
           </List>
         </DrawerBody>
         <DrawerFooter>
@@ -66,5 +77,18 @@ export const TransactionHistoryDrawer = ({disclosure}) => {
 }
 
 export const TransactionHistoryEntry = ({txn, ...rest}) => {
-  return <Text>{txn.hash}</Text>
+  const provider = useProvider();
+  const [receipt, setReceipt] = useState(null);
+
+  useEffect(() => {
+    (async function() {
+      const r = await provider.waitForTransaction(txn.data.hash);
+      setReceipt(r);
+    })();
+  }, []);
+  return (<HStack>
+    { receipt === null && <Spinner/> }
+    { receipt !== null && <AiFillCheckCircle size='24' color='green'/> }
+    <Text fontWeight='bold'>{txn.title}</Text>
+  </HStack>)
 }

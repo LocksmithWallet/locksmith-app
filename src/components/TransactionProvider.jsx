@@ -24,20 +24,24 @@ export const TransactionContext = ({children}) => {
   const [notifyViewNonce, setNotifyViewNonce] = useState(0);
   const [notificationCount, setNotificationCount] = useState(0);
 
+  const getViewNonce = function() {
+    return notifyViewNonce;
+  }
+
   // when the network changes, we need to blow away all of the state
   useEffect(() => {
     setTransactions([]);
     setTransactionLogs({});
     setNotifyViewNonce(0);
     setNotificationCount(0);
-  }, [network.chain.id]);
+  }, [network.chain ? network.chain.id : network]);
 
   return (<TransactionListContext.Provider value={{
     transactions: transactions,
     notificationCount: notificationCount,
     clearNotificationCount: useCallback(() => {
-      setNotificationCount(0);
       setNotifyViewNonce(notifyViewNonce+1);
+      setNotificationCount(0);
     }),
     addTransaction: useCallback((txn) =>{
       // keep a history of each hash
@@ -57,12 +61,19 @@ export const TransactionContext = ({children}) => {
       // is created and when it is mined into a block.
       const myViewNonce = notifyViewNonce;
 
-      // increment the notification count
       setNotificationCount(notificationCount+1);
 
       // now actually wait on that transaction
-    
-      // run the async process here
+      setTimeout(() => { (async function() {
+        console.log('go');
+        console.log(myViewNonce, ' ', getViewNonce());
+        const receipt = provider.waitForTransaction(txn.data.hash);
+
+        // if the view nonce isn't the same, increment the notification
+        if (myViewNonce !== getViewNonce()) {
+          setNotificationCount(notificationCount+1);
+        }
+      })(); }, 10000);
     })
   }}>{children}</TransactionListContext.Provider>)
 }
