@@ -5,6 +5,9 @@ import {
   useState,
 } from 'react';
 import {
+  useToast
+} from '@chakra-ui/react';
+import {
   useProvider,
   useNetwork,
 } from 'wagmi';
@@ -14,6 +17,7 @@ export const TransactionListContext = createContext({});
 export const TransactionContext = ({children}) => {
   const provider = useProvider();
   const network = useNetwork();
+  const toast = useToast();
 
   const [transactions, setTransactions] = useState([]);
   const [transactionLogs, setTransactionLogs] = useState({});
@@ -38,6 +42,15 @@ export const TransactionContext = ({children}) => {
     addTransaction: useCallback((txn) =>{
       // keep a history of each hash
       setTransactions([txn, ...transactions]);
+
+      // acknowledge that we have it now
+      toast({
+        description: 'Transaction Submitted',
+        status: 'info',
+        duration: 2000,
+        isClosable: false,
+        position: 'top',
+      });
 
       // we want to make sure to re-add the notification count
       // if the history is looked at between when the transaction

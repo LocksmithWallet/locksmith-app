@@ -14,7 +14,7 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { useContext, useRef } from 'react';
-import { AiOutlineBell } from 'react-icons/ai';
+import { AiOutlineHistory, } from 'react-icons/ai';
 import { TransactionListContext } from '../components/TransactionProvider';
 
 export const TransactionHistoryButton = () => {
@@ -33,7 +33,7 @@ export const TransactionHistoryButton = () => {
         <Text textColor='white' fontWeight='bold'>{transactions.notificationCount}</Text>
       </Box>
       <Box pos='absolute'>
-        <AiOutlineBell size='20px'/>
+        <AiOutlineHistory size='20px'/>
       </Box>
       <TransactionHistoryDrawer disclosure={disclosure}/>
     </Button>)
