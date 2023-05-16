@@ -32,23 +32,42 @@ export const TransactionHistoryButton = () => {
   return transactions.transactions.length > 0 && (
     <Button size='sm' boxShadow='lg' pos='relative' onClick={() => {
         disclosure.onOpen();
-        transactions.clearNotificationCount();
+        transactions.clearUnviewedTransactions();
       }}>
-      { transactions.notificationCount > 0 && <Box 
+      { transactions.unviewedTransactions.length > 0 && <Box 
         pos='absolute'
         bg='red.500'
         top='-0.8em'
         right='-0.8em'
         fontSize='0.9em'
         borderRadius='full' p='0.3em' pl='0.5em' pr='0.5em'>
-        <Text textColor='white' fontWeight='bold'>{transactions.notificationCount}</Text>
+        <Text textColor='white' fontWeight='bold'>{transactions.unviewedTransactions.length}</Text>
       </Box> }
       <Box pos='absolute'>
         <AiOutlineHistory size='20px'/>
       </Box>
       <TransactionHistoryDrawer disclosure={disclosure}/>
+      { transactions.transactions.map((t) => <TransactionWatcher 
+        key={'watcher'+t.data.hash}
+        txn={t} />) }
     </Button>)
 };
+
+export const TransactionWatcher = ({txn, ...rest}) => {
+  const provider = useProvider();
+  const transactions = useContext(TransactionListContext);
+
+  useEffect(() => {
+    setTimeout(() => { (async function() {
+      const receipt = provider.waitForTransaction(txn.data.hash);
+
+      // remove the hash from pending transactions
+      transactions.addUnviewedTransaction(txn.data.hash);
+    })(); }, 10000);
+  }, []);
+
+  return '';
+}
 
 export const TransactionHistoryDrawer = ({disclosure}) => {
   const transactions = useContext(TransactionListContext);
