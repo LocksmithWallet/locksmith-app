@@ -8,7 +8,7 @@ import * as VirtualKeyAddress from './interfaces/agents/VirtualKeyAddress.json';
 import { ethers } from 'ethers';
 
 export const LocksmithInterface = (function() {
-  var interfaces = {
+  const interfaces = {
     'KeyVault': KeyVault,
     'Locksmith': Locksmith,
     'Ledger': Ledger,
@@ -18,6 +18,14 @@ export const LocksmithInterface = (function() {
     'VirtualKeyAddress': VirtualKeyAddress,
   };
 
+  const eventDictionary = Object.keys(interfaces).reduce((memo, next, index) => {
+    memo[next] = interfaces[next].abi.filter((f) => f.type === 'event').reduce((events, event, x) => {
+      events[ethers.utils.id([event.name, '(', event.inputs.map((i) => i.internalType), ')'].join(''))] = event;
+      return events;
+    }, {});
+    return memo;
+  }, {});
+
   return {
     //////////////////////////
     // getAbi 
@@ -26,6 +34,15 @@ export const LocksmithInterface = (function() {
     //////////////////////////
     getAbi: function(contract) {
       return interfaces[contract]; 
+    },
+    //////////////////////////
+    // getEventDictionary
+    //
+    // Returns a hash of (contract => method => {signature, abi})
+    // for all contracts defined in the interface.
+    //////////////////////////
+    getEventDictionary: function() {
+      return eventDictionary;
     },
     //////////////////////////
     // getEventSignature

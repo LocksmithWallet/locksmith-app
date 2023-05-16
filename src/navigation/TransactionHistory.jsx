@@ -12,6 +12,7 @@ import {
   ListItem,
   HStack,
   Text,
+  Spacer,
   Spinner,
   useDisclosure,
 } from '@chakra-ui/react';
@@ -23,7 +24,10 @@ import {
 } from 'react';
 import { AiOutlineHistory, AiFillCheckCircle } from 'react-icons/ai';
 import { TransactionListContext } from '../components/TransactionProvider';
+import { motion } from 'framer-motion';
 import { useProvider } from 'wagmi';
+
+import { TransactionExplorerButton } from '../components/Address';
 
 export const TransactionHistoryButton = () => {
   const transactions = useContext(TransactionListContext);
@@ -61,7 +65,7 @@ export const TransactionWatcher = ({txn, ...rest}) => {
     setTimeout(() => { (async function() {
       const receipt = provider.waitForTransaction(txn.data.hash);
 
-      // remove the hash from pending transactions
+      // add the hash to unviewed transactions 
       transactions.addUnviewedTransaction(txn.data.hash);
     })(); }, 10000);
   }, []);
@@ -82,9 +86,11 @@ export const TransactionHistoryDrawer = ({disclosure}) => {
       <DrawerContent>
         <DrawerCloseButton size='lg'/>
         <DrawerHeader>Transaction History</DrawerHeader>
-        <DrawerBody>
-          <List>
-            {transactions.transactions.map((txn) => (<ListItem key={txn.data.hash}>
+        <DrawerBody p='0em'>
+          <List spacing='0.5em'>
+            {transactions.transactions.map((txn, i) => (<ListItem key={txn.data.hash}
+              p='1em'
+              bg={i%2!==0?'gray.50':'white'}>
               <TransactionHistoryEntry txn={txn}/>
             </ListItem> ))} 
           </List>
@@ -100,14 +106,21 @@ export const TransactionHistoryEntry = ({txn, ...rest}) => {
   const [receipt, setReceipt] = useState(null);
 
   useEffect(() => {
-    (async function() {
+    setTimeout(() => { (async function() {
       const r = await provider.waitForTransaction(txn.data.hash);
       setReceipt(r);
-    })();
+    })(); }, 5000);
   }, []);
-  return (<HStack>
+  return (<HStack { ...rest}>
     { receipt === null && <Spinner/> }
-    { receipt !== null && <AiFillCheckCircle size='24' color='green'/> }
+    { receipt !== null && <AiFillCheckCircle size='28' color='green'/> }
     <Text fontWeight='bold'>{txn.title}</Text>
+    <TransactionExplorerButton hash={txn.data.hash} size='16px'/>
+    <Spacer/>
+    { receipt && <motion.div
+      initial={{opacity: 0, x: 200}}
+      animate={{opacity: 1, x: 0}}>
+        <Button size='sm' boxShadow='md'>Details</Button>
+    </motion.div> }
   </HStack>)
 }

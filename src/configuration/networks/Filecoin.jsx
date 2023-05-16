@@ -33,6 +33,9 @@ export const Filecoin = (function() {
     })(),
     getAddressExplorerUrl: function(address) {
       return "https://filfox.info/en/address/" + address;
+    },
+    getTransactionExplorerUrl: function(txn) {
+      return "https://filfox.info/en/message/" + txn; 
     }
   };
 })();

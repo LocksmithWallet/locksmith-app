@@ -69,6 +69,9 @@ export const HardHat = (function() {
     })(),
     getAddressExplorerUrl: function(address) {
       return "https://etherscan.io"; // nothing locally right now?
+    },
+    getTransactionExplorerUrl: function(txn) {
+      return "https://etherscan.io"; // nothing locally right now?
     }
   };
 })();

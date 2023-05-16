@@ -35,6 +35,9 @@ export const BaseGoerli = (function() {
     })(),
     getAddressExplorerUrl: function(address) {
       return "https://goerli.basescan.org/address/" + address;
+    },
+    getTransactionExplorerUrl: function(txn) {
+      return "https://goerli.basescan.org/tx/" + txn; 
     }
   };
 })();
