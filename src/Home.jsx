@@ -2,7 +2,7 @@
 // React and UI Components
 //////////////////////////////////////
 import { useNavigate } from 'react-router-dom';
-import { React, useState, useEffect } from 'react';
+import { React, useState, useEffect, useContext } from 'react';
 import {
   Box,
   Button,
@@ -32,6 +32,7 @@ import {
 import { AttentionSeeker } from 'react-awesome-reveal';
 import { BiLink } from 'react-icons/bi';
 
+import { TransactionListContext } from './components/TransactionProvider';
 import { useMintTrust } from './hooks/contracts/TrustCreator.jsx';
 
 export function Home() {
@@ -93,6 +94,7 @@ export function Home() {
 
 const CreateAccount = ({}) => {
   const navigate = useNavigate();
+  const transactions = useContext(TransactionListContext);
 
   // Animations
   const [choice, setChoice] = useState(-1);
@@ -107,6 +109,11 @@ const CreateAccount = ({}) => {
   }, (data) => {
     // track pending transaction
     setTransaction(data);
+    transactions.addTransaction({
+        type: 'CREATE_TRUST',
+        title: 'Create Trust',
+        data: data
+      });
     setTimeout(()=> {navigate('/reveal/'+data.hash);}, 500);
   });
   const nameTooShort = name.length < 3;

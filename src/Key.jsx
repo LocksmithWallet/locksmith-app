@@ -96,7 +96,7 @@ import { IoMdArrowRoundBack } from 'react-icons/io';
 export function Key() {
   const { keyId } = useParams();
   const key = useInspectKey(keyId);
-
+  
   return (key && <motion.div key={"key-"+keyId}>
     <Box ml={{base: 0, md: 72}}>
       <KeyHeader keyInfo={key}/>
@@ -704,11 +704,11 @@ export const SendTokenButton = ({keyInfo, inbox, destination, arn, asset, amount
 export const SendToKeyConfirmationButton = ({keyInfo, destinationKey, arn, asset, amount, toggleDetail}) => {
   const network = useNetwork();
   const transactions = useContext(TransactionListContext);
-  
+ 
   // the assumption about which provider we are using is going to break at some point in the near
   // future
   const distribution = useDistribute(Networks.getContractAddress(network.chain.id, asset.standard === 0 ? 'EtherVault' : 'TokenVault'),
-    arn, keyInfo.keyId, [destinationKey], [ethers.utils.parseUnits(amount.toString(), asset.decimals)],
+    arn, keyInfo.keyId, [destinationKey], [ethers.utils.parseUnits(parseFloat(amount).toFixed(asset.decimals).toString(), asset.decimals)],
     (error) => { 
       console.log('error');
       console.log(error);

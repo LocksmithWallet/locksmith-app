@@ -33,6 +33,26 @@ export function getReceiptEvents(receipt, contract, eventName) {
   });
 }
 
+export function getLocksmithEvents(receipt) {
+  const dictionary = LocksmithInterface.getEventDictionary();
+  return (receipt !== null ? receipt.logs :[]).reduce((memo, next, i) => {
+    const definition = dictionary[next.topics[0]];
+    if (definition) {
+      const parsedEvent  = ethers.utils.defaultAbiCoder.decode(
+        definition.inputs.filter((input) => !input.indexed)
+          .map((i) => i.internalType), next.data);
+      const parsedTopics = definition.inputs.filter((input) => input.indexed)
+        .map((input, index) => (ethers.utils.defaultAbiCoder.decode([input.internalType], next.topics[index+1])[0]));
+      
+      memo.push(definition.inputs.reduce((values, topic, index) => {
+        values.topics[topic.name] = topic.indexed ? parsedTopics[index] : parsedEvent[index];
+        return values;
+      }, {name: definition.name, topics: {}, contract: definition.contractName}));
+    }
+    return memo;
+  }, []);
+};
+
 export function useDebounce(value, delay) {
   // State and setters for debounced value
   const [debouncedValue, setDebouncedValue] = useState(value);

@@ -19,10 +19,10 @@ export const LocksmithInterface = (function() {
   };
 
   const eventDictionary = Object.keys(interfaces).reduce((memo, next, index) => {
-    memo[next] = interfaces[next].abi.filter((f) => f.type === 'event').reduce((events, event, x) => {
-      events[ethers.utils.id([event.name, '(', event.inputs.map((i) => i.internalType), ')'].join(''))] = event;
-      return events;
-    }, {});
+    interfaces[next].abi.filter((f) => f.type === 'event').forEach((event) => {
+      memo[ethers.utils.id([event.name, '(', event.inputs.map((i) => i.internalType), ')'].join(''))] =
+        {... event, contractName: next};
+    });
     return memo;
   }, {});
 

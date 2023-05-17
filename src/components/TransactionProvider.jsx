@@ -38,6 +38,9 @@ export const TransactionContext = ({children}) => {
     addUnviewedTransaction: useCallback((hash) => {
       setUnviewedTransactions([hash, ...unviewedTransactions]);
     }),
+    removeUnviewedTransaction: useCallback((hash) => {
+      setUnviewedTransactions(unviewedTransactions.filter((t) => t.data.hash !== hash));
+    }),
     addTransaction: useCallback((txn) =>{
       // keep a history of each hash
       setTransactions([txn, ...transactions]);

@@ -1,6 +1,7 @@
 import { 
   Box,
   Button,
+  Collapse,
   Drawer,
   DrawerOverlay,
   DrawerContent,
@@ -14,6 +15,7 @@ import {
   Text,
   Spacer,
   Spinner,
+  VStack,
   useDisclosure,
 } from '@chakra-ui/react';
 import { 
@@ -24,9 +26,13 @@ import {
 } from 'react';
 import { AiOutlineHistory, AiFillCheckCircle } from 'react-icons/ai';
 import { TransactionListContext } from '../components/TransactionProvider';
-import { motion } from 'framer-motion';
+import {
+  motion,
+  AnimatePresence,
+  LayoutGroup
+} from 'framer-motion';
 import { useProvider } from 'wagmi';
-
+import { getLocksmithEvents } from '../hooks/Utils';
 import { TransactionExplorerButton } from '../components/Address';
 
 export const TransactionHistoryButton = () => {
@@ -62,12 +68,12 @@ export const TransactionWatcher = ({txn, ...rest}) => {
   const transactions = useContext(TransactionListContext);
 
   useEffect(() => {
-    setTimeout(() => { (async function() {
+    (async function() {
       const receipt = provider.waitForTransaction(txn.data.hash);
 
       // add the hash to unviewed transactions 
       transactions.addUnviewedTransaction(txn.data.hash);
-    })(); }, 10000);
+    })();
   }, []);
 
   return '';
@@ -75,6 +81,7 @@ export const TransactionWatcher = ({txn, ...rest}) => {
 
 export const TransactionHistoryDrawer = ({disclosure}) => {
   const transactions = useContext(TransactionListContext);
+  const [selectedHash, setSelectedHash] = useState(null);
   const btnRef = useRef();
 
   return (<Drawer
@@ -88,11 +95,20 @@ export const TransactionHistoryDrawer = ({disclosure}) => {
         <DrawerHeader>Transaction History</DrawerHeader>
         <DrawerBody p='0em'>
           <List spacing='0.5em'>
-            {transactions.transactions.map((txn, i) => (<ListItem key={txn.data.hash}
-              p='1em'
-              bg={i%2!==0?'gray.50':'white'}>
-              <TransactionHistoryEntry txn={txn}/>
-            </ListItem> ))} 
+            <LayoutGroup>
+              <AnimatePresence>
+                { transactions.transactions.map((txn, i) => (selectedHash === null || txn.data.hash === selectedHash) && (
+                  <motion.div key={'animate-'+txn.data.hash} layout
+                      style={{position: 'relative'}}
+                      initial={{opacity: 0, x: 300}}
+                      animate={{opacity: 1, x: 0}}
+                      exit={{opacity: 0, x: 200}}>
+                    <ListItem key={txn.data.hash} p='1em' bg={i%2!==0?'gray.50':'white'}>
+                      <TransactionHistoryEntry txn={txn} selectedHash={selectedHash} selectHash={setSelectedHash}/>
+                    </ListItem>
+                  </motion.div>))}
+              </AnimatePresence>
+            </LayoutGroup>
           </List>
         </DrawerBody>
         <DrawerFooter>
@@ -101,26 +117,48 @@ export const TransactionHistoryDrawer = ({disclosure}) => {
     </Drawer>) 
 }
 
-export const TransactionHistoryEntry = ({txn, ...rest}) => {
+export const TransactionHistoryEntry = ({txn, selectedHash, selectHash, ...rest}) => {
   const provider = useProvider();
+  const transactions = useContext(TransactionListContext);
   const [receipt, setReceipt] = useState(null);
 
   useEffect(() => {
-    setTimeout(() => { (async function() {
+    (async function() {
       const r = await provider.waitForTransaction(txn.data.hash);
+      transactions.removeUnviewedTransaction(txn.data.hash);
       setReceipt(r);
-    })(); }, 5000);
+    })();
   }, []);
-  return (<HStack { ...rest}>
-    { receipt === null && <Spinner/> }
-    { receipt !== null && <AiFillCheckCircle size='28' color='green'/> }
-    <Text fontWeight='bold'>{txn.title}</Text>
-    <TransactionExplorerButton hash={txn.data.hash} size='16px'/>
-    <Spacer/>
-    { receipt && <motion.div
-      initial={{opacity: 0, x: 200}}
-      animate={{opacity: 1, x: 0}}>
-        <Button size='sm' boxShadow='md'>Details</Button>
-    </motion.div> }
-  </HStack>)
+
+  return (<VStack align='stretch' {...rest}>
+    <HStack>
+      { receipt === null && <Spinner/> }
+      { receipt !== null && <AiFillCheckCircle size='28' color='green'/> }
+      <Text fontWeight='bold'>{txn.title}</Text>
+      <TransactionExplorerButton hash={txn.data.hash} size='16px'/>
+      <Spacer/>
+      { receipt && <motion.div
+        initial={{opacity: 0, x: 200}}
+        animate={{opacity: 1, x: 0}}>
+        <Button size='sm' boxShadow='md' onClick={() => {
+          selectHash(txn.data.hash === selectedHash ? null : txn.data.hash);
+        }}>{txn.data.hash === selectedHash ? 'Back' : 'Details'}</Button>
+      </motion.div> }
+    </HStack>
+    <Collapse in={(selectedHash === txn.data.hash) && (receipt !== null)}>
+      <TransactionEventDetail receipt={receipt}/>
+    </Collapse>
+  </VStack>)
 }
+
+export const TransactionEventDetail = ({receipt, ...rest}) => {
+  const events = getLocksmithEvents(receipt);
+  console.log(events);
+  return (<List>
+    { events.map((e) => (
+      <ListItem>
+        <Text>{e.name}</Text>
+      </ListItem>
+    )) }
+  </List>)
+};
