@@ -15,7 +15,7 @@ export function getReceiptEvents(receipt, contract, eventName) {
   const definition = LocksmithInterface.getEventDefinition(contract, eventName);
 
   // translate this into the ethers topic signature
-  const eventTopics = definition.inputs.map((i) => i.internalType);
+  const eventTopics = definition.inputs.map((i) => i.type);
   const eventSignature = ethers.utils.id(
     [eventName, '(', eventTopics.join(','), ')'].join('')
   );
@@ -40,14 +40,17 @@ export function getLocksmithEvents(receipt) {
     if (definition) {
       const parsedEvent  = ethers.utils.defaultAbiCoder.decode(
         definition.inputs.filter((input) => !input.indexed)
-          .map((i) => i.internalType), next.data);
+          .map((i) => i.type), next.data);
       const parsedTopics = definition.inputs.filter((input) => input.indexed)
-        .map((input, index) => (ethers.utils.defaultAbiCoder.decode([input.internalType], next.topics[index+1])[0]));
+        .map((input, index) => (ethers.utils.defaultAbiCoder.decode([input.type], next.topics[index+1])[0]));
       
       memo.push(definition.inputs.reduce((values, topic, index) => {
         values.topics[topic.name] = topic.indexed ? parsedTopics[index] : parsedEvent[index];
         return values;
       }, {name: definition.name, topics: {}, contract: definition.contractName}));
+    } else {
+      console.log("missing event: ");
+      console.log(next);
     }
     return memo;
   }, []);
