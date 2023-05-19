@@ -1,5 +1,6 @@
 import {
   Button,
+  Text,
   useToast
 } from '@chakra-ui/react';
 import { useNetwork } from 'wagmi';
@@ -10,6 +11,10 @@ import { FiExternalLink } from 'react-icons/fi';
 
 export function DisplayAddress({address, ...rest}) {
   return address.substring(0,6) + '...' + address.substring(address.length - 4)
+}
+
+export function AddressAlias({address, ...rest}) {
+  return <Text {...rest}>Address</Text>
 }
 
 export function CopyButton({label, thing, ...rest}) {

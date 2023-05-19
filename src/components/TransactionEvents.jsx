@@ -80,17 +80,20 @@ export const TrustedRoleChangeEvent = ({event}) => {
       FcRules,  // Scribe
       FcFlashOn // Dispatcher
   ][role];
+  const RoleName = [
+    'Vault', 
+    'Scribe', 
+    'Dispatcher'
+  ][role];
 
   return (<HStack pos='relative'>
     <RoleIcon size='32px'/>
     { event.topics.trustLevel && <Box pos='absolute' left='10px' top='20px'><FcPlus size='16px'/></Box> }
     { !event.topics.trustLevel && <Box pos='absolute' left='4px' top='10px'><FcCancel size='26px'/></Box> }
     <VStack align='stretch' spacing='0em' fontSize='0.8em'>
-      <Text fontWeight='bold'>Vault {event.topics.trustLevel ? 'Added' : 'Removed'}</Text>
-      <Skeleton isLoaded={actorAlias.isSuccess} width='8em' height='1em'>
-        {actorAlias.isSuccess && 
-          <Text fontStyle='italic' textColor='gray.500'>{ethers.utils.parseBytes32String(actorAlias.data)}</Text> }
-      </Skeleton>
+      <Text fontWeight='bold'>{RoleName} {event.topics.trustLevel ? 'Added' : 'Removed'}</Text>
+      { actorAlias.isSuccess && 
+        <Text fontStyle='italic' textColor='gray.500'>{ethers.utils.parseBytes32String(actorAlias.data)}</Text> }
     </VStack>
   </HStack>)
 }
