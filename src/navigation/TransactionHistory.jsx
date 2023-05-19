@@ -157,10 +157,10 @@ export const TransactionEventDetail = ({receipt, ...rest}) => {
   console.log(events);
   
   return (<List spacing='1em'>
-    { events.map((e) => {
+    { events.map((e,x) => {
       const EventType = transactionEvents[e.name.charAt(0).toUpperCase() + e.name.slice(1) + "Event"] 
         || transactionEvents['DefaultTransactionEvent'];
-      return (<ListItem>
+      return (<ListItem key={'tedli-'+x}>
         <EventType event={e}/>
       </ListItem>)
     }) }

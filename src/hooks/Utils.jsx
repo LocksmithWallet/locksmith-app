@@ -43,11 +43,16 @@ export function getLocksmithEvents(receipt) {
           .map((i) => i.type), next.data);
       const parsedTopics = definition.inputs.filter((input) => input.indexed)
         .map((input, index) => (ethers.utils.defaultAbiCoder.decode([input.type], next.topics[index+1])[0]));
-      
-      memo.push(definition.inputs.reduce((values, topic, index) => {
-        values.topics[topic.name] = topic.indexed ? parsedTopics[index] : parsedEvent[index];
+     
+      // merge in all of the proper values
+      var e = definition.inputs.filter((input)=> input.indexed).reduce((values, topic, index) => {
+        values.topics[topic.name] = parsedTopics[index];
         return values;
-      }, {name: definition.name, topics: {}, contract: definition.contractName}));
+      }, {name: definition.name, topics: {}, contract: definition.contractName});
+      definition.inputs.filter((input)=> !input.indexed).forEach((topic, index) => {
+        e.topics[topic.name] = parsedEvent[index];
+      });
+      memo.push(e);
     } else {
       console.log("missing event: ");
       console.log(next);

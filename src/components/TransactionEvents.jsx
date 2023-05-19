@@ -8,23 +8,39 @@ import {
 } from '@chakra-ui/react';
 import { ethers } from 'ethers';
 import { useInspectKey } from '../hooks/contracts/Locksmith';
+import { useTrustedActorAlias } from '../hooks/contracts/Notary';
 
+import { DisplayAddress } from './Address';
 import { KeyIcon } from './Key';
 import {
   FcCancel,
   FcFlashOn,
+  FcAdvance,
   FcSafe,
   FcRules,
   FcPlus
 } from 'react-icons/fc';
 
 export const TransferSingleEvent = ({event}) => {
+  const keyInfo = useInspectKey(event.topics.id);
+
+  // see if we can name the destination in some way
+
   // check to make sure its not a mint event, because the key minted event will cover it
   if (event.topics.from === ethers.constants.AddressZero) {
     return '';
   }
 
-  return <Text>Le Transfer Key</Text> 
+  return (<HStack pos='relative'>
+    <Skeleton isLoaded={keyInfo} width='2em' height='2.5em'>
+      {keyInfo && <KeyIcon keyInfo={keyInfo} size='32px'/> }
+      <Box pos='absolute' left='8px' top='10px'><FcAdvance size='24px'/></Box>
+    </Skeleton>
+    <VStack align='stretch' spacing='0em' fontSize='0.8em'>
+      {keyInfo && <Text fontWeight='bold'>{keyInfo.alias} sent</Text> }
+      <Text fontWeight='italic' color='gray.500'><DisplayAddress address={event.topics.from}/> to <DisplayAddress address={event.topics.to}/></Text>
+    </VStack>
+  </HStack>)
 }
 
 export const KeyMintedEvent = ({event}) => {
@@ -53,6 +69,11 @@ export const TrustCreatedEvent = ({event}) => {
 }
 
 export const TrustedRoleChangeEvent = ({event}) => {
+  const actorAlias = useTrustedActorAlias(
+    event.topics.trustId,
+    event.topics.role,
+    event.topics.actor,
+    event.topics.ledger);
   const role = parseInt(event.topics.role.toString());
   const RoleIcon = [
       FcSafe,   // Collateral Provider
@@ -66,7 +87,10 @@ export const TrustedRoleChangeEvent = ({event}) => {
     { !event.topics.trustLevel && <Box pos='absolute' left='4px' top='10px'><FcCancel size='26px'/></Box> }
     <VStack align='stretch' spacing='0em' fontSize='0.8em'>
       <Text fontWeight='bold'>Vault {event.topics.trustLevel ? 'Added' : 'Removed'}</Text>
-
+      <Skeleton isLoaded={actorAlias.isSuccess} width='8em' height='1em'>
+        {actorAlias.isSuccess && 
+          <Text fontStyle='italic' textColor='gray.500'>{ethers.utils.parseBytes32String(actorAlias.data)}</Text> }
+      </Skeleton>
     </VStack>
   </HStack>)
 }
