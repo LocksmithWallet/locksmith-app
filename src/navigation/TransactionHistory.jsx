@@ -34,6 +34,7 @@ import {
 import { useProvider } from 'wagmi';
 import { getLocksmithEvents } from '../hooks/Utils';
 import { TransactionExplorerButton } from '../components/Address';
+import * as transactionEvents from '../components/TransactionEvents';
 
 export const TransactionHistoryButton = () => {
   const transactions = useContext(TransactionListContext);
@@ -154,11 +155,14 @@ export const TransactionHistoryEntry = ({txn, selectedHash, selectHash, ...rest}
 export const TransactionEventDetail = ({receipt, ...rest}) => {
   const events = getLocksmithEvents(receipt);
   console.log(events);
-  return (<List>
-    { events.map((e) => (
-      <ListItem>
-        <Text>{e.name}</Text>
-      </ListItem>
-    )) }
+  
+  return (<List spacing='1em'>
+    { events.map((e) => {
+      const EventType = transactionEvents[e.name.charAt(0).toUpperCase() + e.name.slice(1) + "Event"] 
+        || transactionEvents['DefaultTransactionEvent'];
+      return (<ListItem>
+        <EventType event={e}/>
+      </ListItem>)
+    }) }
   </List>)
 };
