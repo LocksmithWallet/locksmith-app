@@ -3,9 +3,9 @@ import {
   Text,
   useToast
 } from '@chakra-ui/react';
-import { useNetwork } from 'wagmi';
-import { motion } from 'framer-motion';
+import { useAccount, useNetwork } from 'wagmi';
 import { Networks } from '../configuration/Networks';
+import { motion } from 'framer-motion';
 
 import { FiExternalLink } from 'react-icons/fi';
 
@@ -14,7 +14,15 @@ export function DisplayAddress({address, ...rest}) {
 }
 
 export function AddressAlias({address, ...rest}) {
-  return <Text {...rest}>Address</Text>
+  // we can determine if its a contract we know about
+  const network = useNetwork();
+  const contractAlias = Networks.getContractAlias(network.chain.id, address);
+
+  // we can also determine if its the connected account
+  const account = useAccount();
+  
+  return account.address === address ? "(you)" : 
+    (contractAlias || <DisplayAddress address={address}/>);
 }
 
 export function CopyButton({label, thing, ...rest}) {

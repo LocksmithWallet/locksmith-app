@@ -135,8 +135,13 @@ export const TransactionHistoryEntry = ({txn, selectedHash, selectHash, ...rest}
     <HStack>
       { receipt === null && <Spinner/> }
       { receipt !== null && <AiFillCheckCircle size='28' color='green'/> }
-      <Text fontWeight='bold'>{txn.title}</Text>
-      <TransactionExplorerButton hash={txn.data.hash} size='16px'/>
+      <VStack align='stretch' spacing='0em'>
+        <HStack>
+          <Text fontWeight='bold'>{txn.title}</Text>
+          <TransactionExplorerButton hash={txn.data.hash} size='16px'/>
+        </HStack>
+        <Text fontStyle='italic' fontSize='0.8em' textColor='gray.500'>{txn.subtitle}</Text>
+      </VStack>
       <Spacer/>
       { receipt && <motion.div
         initial={{opacity: 0, x: 200}}

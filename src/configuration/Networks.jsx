@@ -27,6 +27,17 @@ export const Networks = (function() {
       return networks[networkId].contracts[contract].address;
     },
     //////////////////////////
+    // getContractAlias
+    //
+    // Returns the name of a contract for a given
+    // address, or null if it doesn't exist.
+    //////////////////////////
+    getContractAlias(networkId, address) {
+      const found = Object.keys(networks[networkId].contracts).filter(
+        (contract) => networks[networkId].contracts[contract].address === address);
+      return found.length > 0 ? found[0] : null;
+    },
+    //////////////////////////
     // getSupportedNetworks
     //
     // Returns a list of all supported networks.

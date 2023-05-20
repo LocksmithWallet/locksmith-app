@@ -669,7 +669,8 @@ export const SendGasButton = ({keyInfo, inbox, destination, arn, asset, amount, 
     }, (data) => {
       transactions.addTransaction({
         type: 'SEND_ASSET',
-        title: 'Send ' + asset.symbol,
+        title: 'Send ' + asset.name,
+        subtitle: amount.toString() + " " + asset.symbol,
         data: data
       });
       toggleDetail();
@@ -692,7 +693,8 @@ export const SendTokenButton = ({keyInfo, inbox, destination, arn, asset, amount
     }, (data) => {
       transactions.addTransaction({
         type: 'SEND_ASSET',
-        title: 'Send ' + asset.symbol,
+        title: 'Send ' + asset.name,
+        subtitle: amount.toString() + " " + asset.symbol,
         data: data
       });
       toggleDetail();
@@ -715,7 +717,8 @@ export const SendToKeyConfirmationButton = ({keyInfo, destinationKey, arn, asset
     }, (data) => {
       transactions.addTransaction({
         type: 'SEND_ASSET',
-        title: 'Send ' + asset.symbol,
+        title: 'Send ' + asset.name,
+        subtitle: amount.toString() + " " + asset.symbol,
         data: data
       });
       toggleDetail();

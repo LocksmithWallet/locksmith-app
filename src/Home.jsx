@@ -112,6 +112,7 @@ const CreateAccount = ({}) => {
     transactions.addTransaction({
         type: 'CREATE_TRUST',
         title: 'Create Trust',
+        subtitle: name,
         data: data
       });
     setTimeout(()=> {navigate('/reveal/'+data.hash);}, 500);
