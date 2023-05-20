@@ -107,7 +107,7 @@ export const SetSoulboundKeyAmountEvent = ({event}) => {
     { keyInfo ?  <KeyIcon keyInfo={keyInfo} size='32px'/> : <Skeleton width='2em' height='2.5em'/> }
     { keyInfo && <Box pos='absolute' left='4px' top='16px'><FcLink size='20px'/></Box> }
     <VStack align='stretch' spacing='0em' fontSize='0.8em'>
-      <Text fontWeight='bold'>Bind '{keyInfo.alias}'</Text>
+      <Text fontWeight='bold'>Bind {keyInfo ? "'" + keyInfo.alias + "'" : 'Key'}</Text>
       <Text fontStyle='italic' textColor='gray.500'><AddressAlias address={event.topics.keyHolder}/> must maintain <b>{event.topics.amount.toString()}</b> copies</Text>
     </VStack>
   </HStack>)
