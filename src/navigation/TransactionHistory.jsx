@@ -93,7 +93,7 @@ export const TransactionHistoryDrawer = ({disclosure}) => {
       <DrawerOverlay />
       <DrawerContent>
         <DrawerCloseButton size='lg'/>
-        <DrawerHeader>Transaction History</DrawerHeader>
+        <DrawerHeader>Recent Transactions</DrawerHeader>
         <DrawerBody p='0em'>
           <List spacing='0.5em'>
             <LayoutGroup>
