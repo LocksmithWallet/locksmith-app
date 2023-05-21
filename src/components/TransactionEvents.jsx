@@ -22,6 +22,7 @@ import {
   FcRules,
   FcPlus
 } from 'react-icons/fc';
+import { ImQrcode } from 'react-icons/im';
 
 export const TransferSingleEvent = ({event}) => {
   const keyInfo = useInspectKey(event.topics.id);
@@ -109,6 +110,19 @@ export const SetSoulboundKeyAmountEvent = ({event}) => {
     <VStack align='stretch' spacing='0em' fontSize='0.8em'>
       <Text fontWeight='bold'>Bind {keyInfo ? "'" + keyInfo.alias + "'" : 'Key'}</Text>
       <Text fontStyle='italic' textColor='gray.500'><AddressAlias address={event.topics.keyHolder}/> must maintain <b>{event.topics.amount.toString()}</b> copies</Text>
+    </VStack>
+  </HStack>)
+}
+
+export const KeyAddressRegistrationEvent = ({event}) => {
+  const keyInfo = useInspectKey(event.topics.inboxKey);
+
+  return (<HStack pos='relative'>
+    <Box ml='0.3em'><ImQrcode size='24px'/></Box>
+    <Box pos='absolute' left='8px' top='20px'><FcPlus size='16px'/></Box>
+    <VStack align='stretch' spacing='0em' fontSize='0.8em'>
+      <Text fontWeight='bold'>Wallet Created{keyInfo ? " for '" + keyInfo.alias + "'" : ''}</Text>
+      <Text fontStyle='italic' textColor='gray.500'><DisplayAddress address={event.topics.inbox}/></Text>
     </VStack>
   </HStack>)
 }
