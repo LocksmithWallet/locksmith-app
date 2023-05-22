@@ -6,7 +6,9 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react';
-import { ethers } from 'ethers';
+import { useNetwork } from 'wagmi';
+import { ethers, BigNumber } from 'ethers';
+import { Networks } from '../configuration/Networks';
 import { useInspectKey } from '../hooks/contracts/Locksmith';
 import { useTrustedActorAlias } from '../hooks/contracts/Notary';
 
@@ -14,11 +16,13 @@ import { motion } from 'framer-motion';
 import { DisplayAddress, AddressAlias } from './Address';
 import { KeyIcon } from './Key';
 import {
+  FcApproval,
   FcCancel,
   FcFlashOn,
   FcAdvance,
   FcLink,
   FcSafe,
+  FcShare,
   FcRules,
   FcPlus
 } from 'react-icons/fc';
@@ -123,6 +127,37 @@ export const KeyAddressRegistrationEvent = ({event}) => {
     <VStack align='stretch' spacing='0em' fontSize='0.8em'>
       <Text fontWeight='bold'>Wallet Created{keyInfo ? " for '" + keyInfo.alias + "'" : ''}</Text>
       <Text fontStyle='italic' textColor='gray.500'><DisplayAddress address={event.topics.inbox}/></Text>
+    </VStack>
+  </HStack>)
+}
+
+export const NotaryDistributionApprovalEvent = ({event}) => {
+  return (<HStack pos='relative'>
+    <FcRules size='24px'/>
+    <Box pos='absolute' left='4px' top='16px'><FcApproval size='16px'/></Box>
+    <VStack align='stretch' spacing='0em' fontSize='0.8em'>
+      <Text fontWeight='bold'><AddressAlias address={event.topics.scribe}/> Approval</Text>
+      <Text fontStyle='italic' textColor='gray.500'>Funds in <AddressAlias address={event.topics.provider}/></Text>
+    </VStack>
+  </HStack>)
+}
+
+export const LedgerTransferOccurredEvent = ({event}) => {
+  const network = useNetwork();
+  const asset = Networks.getAsset(network.chain.id, event.topics.arn);
+  const fromKeyInfo = useInspectKey(event.topics.rootKeyId);
+  const toKeyInfo = useInspectKey(event.topics.keys[0]);
+
+  return (<HStack pos='relative'>
+    <FcShare size='24px'/>
+    <VStack align='stretch' spacing='0em' fontSize='0.8em'>
+      <Text fontWeight='bold'>Transfer {ethers.utils.formatUnits(event.topics.amounts.reduce((memo, next, i) => { return memo.add(next);}, BigNumber.from(0)), asset.decimals)} {asset.symbol}</Text>
+      { event.topics.keys.length < 2 &&  <Text fontStyle='italic' textColor='gray.500'>
+        From {fromKeyInfo ? fromKeyInfo.alias : 'a key'} to {toKeyInfo ? toKeyInfo.alias : 'another key'}
+      </Text> }
+      { event.topics.keys.length >= 2 &&  <Text fontStyle='italic' textColor='gray.500'>
+          From {fromKeyInfo ? fromKeyInfo.alias : 'a key'} across {event.topics.keys.length} keys 
+      </Text> }
     </VStack>
   </HStack>)
 }
