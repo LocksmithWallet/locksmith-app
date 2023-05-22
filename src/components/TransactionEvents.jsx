@@ -142,6 +142,22 @@ export const NotaryDistributionApprovalEvent = ({event}) => {
   </HStack>)
 }
 
+export const NotaryWithdrawalApprovalEvent = ({event}) => {
+  const network = useNetwork();
+  const asset = Networks.getAsset(network.chain.id, event.topics.arn);
+
+  return (<HStack pos='relative'>
+    <FcRules size='24px'/>
+    <Box pos='absolute' left='4px' top='16px'><FcApproval size='16px'/></Box>
+    <VStack align='stretch' spacing='0em' fontSize='0.8em'>
+      <Text fontWeight='bold'>Withdrawal Approved</Text>
+      <Text fontStyle='italic' textColor='gray.500'>
+        {ethers.utils.formatUnits(event.topics.amount, asset.decimals)} {asset.symbol} from <AddressAlias address={event.topics.provider}/> 
+      </Text>
+    </VStack>
+  </HStack>)
+}
+
 export const LedgerTransferOccurredEvent = ({event}) => {
   const network = useNetwork();
   const asset = Networks.getAsset(network.chain.id, event.topics.arn);
@@ -158,6 +174,23 @@ export const LedgerTransferOccurredEvent = ({event}) => {
       { event.topics.keys.length >= 2 &&  <Text fontStyle='italic' textColor='gray.500'>
           From {fromKeyInfo ? fromKeyInfo.alias : 'a key'} across {event.topics.keys.length} keys 
       </Text> }
+    </VStack>
+  </HStack>)
+}
+
+export const WithdrawalAllowanceAssignedEvent = ({event}) => {
+  const network = useNetwork();
+  const asset = Networks.getAsset(network.chain.id, event.topics.arn);
+  const key = useInspectKey(event.topics.keyId);
+  
+  return (<HStack pos='relative'>
+    <FcSafe size='28px'/>
+    <Box pos='absolute' left='6px' top='16px'><FcApproval size='16px'/></Box>
+    <VStack align='stretch' spacing='0em' fontSize='0.8em'>
+      <Text fontWeight='bold'><AddressAlias address={event.topics.provider}/> Allowance</Text>
+      <Text fontStyle='italic' textColor='gray.500'>
+        Set to {ethers.utils.formatUnits(event.topics.amount, asset.decimals)} {asset.symbol} for {key ? key.alias : 'a key'}
+      </Text>
     </VStack>
   </HStack>)
 }
