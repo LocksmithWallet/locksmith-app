@@ -18,13 +18,18 @@ import { KeyIcon } from './Key';
 import {
   FcApproval,
   FcCancel,
+  FcDownload,
   FcFlashOn,
   FcAdvance,
   FcLink,
   FcSafe,
   FcShare,
   FcRules,
-  FcPlus
+  FcPlus,
+  FcQuestions,
+  FcMoneyTransfer,
+  FcUpload,
+  FcMultipleInputs,
 } from 'react-icons/fc';
 import { ImQrcode } from 'react-icons/im';
 
@@ -191,6 +196,63 @@ export const WithdrawalAllowanceAssignedEvent = ({event}) => {
       <Text fontStyle='italic' textColor='gray.500'>
         Set to {ethers.utils.formatUnits(event.topics.amount, asset.decimals)} {asset.symbol} for {key ? key.alias : 'a key'}
       </Text>
+    </VStack>
+  </HStack>)
+}
+
+export const WithdrawalOccurredEvent = ({event}) => {
+  const network = useNetwork();
+  const asset = Networks.getAsset(network.chain.id, event.topics.arn);
+  const key = useInspectKey(event.topics.keyId);
+  return (<HStack pos='relative'>
+    <FcDownload size='28px'/>
+    <VStack align='stretch' spacing='0em' fontSize='0.8em'>
+      <Text fontWeight='bold'>{ethers.utils.formatUnits(event.topics.amount, asset.decimals)} {asset.symbol} Withdrawn</Text>
+      <Text fontStyle='italic' textColor='gray.500'>
+        From {key ? key.alias : 'a key'} in <AddressAlias address={event.topics.provider}/> 
+      </Text>
+    </VStack>
+  </HStack>)
+}
+
+export const AddressTransactionEvent = ({event}) => {
+  const network = useNetwork();
+  const asset = Networks.getAsset(network.chain.id, event.topics.arn);
+  const key = useInspectKey(event.topics.keyId);
+
+  const TransactionIcon = [
+    FcQuestions,
+    FcMoneyTransfer,
+    FcUpload,
+    FcMultipleInputs
+  ][event.topics.txType];
+
+  const eventTitle = [
+    'Invalid',
+    'Sent ' + ethers.utils.formatUnits(event.topics.amount, asset.decimals) + " " + asset.symbol,
+    'Received ' + ethers.utils.formatUnits(event.topics.amount, asset.decimals) + " " + asset.symbol,
+    'Multi-call Transaction'
+  ][event.topics.txType];
+
+  const eventDescription = [
+    'Invalid',
+    'To ',
+    'From ',
+    'See Explorer',
+  ][event.topics.txType];
+
+  const eventActor = [
+    'Invalid',
+    event.topics.target,
+    event.topics.operator,
+    event.topics.target,
+  ][event.topics.txType];
+
+  return (<HStack pos='relative'>
+    <TransactionIcon size='28px'/>
+    <VStack align='stretch' spacing='0em' fontSize='0.8em'>
+      <Text fontWeight='bold'>{eventTitle}</Text>
+      <Text fontStyle='italic' textColor='gray.500'>{eventDescription} <DisplayAddress address={eventActor}/></Text>
     </VStack>
   </HStack>)
 }
