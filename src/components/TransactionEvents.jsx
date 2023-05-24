@@ -28,10 +28,11 @@ import {
   FcPlus,
   FcQuestions,
   FcMoneyTransfer,
-  FcUpload,
+  FcRight,
+  FcLeft,
   FcMultipleInputs,
 } from 'react-icons/fc';
-import { ImQrcode } from 'react-icons/im';
+import { ImQrcode, ImMinus } from 'react-icons/im';
 
 export const TransferSingleEvent = ({event}) => {
   const keyInfo = useInspectKey(event.topics.id);
@@ -163,6 +164,22 @@ export const NotaryWithdrawalApprovalEvent = ({event}) => {
   </HStack>)
 }
 
+export const NotaryDepositApprovalEvent = ({event}) => {
+  const network = useNetwork();
+  const asset = Networks.getAsset(network.chain.id, event.topics.arn);
+
+  return (<HStack pos='relative'>
+    <FcRules size='24px'/>
+    <Box pos='absolute' left='4px' top='16px'><FcApproval size='16px'/></Box>
+    <VStack align='stretch' spacing='0em' fontSize='0.8em'>
+      <Text fontWeight='bold'>Deposit Approved</Text>
+      <Text fontStyle='italic' textColor='gray.500'>
+        {ethers.utils.formatUnits(event.topics.amount, asset.decimals)} {asset.symbol} to <AddressAlias address={event.topics.provider}/>
+      </Text>
+    </VStack>
+  </HStack>)
+}
+
 export const LedgerTransferOccurredEvent = ({event}) => {
   const network = useNetwork();
   const asset = Networks.getAsset(network.chain.id, event.topics.arn);
@@ -205,11 +222,28 @@ export const WithdrawalOccurredEvent = ({event}) => {
   const asset = Networks.getAsset(network.chain.id, event.topics.arn);
   const key = useInspectKey(event.topics.keyId);
   return (<HStack pos='relative'>
-    <FcDownload size='28px'/>
+    {asset.icon({size: '28px'})}
+    <Box pos='absolute' left='6px' top='20px'><ImMinus size='16px' color='#FF6666'/></Box>
     <VStack align='stretch' spacing='0em' fontSize='0.8em'>
       <Text fontWeight='bold'>{ethers.utils.formatUnits(event.topics.amount, asset.decimals)} {asset.symbol} Withdrawn</Text>
       <Text fontStyle='italic' textColor='gray.500'>
         From {key ? key.alias : 'a key'} in <AddressAlias address={event.topics.provider}/> 
+      </Text>
+    </VStack>
+  </HStack>)
+}
+
+export const DepositOccurredEvent = ({event}) => {
+ const network = useNetwork();
+  const asset = Networks.getAsset(network.chain.id, event.topics.arn);
+  const key = useInspectKey(event.topics.keyId);
+  return (<HStack pos='relative'>
+    {asset.icon({size: '28px'})}
+    <Box pos='absolute' left='8px' top='20px'><FcPlus size='16px'/></Box>
+    <VStack align='stretch' spacing='0em' fontSize='0.8em'>
+      <Text fontWeight='bold'>{ethers.utils.formatUnits(event.topics.amount, asset.decimals)} {asset.symbol} Deposited</Text>
+      <Text fontStyle='italic' textColor='gray.500'>
+        To {key ? key.alias : 'a key'} in <AddressAlias address={event.topics.provider}/>
       </Text>
     </VStack>
   </HStack>)
@@ -223,8 +257,15 @@ export const AddressTransactionEvent = ({event}) => {
   const TransactionIcon = [
     FcQuestions,
     FcMoneyTransfer,
-    FcUpload,
+    FcMoneyTransfer,
     FcMultipleInputs
+  ][event.topics.txType];
+
+  const TransactionSubIcon = [
+    null,
+    FcRight,
+    FcLeft,
+    null
   ][event.topics.txType];
 
   const eventTitle = [
@@ -250,6 +291,7 @@ export const AddressTransactionEvent = ({event}) => {
 
   return (<HStack pos='relative'>
     <TransactionIcon size='28px'/>
+    <Box position='absolute' left='-6px' top='12px'><TransactionSubIcon size='24px'/></Box>
     <VStack align='stretch' spacing='0em' fontSize='0.8em'>
       <Text fontWeight='bold'>{eventTitle}</Text>
       <Text fontStyle='italic' textColor='gray.500'>{eventDescription} <DisplayAddress address={eventActor}/></Text>
