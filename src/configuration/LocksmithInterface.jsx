@@ -22,6 +22,11 @@ export const LocksmithInterface = (function() {
 
   const eventDictionary = Object.keys(interfaces).reduce((memo, next, index) => {
     interfaces[next].abi.filter((f) => f.type === 'event').forEach((event) => {
+      if (next === 'VirtualKeyAddress') {
+        console.log(event);
+        console.log(ethers.utils.id([event.name, '(', event.inputs.map((i) => i.type), ')'].join('')));
+      }
+
       memo[ethers.utils.id([event.name, '(', event.inputs.map((i) => i.type), ')'].join(''))] =
         {... event, contractName: next};
     });

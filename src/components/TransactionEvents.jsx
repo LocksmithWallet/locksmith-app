@@ -229,8 +229,8 @@ export const AddressTransactionEvent = ({event}) => {
 
   const eventTitle = [
     'Invalid',
-    'Sent ' + ethers.utils.formatUnits(event.topics.amount, asset.decimals) + " " + asset.symbol,
-    'Received ' + ethers.utils.formatUnits(event.topics.amount, asset.decimals) + " " + asset.symbol,
+    (key ? key.alias : 'A key') + ' sent ' + ethers.utils.formatUnits(event.topics.amount, asset.decimals) + " " + asset.symbol,
+    (key ? key.alias : 'A key') + ' received ' + ethers.utils.formatUnits(event.topics.amount, asset.decimals) + " " + asset.symbol,
     'Multi-call Transaction'
   ][event.topics.txType];
 
