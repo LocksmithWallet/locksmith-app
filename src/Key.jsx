@@ -675,7 +675,7 @@ export const SendGasButton = ({keyInfo, inbox, destination, arn, asset, amount, 
       });
       toggleDetail();
     });
-  return <Button isLoading={sendToken.isLoading} colorScheme='blue' boxShadow='lg' width='100%' size='lg'
+  return <Button isDisabled={!sendToken.write} isLoading={sendToken.isLoading} colorScheme='blue' boxShadow='lg' width='100%' size='lg'
     onClick={() => {sendToken.write?.();}}>Confirm</Button>
 
 }
@@ -699,7 +699,7 @@ export const SendTokenButton = ({keyInfo, inbox, destination, arn, asset, amount
       });
       toggleDetail();
     });
-  return <Button isLoading={sendToken.isLoading} colorScheme='blue' boxShadow='lg' width='100%' size='lg'
+  return <Button isDisabled={!sendToken.write} isLoading={sendToken.isLoading} colorScheme='blue' boxShadow='lg' width='100%' size='lg'
     onClick={() => {sendToken.write?.();}}>Confirm</Button>
 }
 
