@@ -27,7 +27,7 @@ export const TransactionContext = ({children}) => {
   useEffect(() => {
     setTransactions([]);
     setTransactionLogs({});
-  }, [network.chain ? network.chain.id : network]);
+  }, [network.chain ? network.chain.id : null]);
 
   return (<TransactionListContext.Provider value={{
     transactions: transactions,
