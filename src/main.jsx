@@ -24,7 +24,6 @@ import App from './App'
 // Add Network Support
 Networks.addNetwork(BaseGoerli);
 Networks.addNetwork(HardHat);
-Networks.addNetwork(Filecoin);
 
 // Generate Wagmi Controllers
 const {chains, provider, webSocketProvider} = configureChains(Networks.wagmiChains(),[
