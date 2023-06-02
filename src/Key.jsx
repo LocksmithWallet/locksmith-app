@@ -63,6 +63,12 @@ import {
   useDistribute
 } from './hooks/contracts/Distributor';
 import {
+  useEtherVaultDeposit
+} from './hooks/contracts/EtherVault';
+import {
+  useTokenVaultDeposit
+} from './hooks/contracts/TokenVault';
+import {
   USDFormatter,
   useCoinCapPrice,
 } from './hooks/Prices';
@@ -505,7 +511,7 @@ export const AssetDepositFlow = ({keyInfo, arn, asset, price, container, toggleD
 
   return (<VStack mt={layoutMargin} spacing={layoutMargin}>
     <HStack width='100%'>
-      <Button size='sm' onClick={() => {console.log(balance.data.formatted);setAmount(balance.isSuccess ? balance.data.formatted : 0);}}>Max</Button>
+      <Button size='sm' onClick={() => {setAmount(balance.isSuccess ? balance.data.formatted : 0);}}>Max</Button>
       <Spacer/>
       { balance.isSuccess && (<VStack spacing='0em'>
         <Text fontSize='sm' fontStyle='italic'>You have</Text>
@@ -560,20 +566,54 @@ export const AssetDepositFlow = ({keyInfo, arn, asset, price, container, toggleD
         </AnimatePresence>
     </NumberInput>
     </motion.div>
-    <DepositButton keyInfo={keyInfo} asset={asset} price={price} amount={ethers.utils.parseUnits(amount.toString(), asset.decimals)}/>
+    <DepositButton keyInfo={keyInfo} asset={asset} price={price} amount={amount}
+      toggleDetail={toggleDetail}/>
   </VStack>)
 }
 
-export const DepositGasButton = ({keyInfo, asset, price, amount, ...rest}) => {
+export const DepositGasButton = ({keyInfo, asset, price, amount, toggleDetail, ...rest}) => {
+  const transactions = useContext(TransactionListContext);
+  const deposit = useEtherVaultDeposit(keyInfo.keyId, ethers.utils.parseUnits((parseFloat(amount)||0).toFixed(asset.decimals).toString(), asset.decimals), 
+    (error) => {
+      console.log('error');
+      console.log(error);
+    }, (data) => {
+      transactions.addTransaction({
+        type: 'DEPSOT_ASSET',
+        title: 'Deposit ' + asset.name,
+        subtitle: amount + " " + asset.symbol, 
+        data: data
+      });
+      toggleDetail();
+    });
+
   return ( 
-    <Button colorScheme='blue' boxShadow='lg' width='100%' size='lg'>Deposit {asset.symbol}</Button>
+    <Button colorScheme='blue' isDisabled={parseFloat(amount) <= 0} isLoading={deposit.isLoading} boxShadow='lg' width='100%' size='lg'
+      onClick={() => { deposit.write?.(); }}>
+      Deposit {asset.symbol}
+    </Button>
   )
 }
 
-export const DepositTokenButton = ({keyInfo, asset, price, amount, ...rest}) => {
-  return ( 
-    <Button colorScheme='blue' boxShadow='lg' width='100%' size='lg'>Deposit {asset.symbol}</Button>
-  )
+export const DepositTokenButton = ({keyInfo, asset, price, amount, toggleDetail, ...rest}) => {
+  const transactions = useContext(TransactionListContext);
+  const deposit = useTokenVaultDeposit(keyInfo.keyId, asset.contractAddress,
+    ethers.utils.parseUnits((parseFloat(amount)||0).toFixed(asset.decimals).toString(), asset.decimals),
+    (error) => {
+      console.log('error');
+      console.log(error);
+    }, (data) => {
+      transactions.addTransaction({
+        type: 'DEPSOT_ASSET',
+        title: 'Deposit ' + asset.name,
+        subtitle: amount + " " + asset.symbol,
+        data: data
+      });
+      toggleDetail();
+    });
+
+  return (<Button isDisabled={parseFloat(amount) <= 0} isLoading={deposit.isLoading} colorScheme='blue' boxShadow='lg' width='100%' size='lg'
+    onClick={() => { deposit.write?.(); }}>Deposit {asset.symbol}</Button>)
 }
 
 export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, toggleDetail, ...rest}) => {

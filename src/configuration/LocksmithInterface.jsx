@@ -1,5 +1,7 @@
 import * as KeyVault from './interfaces/KeyVault.json';
 import * as Locksmith from './interfaces/Locksmith.json';
+import * as EtherVault from './interfaces/providers/EtherVault.json';
+import * as TokenVault from './interfaces/providers/TokenVault.json';
 import * as Notary from './interfaces/Notary.json';
 import * as Ledger from './interfaces/Ledger.json';
 import * as PostOffice from './interfaces/PostOffice.json';
@@ -12,6 +14,8 @@ export const LocksmithInterface = (function() {
   const interfaces = {
     'KeyVault': KeyVault,
     'Locksmith': Locksmith,
+    'EtherVault': EtherVault,
+    'TokenVault': TokenVault,
     'Notary': Notary,
     'Ledger': Ledger,
     'Distributor': Distributor,
