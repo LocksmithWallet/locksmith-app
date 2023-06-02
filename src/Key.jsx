@@ -29,6 +29,7 @@ import {
   TabPanel,
   Text,
   Select,
+  Skeleton,
   Spacer,
   Switch,
   VStack,
@@ -38,6 +39,8 @@ import {
 import { QRCode } from 'react-qrcode-logo'
 import { ethers } from 'ethers';
 import { 
+  useAccount,
+  useBalance,
   useProvider, 
   useNetwork,
 } from 'wagmi';
@@ -461,8 +464,14 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
                     container={ref}
                     toggleDetail={toggleDetail}/>
                 </TabPanel>
-                <TabPanel>
-                  <p>two!</p>
+                <TabPanel maxWidth='20em'>
+                  <AssetDepositFlow
+                    keyInfo={keyInfo}
+                    arn={arn}
+                    asset={asset}
+                    price={assetPrice.data}
+                    container={ref}
+                    toggleDetail={toggleDetail}/>
                 </TabPanel>
               </TabPanels>
             </Tabs>
@@ -472,6 +481,100 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
       </Box>
     </AnimatePresence>)
 };
+
+export const AssetDepositFlow = ({keyInfo, arn, asset, price, container, toggleDetail, ...rest}) => {
+  const animate = useAnimation();
+  const account = useAccount();
+  const balance = useBalance({
+    address: account.address,
+    token: asset.contractAddress // this won't work for NFTs.
+  });
+  const [amount, setAmount] = useState(0);
+  const DepositButton = asset.contractAddress ? DepositTokenButton : DepositGasButton;
+  const layoutMargin = useBreakpointValue({
+    base: '0.5em',
+    md: '2em',
+  });
+
+  const inputVariants = {
+    tooMuch: {
+      x: [-5, 5, -3, 3, -1, 0],
+      transition: {type: 'linear'}
+    }
+  };
+
+  return (<VStack mt={layoutMargin} spacing={layoutMargin}>
+    <HStack width='100%'>
+      <Button size='sm' onClick={() => {console.log(balance.data.formatted);setAmount(balance.isSuccess ? balance.data.formatted : 0);}}>Max</Button>
+      <Spacer/>
+      { balance.isSuccess && (<VStack spacing='0em'>
+        <Text fontSize='sm' fontStyle='italic'>You have</Text>
+        <Text fontSize='lg' fontWeight='bold'>{balance.data.formatted} {asset.symbol}</Text> 
+      </VStack>)}
+      { !balance.isSuccess && <Skeleton height='3em' width='8em'/> } 
+    </HStack>
+    <motion.div key='input-for-deposit' animate={animate} variants={inputVariants}>
+    <NumberInput
+      min={0}
+      onClick={() => {
+        setTimeout(() => {
+          container.current.scrollTo({
+            top:  container.current.scrollHeight,
+            behavior: 'smooth'
+          });
+        }, 500);
+      }}
+      value={amount}
+      max={balance.data ? balance.data.formatted : 0}
+      onChange={(value) => {
+        var cleaned = value.trim();
+        if (cleaned[0] === '0') {
+          cleaned = cleaned.substring(1);
+        }
+        setAmount(cleaned.length > 0 ? cleaned : 0);
+        if (parseFloat(cleaned) > parseFloat(balance.data ? balance.data.formatted : 0)) {
+          animate.start('tooMuch');
+        }
+      }}
+      style={{
+        overflow: 'hidden',
+        borderRadius: '8px'
+      }}
+      keepWithinRange={true}
+      clampValueOnBlur={true}>
+        <NumberInputField
+          style ={{
+            paddingTop: '30px',
+            paddingBottom: '30px',
+            paddingLeft: '10px',
+            paddingRight: '10px',
+            boxShadow: '0 1px 3px inset rgba(0,0,0,0.4)',
+            textAlign: 'center',
+            fontWeight: 'bold',
+            fontSize:'30px'
+          }}/>
+        <AnimatePresence>
+          <motion.div key='input-as-asset' style={{opacity: 0.4, y: -75, x: -30, position: 'absolute'}}> 
+                {asset.icon({ size: 90})}
+          </motion.div>
+        </AnimatePresence>
+    </NumberInput>
+    </motion.div>
+    <DepositButton keyInfo={keyInfo} asset={asset} price={price} amount={ethers.utils.parseUnits(amount.toString(), asset.decimals)}/>
+  </VStack>)
+}
+
+export const DepositGasButton = ({keyInfo, asset, price, amount, ...rest}) => {
+  return ( 
+    <Button colorScheme='blue' boxShadow='lg' width='100%' size='lg'>Deposit {asset.symbol}</Button>
+  )
+}
+
+export const DepositTokenButton = ({keyInfo, asset, price, amount, ...rest}) => {
+  return ( 
+    <Button colorScheme='blue' boxShadow='lg' width='100%' size='lg'>Deposit {asset.symbol}</Button>
+  )
+}
 
 export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, toggleDetail, ...rest}) => {
   const [step, setStep] = useState(0);
