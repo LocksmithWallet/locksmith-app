@@ -66,6 +66,7 @@ import {
   useEtherVaultDeposit
 } from './hooks/contracts/EtherVault';
 import {
+  useTokenVaultAllowance,
   useTokenVaultDeposit
 } from './hooks/contracts/TokenVault';
 import {
@@ -597,6 +598,24 @@ export const DepositGasButton = ({keyInfo, asset, price, amount, toggleDetail, .
 
 export const DepositTokenButton = ({keyInfo, asset, price, amount, toggleDetail, ...rest}) => {
   const transactions = useContext(TransactionListContext);
+  const account = useAccount();
+  const allowance = useTokenVaultAllowance(asset.contractAddress, account.address);
+
+  if (allowance.isSuccess && allowance.data.gte(ethers.utils.parseUnits((parseFloat(amount)||0).toString(), asset.decimals))) {
+    return (<DepositTokenInternal 
+      keyInfo={keyInfo}
+      asset={asset}
+      price={price}
+      amount={amount}
+      toggleDetail={toggleDetail}/>)
+  }
+  
+  return (<Button isDisabled={parseFloat(amount) <= 0 || !allowance.isSuccess}
+    colorScheme='blue' boxShadow='lg' width='100%' size='lg'
+    onClick={() => { /* set allowance */ }}>Set Allowance</Button>)
+}
+
+export const DepositTokenInternal = ({keyInfo, asset, price, amount, toggleDetail, ...rest}) => {
   const deposit = useTokenVaultDeposit(keyInfo.keyId, asset.contractAddress,
     ethers.utils.parseUnits((parseFloat(amount)||0).toFixed(asset.decimals).toString(), asset.decimals),
     (error) => {
@@ -611,8 +630,8 @@ export const DepositTokenButton = ({keyInfo, asset, price, amount, toggleDetail,
       });
       toggleDetail();
     });
-
-  return (<Button isDisabled={parseFloat(amount) <= 0} isLoading={deposit.isLoading} colorScheme='blue' boxShadow='lg' width='100%' size='lg'
+    
+      return (<Button isDisabled={parseFloat(amount) <= 0} isLoading={deposit.isLoading} colorScheme='blue' boxShadow='lg' width='100%' size='lg'
     onClick={() => { deposit.write?.(); }}>Deposit {asset.symbol}</Button>)
 }
 
