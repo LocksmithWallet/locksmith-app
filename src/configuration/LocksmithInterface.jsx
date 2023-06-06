@@ -8,6 +8,7 @@ import * as PostOffice from './interfaces/PostOffice.json';
 import * as Distributor from './interfaces/scribes/Distributor.json';
 import * as TrustCreator from './interfaces/agents/TrustCreator.json';
 import * as VirtualKeyAddress from './interfaces/agents/VirtualKeyAddress.json';
+import * as ShadowERC from './interfaces/ShadowERC.json';
 import { ethers } from 'ethers';
 
 export const LocksmithInterface = (function() {
@@ -22,6 +23,7 @@ export const LocksmithInterface = (function() {
     'PostOffice': PostOffice,
     'TrustCreator': TrustCreator,
     'VirtualKeyAddress': VirtualKeyAddress,
+    'ShadowERC': ShadowERC,
   };
 
   const eventDictionary = Object.keys(interfaces).reduce((memo, next, index) => {
