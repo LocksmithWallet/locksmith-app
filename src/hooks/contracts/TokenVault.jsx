@@ -28,3 +28,14 @@ export function useTokenVaultAllowance(tokenAddress, userAddress) {
     watch: true 
   });
 }
+
+export function useTokenVaultApprove(tokenAddress, amount, errorFunc, successFunc) {
+  const network = useNetwork();
+  const connected = network && network.chain && network.chain.id;
+  const config = Networks.getNetwork(connected ? network.chain.id : null);
+
+  return useLocksmithWrite('ShadowERC', 'approve',
+      [config.contracts['TokenVault'].address, amount],
+      amount > 0,
+      errorFunc, successFunc, tokenAddress);
+}

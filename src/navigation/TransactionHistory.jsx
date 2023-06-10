@@ -166,7 +166,7 @@ export const TransactionEventDetail = ({receipt, ...rest}) => {
       const EventType = transactionEvents[e.name.charAt(0).toUpperCase() + e.name.slice(1) + "Event"] 
         || transactionEvents['DefaultTransactionEvent'];
       return (<ListItem key={'tedli-'+x}>
-        <EventType event={e}/>
+        <EventType event={e} receipt={receipt}/>
       </ListItem>)
     }) }
   </List>)

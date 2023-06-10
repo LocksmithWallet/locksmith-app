@@ -67,7 +67,8 @@ import {
 } from './hooks/contracts/EtherVault';
 import {
   useTokenVaultAllowance,
-  useTokenVaultDeposit
+  useTokenVaultApprove,
+  useTokenVaultDeposit,
 } from './hooks/contracts/TokenVault';
 import {
   USDFormatter,
@@ -601,6 +602,20 @@ export const DepositTokenButton = ({keyInfo, asset, price, amount, toggleDetail,
   const account = useAccount();
   const allowance = useTokenVaultAllowance(asset.contractAddress, account.address);
 
+  const approve = useTokenVaultApprove(asset.contractAddress, 
+    ethers.utils.parseUnits((parseFloat(amount)||0).toFixed(asset.decimals).toString(), asset.decimals),
+    (error) => {
+      console.log('error');
+      console.log(error);
+    }, (data) => {
+      transactions.addTransaction({
+        type: 'APPROVE_TOKEN',
+        title: 'Approve ' + asset.name,
+        subtitle: amount + " " + asset.symbol,
+        data: data
+      });
+    });
+
   if (allowance.isSuccess && allowance.data.gte(ethers.utils.parseUnits((parseFloat(amount)||0).toString(), asset.decimals))) {
     return (<DepositTokenInternal 
       keyInfo={keyInfo}
@@ -610,12 +625,13 @@ export const DepositTokenButton = ({keyInfo, asset, price, amount, toggleDetail,
       toggleDetail={toggleDetail}/>)
   }
   
-  return (<Button isDisabled={parseFloat(amount) <= 0 || !allowance.isSuccess}
+  return (<Button isDisabled={parseFloat(amount) <= 0 || !allowance.isSuccess || !approve.write }
     colorScheme='blue' boxShadow='lg' width='100%' size='lg'
-    onClick={() => { /* set allowance */ }}>Set Allowance</Button>)
+    onClick={() => { approve.write?.(); }}>Set Allowance</Button>)
 }
 
 export const DepositTokenInternal = ({keyInfo, asset, price, amount, toggleDetail, ...rest}) => {
+  const transactions = useContext(TransactionListContext);
   const deposit = useTokenVaultDeposit(keyInfo.keyId, asset.contractAddress,
     ethers.utils.parseUnits((parseFloat(amount)||0).toFixed(asset.decimals).toString(), asset.decimals),
     (error) => {

@@ -299,6 +299,17 @@ export const AddressTransactionEvent = ({event}) => {
   </HStack>)
 }
 
+export const ApprovalEvent = ({event, receipt}) => {
+  console.log(receipt);
+  return (<HStack pos='relative'>
+    <FcApproval size='24px'/>
+    <VStack align='stretch' spacing='0em' fontSize='0.8em'>
+      <Text fontWeight='bold'>Token Approval</Text>
+      <Text fontStyle='italic' textColor='gray.500'>For <AddressAlias address={event.topics.spender}/></Text>
+    </VStack>
+  </HStack>)
+}
+
 export const InitializedEvent = ({event}) => {}
 export const UpgradedEvent = ({event}) => {}
 export const DefaultTransactionEvent = ({event}) => {
