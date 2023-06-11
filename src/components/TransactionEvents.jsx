@@ -300,12 +300,22 @@ export const AddressTransactionEvent = ({event}) => {
 }
 
 export const ApprovalEvent = ({event, receipt}) => {
-  console.log(receipt);
   return (<HStack pos='relative'>
     <FcApproval size='24px'/>
     <VStack align='stretch' spacing='0em' fontSize='0.8em'>
       <Text fontWeight='bold'>Token Approval</Text>
       <Text fontStyle='italic' textColor='gray.500'>For <AddressAlias address={event.topics.spender}/></Text>
+    </VStack>
+  </HStack>)
+}
+
+export const TransferEvent = ({event, receipt}) => {
+  console.log(receipt);
+  return (<HStack pos='relative'>
+    <FcMoneyTransfer size='24px'/>
+    <VStack align='stretch' spacing='0em' fontSize='0.8em'>
+      <Text fontWeight='bold'>Token Transfer</Text>
+      <Text fontStyle='italic' textColor='gray.500'>To <AddressAlias address={event.topics.to}/></Text>
     </VStack>
   </HStack>)
 }

@@ -625,9 +625,17 @@ export const DepositTokenButton = ({keyInfo, asset, price, amount, toggleDetail,
       toggleDetail={toggleDetail}/>)
   }
   
-  return (<Button isDisabled={parseFloat(amount) <= 0 || !allowance.isSuccess || !approve.write }
-    colorScheme='blue' boxShadow='lg' width='100%' size='lg'
-    onClick={() => { approve.write?.(); }}>Set Allowance</Button>)
+  return (<>
+    <VStack>
+      <Text fontSize='sm' color='gray.500'>Your Current Allowance:</Text>
+      <Text fontSize='xl' color='gray.500' fontWeight='bold'>
+        {!allowance.isSuccess ? 0 : ethers.utils.formatUnits(allowance.data, asset.decimals)} {asset.symbol}
+      </Text> 
+    </VStack>
+    <Button isDisabled={parseFloat(amount) <= 0 || !allowance.isSuccess || !approve.write}
+    colorScheme='blue' boxShadow='lg' width='100%' size='lg' isLoading={approve.isLoading}
+    onClick={() => { approve.write?.(); }}>Set Allowance</Button>
+  </>)
 }
 
 export const DepositTokenInternal = ({keyInfo, asset, price, amount, toggleDetail, ...rest}) => {
@@ -647,7 +655,7 @@ export const DepositTokenInternal = ({keyInfo, asset, price, amount, toggleDetai
       toggleDetail();
     });
     
-      return (<Button isDisabled={parseFloat(amount) <= 0} isLoading={deposit.isLoading} colorScheme='blue' boxShadow='lg' width='100%' size='lg'
+  return (<Button isDisabled={parseFloat(amount) <= 0} isLoading={deposit.isLoading} colorScheme='blue' boxShadow='lg' width='100%' size='lg'
     onClick={() => { deposit.write?.(); }}>Deposit {asset.symbol}</Button>)
 }
 
