@@ -14,6 +14,7 @@ import { TransactionContext } from './components/TransactionProvider';
 import { Home } from './Home';
 import { RevealTrust } from './RevealTrust';
 import { Key } from './Key';
+import { Trust } from './Trust';
 
 function App() {
   return <ConnectKitProvider theme='auto' mode={useColorModeValue('light', 'dark')}
@@ -46,6 +47,11 @@ export const AnimatedRoutes = () => {
     { account.isConnected && <Route path='/key/:keyId' element={
       <motion.div key='show-key' initial={{x: '100vh'}} animate={{x: 0}} exit={{y: '100vh', transition: pageTransition}}>
         <Key/>
+      </motion.div>
+    }/> }
+    { account.isConnected && <Route path='/trust/:trustId' element={
+      <motion.div key='show-trust' initial={{x: '100vh'}} animate={{x: 0}} exit={{y: '100vh', transition: pageTransition}}>
+        <Trust/>
       </motion.div>
     }/> }
     <Route path='*' element={

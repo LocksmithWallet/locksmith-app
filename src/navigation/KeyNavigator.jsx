@@ -97,6 +97,7 @@ export const KeyInspector = ({keyId, sortKey}) => {
 }
 
 export const TrustNavigationBox = ({trustId, keys, onClose}) => {
+  const navigate = useNavigate();
   const trust = useTrustInfo(trustId);
   const hasRoot = trust && keys.filter(
     (k) => k.keyId === trust.rootKeyId.toString()).length > 0;
@@ -109,6 +110,7 @@ export const TrustNavigationBox = ({trustId, keys, onClose}) => {
             style={{cursor: 'pointer'}}
             whileHover={{scale: 1.5, rotate: 360}}
             whileTap={{scale: 0.95}}
+            onClick={() => { onClose.onClose(); navigate('/trust/' + trustId); }}
             initial={{opacity: 0, x: 50}}
             animate={{opacity:1, x:0}}>
           <FcSettings size='20px'/></motion.div> }
