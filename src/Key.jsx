@@ -19,8 +19,12 @@ import {
   List,
   ListItem,
   Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   ModalOverlay,
-  Portal,
   Tabs,
   TabList,
   TabIndicator,
@@ -234,6 +238,36 @@ const BalanceBox = ({keyInfo, ...rest}) => {
   )
 }
 
+const DepositButtonAndModal = ({keyInfo, ...rest}) => {
+  const initialX = useBreakpointValue({base: '140vw', md: '100vw'});
+  const disclosure = useDisclosure();
+  const network = useNetwork();
+  const assets = Networks.getNetwork(network.chain.id).assets;
+
+  return (
+    <motion.div initial={{x: initialX}} animate={{x: 0}} transition={{delay: 0.375}}>
+      <VStack align='stretch'>
+        <Button m='1em' p='1.4em' colorScheme='blue' boxShadow='lg'
+          onClick={disclosure.onOpen}>Deposit</Button>
+      </VStack>
+      <Modal size='xl' onClose={disclosure.onClose} isOpen={disclosure.isOpen} isCentered motionPreset='scale'>
+        <ModalOverlay backdropFilter='blur(10px)'/>
+        <ModalContent>
+          <ModalHeader>Deposit Asset</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <List spacing='1em'>
+              { Object.keys(assets).map((arn) => <ListItem>{arn}</ListItem>) } 
+            </List>
+          </ModalBody>
+          <ModalFooter>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </motion.div>
+  )
+}
+
 const ViewCarousel = ({keyInfo, balanceSheet, ...rest}) => {
   const initialX = useBreakpointValue({base: '140vw', md: '100vw'});
   const network = useNetwork();
@@ -252,6 +286,7 @@ const ViewCarousel = ({keyInfo, balanceSheet, ...rest}) => {
           </ListItem>
         )) }
       </List>
+      <DepositButtonAndModal keyInfo={keyInfo}/>
     </motion.div>
   )
 }
