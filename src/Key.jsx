@@ -86,6 +86,7 @@ import {
   LayoutGroup,
   useAnimation,
 } from 'framer-motion';
+import { AttentionSeeker, Fade } from 'react-awesome-reveal';
 import { OverlayBlur } from './components/Animations';
 
 // components
@@ -257,7 +258,13 @@ const DepositButtonAndModal = ({keyInfo, ...rest}) => {
           <ModalCloseButton />
           <ModalBody>
             <List spacing='1em'>
-              { Object.keys(assets).map((arn) => <ListItem>{arn}</ListItem>) } 
+              <Fade direction='down' duration='300' cascade>
+              { Object.keys(assets).map((arn) => 
+                <AssetChoiceListItem
+                  keyInfo={keyInfo}
+                  arn={arn}
+                  asset={assets[arn]}/>) }
+              </Fade>
             </List>
           </ModalBody>
           <ModalFooter>
@@ -266,6 +273,33 @@ const DepositButtonAndModal = ({keyInfo, ...rest}) => {
       </Modal>
     </motion.div>
   )
+}
+
+const AssetChoiceListItem = ({keyInfo, arn, asset, ...rest}) => {
+  const account = useAccount();
+  const balance = useBalance({
+    address: account.address,
+    token: asset.contractAddress // this won't work for NFTs.
+  });
+
+  return (<AttentionSeeker effect='pulse'><ListItem
+    as={motion.div}
+    whileTap={{scale: 0.95}}
+    onClick={() => {}}
+    border='1px'
+    borderColor='gray.300'
+    bgColor='gray.100'
+    boxShadow='md'
+    borderRadius='full'
+    padding='0.5em'
+    cursor='pointer'>
+      <HStack spacing='1em' pr='1em'>
+        {asset.icon()}
+        <Text>{asset.name}</Text>
+        <Spacer/>
+        <Text fontSize='sm'>{balance.isSuccess ? balance.data.formatted : '?'} {asset.symbol}</Text>
+      </HStack>
+  </ListItem></AttentionSeeker>)
 }
 
 const ViewCarousel = ({keyInfo, balanceSheet, ...rest}) => {
