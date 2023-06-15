@@ -653,7 +653,7 @@ export const AssetDepositFlow = ({keyInfo, arn, asset, container, toggleDetail, 
 
 export const DepositGasButton = ({keyInfo, asset, amount, toggleDetail, ...rest}) => {
   const transactions = useContext(TransactionListContext);
-  const deposit = useEtherVaultDeposit(keyInfo.keyId, ethers.utils.parseUnits((parseFloat(amount)||0).toFixed(asset.decimals).toString(), asset.decimals), 
+  const deposit = useEtherVaultDeposit(keyInfo.keyId, ethers.utils.parseUnits((parseFloat(amount)||0).toString(), asset.decimals), 
     (error) => {
       console.log('error');
       console.log(error);
@@ -681,7 +681,7 @@ export const DepositTokenButton = ({keyInfo, asset, amount, toggleDetail, ...res
   const allowance = useTokenVaultAllowance(asset.contractAddress, account.address);
 
   const approve = useTokenVaultApprove(asset.contractAddress, 
-    ethers.utils.parseUnits((parseFloat(amount)||0).toFixed(asset.decimals).toString(), asset.decimals),
+    ethers.utils.parseUnits((parseFloat(amount)||0).toString(), asset.decimals),
     (error) => {
       console.log('error');
       console.log(error);
@@ -718,7 +718,7 @@ export const DepositTokenButton = ({keyInfo, asset, amount, toggleDetail, ...res
 export const DepositTokenInternal = ({keyInfo, asset, amount, toggleDetail, ...rest}) => {
   const transactions = useContext(TransactionListContext);
   const deposit = useTokenVaultDeposit(keyInfo.keyId, asset.contractAddress,
-    ethers.utils.parseUnits((parseFloat(amount)||0).toFixed(asset.decimals).toString(), asset.decimals),
+    ethers.utils.parseUnits((parseFloat(amount)||0).toString(), asset.decimals),
     (error) => {
       console.log('error');
       console.log(error);
@@ -973,7 +973,7 @@ export const SendToKeyConfirmationButton = ({keyInfo, destinationKey, arn, asset
   // the assumption about which provider we are using is going to break at some point in the near
   // future
   const distribution = useDistribute(Networks.getContractAddress(network.chain.id, asset.standard === 0 ? 'EtherVault' : 'TokenVault'),
-    arn, keyInfo.keyId, [destinationKey], [ethers.utils.parseUnits(parseFloat(amount).toFixed(asset.decimals).toString(), asset.decimals)],
+    arn, keyInfo.keyId, [destinationKey], [ethers.utils.parseUnits(parseFloat(amount).toString(), asset.decimals)],
     (error) => { 
       console.log('error');
       console.log(error);
