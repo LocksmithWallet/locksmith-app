@@ -244,6 +244,8 @@ const DepositButtonAndModal = ({keyInfo, ...rest}) => {
   const disclosure = useDisclosure();
   const network = useNetwork();
   const assets = Networks.getNetwork(network.chain.id).assets;
+  const ref = useRef(null);
+  const [selectedArn, setSelectedArn] = useState(null);
 
   return (
     <motion.div initial={{x: initialX}} animate={{x: 0}} transition={{delay: 0.375}}>
@@ -256,16 +258,24 @@ const DepositButtonAndModal = ({keyInfo, ...rest}) => {
         <ModalContent>
           <ModalHeader>Deposit Asset</ModalHeader>
           <ModalCloseButton />
-          <ModalBody>
+          <ModalBody ref={ref}>
             <List spacing='1em'>
-              <Fade direction='down' duration='300' cascade>
+              { selectedArn === null && (<Fade direction='down' duration='300' cascade>
               { Object.keys(assets).map((arn) => 
                 <AssetChoiceListItem
                   keyInfo={keyInfo}
                   arn={arn}
-                  asset={assets[arn]}/>) }
-              </Fade>
+                  asset={assets[arn]}
+                  setArn={setSelectedArn}/>) }
+              </Fade>)}
             </List>
+            { selectedArn && <AssetDepositFlow
+                keyInfo={keyInfo}
+                arn={selectedArn}
+                asset={assets[selectedArn]}
+                container={ref}
+                toggleDetail={disclosure.onClose}/>
+            }
           </ModalBody>
           <ModalFooter>
           </ModalFooter>
@@ -275,7 +285,7 @@ const DepositButtonAndModal = ({keyInfo, ...rest}) => {
   )
 }
 
-const AssetChoiceListItem = ({keyInfo, arn, asset, ...rest}) => {
+const AssetChoiceListItem = ({keyInfo, arn, asset, setArn, ...rest}) => {
   const account = useAccount();
   const balance = useBalance({
     address: account.address,
@@ -285,7 +295,7 @@ const AssetChoiceListItem = ({keyInfo, arn, asset, ...rest}) => {
   return (<AttentionSeeker effect='pulse'><ListItem
     as={motion.div}
     whileTap={{scale: 0.95}}
-    onClick={() => {}}
+    onClick={() => {setArn(arn);}}
     border='1px'
     borderColor='gray.300'
     bgColor='gray.100'
@@ -546,7 +556,6 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
                     keyInfo={keyInfo}
                     arn={arn}
                     asset={asset}
-                    price={assetPrice.data}
                     container={ref}
                     toggleDetail={toggleDetail}/>
                 </TabPanel>
@@ -559,7 +568,7 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
     </AnimatePresence>)
 };
 
-export const AssetDepositFlow = ({keyInfo, arn, asset, price, container, toggleDetail, ...rest}) => {
+export const AssetDepositFlow = ({keyInfo, arn, asset, container, toggleDetail, ...rest}) => {
   const animate = useAnimation();
   const account = useAccount();
   const balance = useBalance({
@@ -637,12 +646,12 @@ export const AssetDepositFlow = ({keyInfo, arn, asset, price, container, toggleD
         </AnimatePresence>
     </NumberInput>
     </motion.div>
-    <DepositButton keyInfo={keyInfo} asset={asset} price={price} amount={amount}
+    <DepositButton keyInfo={keyInfo} asset={asset} amount={amount}
       toggleDetail={toggleDetail}/>
   </VStack>)
 }
 
-export const DepositGasButton = ({keyInfo, asset, price, amount, toggleDetail, ...rest}) => {
+export const DepositGasButton = ({keyInfo, asset, amount, toggleDetail, ...rest}) => {
   const transactions = useContext(TransactionListContext);
   const deposit = useEtherVaultDeposit(keyInfo.keyId, ethers.utils.parseUnits((parseFloat(amount)||0).toFixed(asset.decimals).toString(), asset.decimals), 
     (error) => {
@@ -666,7 +675,7 @@ export const DepositGasButton = ({keyInfo, asset, price, amount, toggleDetail, .
   )
 }
 
-export const DepositTokenButton = ({keyInfo, asset, price, amount, toggleDetail, ...rest}) => {
+export const DepositTokenButton = ({keyInfo, asset, amount, toggleDetail, ...rest}) => {
   const transactions = useContext(TransactionListContext);
   const account = useAccount();
   const allowance = useTokenVaultAllowance(asset.contractAddress, account.address);
@@ -689,7 +698,6 @@ export const DepositTokenButton = ({keyInfo, asset, price, amount, toggleDetail,
     return (<DepositTokenInternal 
       keyInfo={keyInfo}
       asset={asset}
-      price={price}
       amount={amount}
       toggleDetail={toggleDetail}/>)
   }
@@ -707,7 +715,7 @@ export const DepositTokenButton = ({keyInfo, asset, price, amount, toggleDetail,
   </>)
 }
 
-export const DepositTokenInternal = ({keyInfo, asset, price, amount, toggleDetail, ...rest}) => {
+export const DepositTokenInternal = ({keyInfo, asset, amount, toggleDetail, ...rest}) => {
   const transactions = useContext(TransactionListContext);
   const deposit = useTokenVaultDeposit(keyInfo.keyId, asset.contractAddress,
     ethers.utils.parseUnits((parseFloat(amount)||0).toFixed(asset.decimals).toString(), asset.decimals),
