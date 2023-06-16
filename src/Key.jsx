@@ -257,25 +257,41 @@ const DepositButtonAndModal = ({keyInfo, ...rest}) => {
         <ModalOverlay backdropFilter='blur(10px)'/>
         <ModalContent>
           <ModalHeader>Deposit Asset</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody ref={ref}>
-            <List spacing='1em'>
-              { selectedArn === null && (<Fade direction='down' duration='300' cascade>
-              { Object.keys(assets).map((arn) => 
-                <AssetChoiceListItem
+          { selectedArn === null ? <ModalCloseButton /> :
+              <IconButton width='1em' pos='absolute' right='10px' top='10px' 
+                icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
+                onClick={() => { setSelectedArn(null); }}/> }
+          <ModalBody ref={ref} style={{overflow: 'hidden'}}>
+            <AnimatePresence mode='wait'> 
+              {selectedArn === null && (<motion.div key='select-deposit-arn' 
+                  initial={{opacity: 0, x: -400}}
+                  animate={{opacity: 1, x: 0}}
+                  exit={{opacity: 0, x: -400}}
+                  transition={{duraton: 0.3}}>
+                <List spacing='1em'>
+                  <Fade direction='down' duration='300' cascade>
+                    { Object.keys(assets).map((arn) => 
+                        <AssetChoiceListItem
+                          keyInfo={keyInfo}
+                          arn={arn}
+                          asset={assets[arn]}
+                          setArn={setSelectedArn}/>) }
+                    </Fade>
+                </List>
+              </motion.div>)}
+              { selectedArn && <motion.div key='deposit-selected-arn'
+                initial={{opacity: 0, x: 400}}
+                animate={{opacity: 1, x: 0}}
+                exit={{opacity: 0, x:400}}
+                transition={{duration: 0.3}}>
+                <AssetDepositFlow
                   keyInfo={keyInfo}
-                  arn={arn}
-                  asset={assets[arn]}
-                  setArn={setSelectedArn}/>) }
-              </Fade>)}
-            </List>
-            { selectedArn && <AssetDepositFlow
-                keyInfo={keyInfo}
-                arn={selectedArn}
-                asset={assets[selectedArn]}
-                container={ref}
-                toggleDetail={disclosure.onClose}/>
-            }
+                  arn={selectedArn}
+                  asset={assets[selectedArn]}
+                  container={ref}
+                  toggleDetail={disclosure.onClose}/>
+              </motion.div>}
+          </AnimatePresence>
           </ModalBody>
           <ModalFooter>
           </ModalFooter>
