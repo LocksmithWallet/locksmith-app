@@ -53,6 +53,7 @@ import { LocksmithInterface } from './configuration/LocksmithInterface';
 
 // hooks
 import { GAS_ARN } from './configuration/AssetResource';
+import { useSupportedTokens } from './hooks/Utils';
 import { useInspectKey } from './hooks/contracts/Locksmith';
 import { useKeyInboxAddress } from './hooks/contracts/PostOffice';
 import {
@@ -124,10 +125,14 @@ export function Key() {
 export function BalanceContextInformation({keyInfo, ...rest}) {
   const balanceSheet = useContextBalanceSheet(KEY_CONTEXT, keyInfo.keyId);
 
-  return (<>
+  return (<LayoutGroup>
+    <motion.div key='balance-box'>
       <BalanceBox keyInfo={keyInfo}/>
+    </motion.div>
+    <motion.div key='view-carousel'>
       <ViewCarousel keyInfo={keyInfo} balanceSheet={balanceSheet}/>
-  </>)
+    </motion.div>
+  </LayoutGroup>)
 }
 
 export function KeyHeader({keyInfo}) {
@@ -223,6 +228,20 @@ export function KeyHeader({keyInfo}) {
 
 const BalanceBox = ({keyInfo, ...rest}) => {
   const initialX = useBreakpointValue({base: '140vw', md: '100vw'});
+  const supportedTokens = useSupportedTokens();
+  const inbox = useKeyInboxAddress(keyInfo.keyId);
+  const network = useNetwork();
+  const assets = Networks.getNetwork(network.chain.id).assets;
+  const [tokenBalances, setTokenBalances] = useState({});
+  const addTokenBalance = function(arn, data) {
+    // don't add it if its zero
+    if (data.value.eq(0)) { return; }
+
+    var balances = { ...tokenBalances};
+    balances[arn] = data;
+    setTokenBalances(balances);
+  }
+  
   return (
     <motion.div initial={{x: initialX}} animate={{x: 0}} transition={{delay: 0.125}}>
       <Box m='1em' mt='2em' bg='white' borderRadius='lg' boxShadow='lg' p='0.8em'>
@@ -235,8 +254,46 @@ const BalanceBox = ({keyInfo, ...rest}) => {
           }}/>
         </VStack>
       </Box>
+      { inbox.isSuccess && supportedTokens.map((t) => (
+          <TokenBalanceCollector
+            key={'tbc-'+t.arn}
+            inbox={inbox.data}
+            token={t.asset.contractAddress}
+            callback={(data) => { addTokenBalance(t.arn, data);}}/>)) }
+      { Object.keys(tokenBalances).length > 0 && 
+        <motion.div initial={{opacity: 0, x: 500}} animate={{opacity: 1, x: 0}}>
+          <Box m='1em' mt='2em' bg='white' borderRadius='lg' boxShadow='lg' p='0.8em'
+            pos='relative'
+            style={{
+              overflow: 'hidden'
+            }}>
+            { Object.keys(tokenBalances).map((arn,x) => (
+                <motion.div
+                  key={'mdfa'-arn}
+                  initial={{background: '#FFFFFF', opacity: 0, left: '100vw', scale: 5, position: 'absolute', zIndex: (Object.keys(tokenBalances).length - x)}}
+                  animate={{opacity: 1, left: '' + (0.25 + x*2) + 'em', scale: 2, transition: {duration: 0.3}}}
+                >{ assets[arn].icon() }</motion.div>)) }
+            <HStack>
+              <Spacer/>
+              <Button size='sm'>Review Token Deposits</Button>
+            </HStack>
+          </Box> 
+        </motion.div> }
     </motion.div>
   )
+}
+
+const TokenBalanceCollector = ({inbox, token, callback, ...rest}) => {
+  const balance = useBalance({
+    address: inbox, 
+    token: token // this won't work for NFTs.
+  });
+
+  useEffect(() => {
+    if (balance.data) {
+      callback(balance.data);
+    }
+  }, [balance.data]);
 }
 
 const DepositButtonAndModal = ({keyInfo, ...rest}) => {
@@ -272,6 +329,7 @@ const DepositButtonAndModal = ({keyInfo, ...rest}) => {
                   <Fade direction='down' duration='300' cascade>
                     { Object.keys(assets).map((arn) => 
                         <AssetChoiceListItem
+                          key={'acli'+arn}
                           keyInfo={keyInfo}
                           arn={arn}
                           asset={assets[arn]}

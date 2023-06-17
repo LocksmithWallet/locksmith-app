@@ -61,6 +61,18 @@ export function getLocksmithEvents(receipt) {
   }, []);
 };
 
+export function useSupportedTokens() {
+  const network = useNetwork();
+  const assets = Networks.getNetwork(network.chain.id).assets;
+  return Object.keys(assets).reduce((m, n, x) => {
+    if (assets[n].standard === 20) {
+      m.push({arn: n, asset: assets[n]});
+    }
+
+    return m;
+  }, []) 
+}
+
 export function useDebounce(value, delay) {
   // State and setters for debounced value
   const [debouncedValue, setDebouncedValue] = useState(value);
