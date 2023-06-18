@@ -270,12 +270,18 @@ const BalanceBox = ({keyInfo, ...rest}) => {
             { Object.keys(tokenBalances).map((arn,x) => (
                 <motion.div
                   key={'mdfa'-arn}
+                  style={{
+                    borderRadius: '18px',
+                    filter: 'drop-shadow(0 0px 2px rgba(0,0,0,0.5))'
+                  }}
                   initial={{background: '#FFFFFF', opacity: 0, left: '100vw', scale: 5, position: 'absolute', zIndex: (Object.keys(tokenBalances).length - x)}}
-                  animate={{opacity: 1, left: '' + (0.25 + x*2) + 'em', scale: 2, transition: {duration: 0.3}}}
-                >{ assets[arn].icon() }</motion.div>)) }
+                  animate={{opacity: 1, left: '' + (0.25 + x*2) + 'em', scale: 2, 
+                    zIndex: (Object.keys(tokenBalances).length - x),
+                    transition: {duration: 0.3}
+                  }}>{ assets[arn].icon() }</motion.div>)) }
             <HStack>
               <Spacer/>
-              <Button size='sm'>Review Token Deposits</Button>
+              <Button size='sm' zIndex='100'>Review Token Deposits</Button>
             </HStack>
           </Box> 
         </motion.div> }
