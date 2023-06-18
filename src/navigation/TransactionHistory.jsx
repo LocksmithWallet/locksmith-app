@@ -85,6 +85,11 @@ export const TransactionHistoryDrawer = ({disclosure}) => {
   const [selectedHash, setSelectedHash] = useState(null);
   const btnRef = useRef();
 
+  useEffect(() => {
+    if(!disclosure.isOpen) {
+      setSelectedHash(null);
+    }
+  }, [disclosure.isOpen]);
   return (<Drawer
     isOpen={disclosure.isOpen}
     placement='right'
