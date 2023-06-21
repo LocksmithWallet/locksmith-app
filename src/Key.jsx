@@ -301,7 +301,7 @@ const BalanceBox = ({keyInfo, ...rest}) => {
     <LayoutGroup> 
       <Box m='1em' mt='2em' bg='white' borderRadius='lg' boxShadow='lg' p='0.8em'>
         <VStack>
-          position: 'fixed',position: 'fixed',position: 'fixed',<ContextBalanceUSD contextId={KEY_CONTEXT} identifier={keyInfo.keyId}
+          <ContextBalanceUSD contextId={KEY_CONTEXT} identifier={keyInfo.keyId}
             skeletonProps={{}} 
             textProps={{
               fontSize: '2xl',
@@ -325,7 +325,8 @@ const BalanceBox = ({keyInfo, ...rest}) => {
               height: '100%',
               overflow: 'hidden'
             }}>
-            { Object.keys(tokenBalances).map((arn,x) => (
+            <AnimatePresence>
+            { !detailDisclosure.isOpen && Object.keys(tokenBalances).map((arn,x) => (
                 <motion.div
                   layoutId={'token-deposit-'+arn}
                   key={'mdfa'+arn}
@@ -333,25 +334,22 @@ const BalanceBox = ({keyInfo, ...rest}) => {
                     borderRadius: '18px',
                     filter: 'drop-shadow(0 0px 2px rgba(0,0,0,0.5))'
                   }}
+                  exit={{opacity: 0, x: -100}}
                   initial={{background: '#FFFFFF', opacity: 0, left: '100vw', scale: 5, position: 'absolute', zIndex: (Object.keys(tokenBalances).length - x)}}
                   animate={{opacity: 1, left: '' + (0.25 + x*2) + 'em', scale: 2, 
                     zIndex: (Object.keys(tokenBalances).length - x),
                     transition: {duration: 0.3}
                   }}>{ assets[arn].icon() }</motion.div>)) }
+            { detailDisclosure.isOpen && <Text as={motion.div} 
+                initial={{x: '100vw'}} animate={{x: 0}}
+                fontWeight='bold' size='lg'>Accept Token Deposits</Text> }
+            </AnimatePresence>
             <HStack>
               <Spacer/>
               <Button zIndex={9} size='sm' onClick={toggleDetail}>Review Token Deposits</Button>
             </HStack>
             { detailDisclosure.isOpen &&
               <VStack align='stretch' as={motion.div}>
-                  { false && Object.keys(tokenBalances).map((arn,x) => (
-                    <motion.div
-                      layoutId={'token-deposit-'+arn}
-                      key={'tdr-'+arn}
-                      style={{
-                        borderRadius: '18px',
-                        filter: 'drop-shadow(0 0px 2px rgba(0,0,0,0.5))'
-                      }}>{ assets[arn].icon() }</motion.div>)) }
               </VStack> }
           </Box>
           </motion.div>
