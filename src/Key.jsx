@@ -338,7 +338,7 @@ const BalanceBox = ({keyInfo, ...rest}) => {
                   }}>{ assets[arn].icon() }</motion.div>)) }
             <HStack>
               <Spacer/>
-              <Button size='sm' onClick={toggleDetail}>Review Token Deposits</Button>
+              <Button zIndex={9} size='sm' onClick={toggleDetail}>Review Token Deposits</Button>
             </HStack>
           </Box>
           </motion.div>
