@@ -227,10 +227,13 @@ export function KeyHeader({keyInfo}) {
 }
 
 const BalanceBox = ({keyInfo, ...rest}) => {
+  const isDesktop = useBreakpointValue({base: false, md: true});
   const initialX = useBreakpointValue({base: '140vw', md: '100vw'});
   const supportedTokens = useSupportedTokens();
   const inbox = useKeyInboxAddress(keyInfo.keyId);
   const network = useNetwork();
+  const animation = useAnimation();
+  const ref = useRef();
   const assets = Networks.getNetwork(network.chain.id).assets;
   const [tokenBalances, setTokenBalances] = useState({});
   const addTokenBalance = function(arn, data) {
@@ -242,6 +245,43 @@ const BalanceBox = ({keyInfo, ...rest}) => {
     setTokenBalances(balances);
   }
   
+  const boxVariants = {
+    start: {
+    },
+    click: function() {
+      const rect = ref.current.getBoundingClientRect();
+      return {
+        position: 'fixed',
+        width: rect.width,
+        height: rect.height,
+        zIndex: 101,
+      };
+    },
+    open: function() {
+      const rect = ref.current.getBoundingClientRect();
+      return {
+        y: -1 * (rect.y) - window.scrollY,
+        marginTop: '3vh',
+        minWidth: isDesktop ? '0' : '92vw',
+        height: '90vh',
+        zIndex: 500,
+        overflow: 'scroll',
+      }
+    },
+    close: {
+      overflow: 'hidden',
+      position: null,
+      y: 0,
+      x: 0,
+      marginTop: 0,
+      height: null,
+      zIndex: 0,
+    },
+    final: {
+      width: null
+    }
+  };
+
   return (
     <motion.div initial={{x: initialX}} animate={{x: 0}} transition={{delay: 0.125}}>
       <Box m='1em' mt='2em' bg='white' borderRadius='lg' boxShadow='lg' p='0.8em'>
@@ -262,6 +302,7 @@ const BalanceBox = ({keyInfo, ...rest}) => {
             callback={(data) => { addTokenBalance(t.arn, data);}}/>)) }
       { Object.keys(tokenBalances).length > 0 && 
         <motion.div initial={{opacity: 0, x: 500}} animate={{opacity: 1, x: 0}}>
+          <motion.div key='accept-jiggle-box' animate={animation}>
           <Box m='1em' mt='2em' bg='white' borderRadius='lg' boxShadow='lg' p='0.8em'
             pos='relative'
             style={{
@@ -269,7 +310,7 @@ const BalanceBox = ({keyInfo, ...rest}) => {
             }}>
             { Object.keys(tokenBalances).map((arn,x) => (
                 <motion.div
-                  key={'mdfa'-arn}
+                  key={'mdfa'+arn}
                   style={{
                     borderRadius: '18px',
                     filter: 'drop-shadow(0 0px 2px rgba(0,0,0,0.5))'
@@ -283,7 +324,8 @@ const BalanceBox = ({keyInfo, ...rest}) => {
               <Spacer/>
               <Button size='sm' zIndex='100'>Review Token Deposits</Button>
             </HStack>
-          </Box> 
+          </Box>
+          </motion.div> 
         </motion.div> }
     </motion.div>
   )
