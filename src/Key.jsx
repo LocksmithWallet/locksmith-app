@@ -298,7 +298,7 @@ const BalanceBox = ({keyInfo, ...rest}) => {
   };
 
   return (
-    <motion.div> 
+    <LayoutGroup> 
       <Box m='1em' mt='2em' bg='white' borderRadius='lg' boxShadow='lg' p='0.8em'>
         <VStack>
           position: 'fixed',position: 'fixed',position: 'fixed',<ContextBalanceUSD contextId={KEY_CONTEXT} identifier={keyInfo.keyId}
@@ -321,11 +321,13 @@ const BalanceBox = ({keyInfo, ...rest}) => {
           <Box ref={ref} bg='white' borderRadius='lg' boxShadow='lg' p='0.8em'
             pos='relative'
             style={{
+              zIndex: 0,
               height: '100%',
               overflow: 'hidden'
             }}>
             { Object.keys(tokenBalances).map((arn,x) => (
                 <motion.div
+                  layoutId={'token-deposit-'+arn}
                   key={'mdfa'+arn}
                   style={{
                     borderRadius: '18px',
@@ -340,10 +342,21 @@ const BalanceBox = ({keyInfo, ...rest}) => {
               <Spacer/>
               <Button zIndex={9} size='sm' onClick={toggleDetail}>Review Token Deposits</Button>
             </HStack>
+            { detailDisclosure.isOpen &&
+              <VStack align='stretch' as={motion.div}>
+                  { false && Object.keys(tokenBalances).map((arn,x) => (
+                    <motion.div
+                      layoutId={'token-deposit-'+arn}
+                      key={'tdr-'+arn}
+                      style={{
+                        borderRadius: '18px',
+                        filter: 'drop-shadow(0 0px 2px rgba(0,0,0,0.5))'
+                      }}>{ assets[arn].icon() }</motion.div>)) }
+              </VStack> }
           </Box>
           </motion.div>
         </motion.div> }
-    </motion.div>
+    </LayoutGroup>
   )
 }
 
