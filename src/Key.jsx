@@ -125,14 +125,14 @@ export function Key() {
 export function BalanceContextInformation({keyInfo, ...rest}) {
   const balanceSheet = useContextBalanceSheet(KEY_CONTEXT, keyInfo.keyId);
 
-  return (<LayoutGroup>
+  return (<>
     <motion.div key='balance-box'>
       <BalanceBox keyInfo={keyInfo}/>
     </motion.div>
     <motion.div key='view-carousel'>
       <ViewCarousel keyInfo={keyInfo} balanceSheet={balanceSheet}/>
     </motion.div>
-  </LayoutGroup>)
+  </>)
 }
 
 export function KeyHeader({keyInfo}) {
@@ -233,7 +233,8 @@ const BalanceBox = ({keyInfo, ...rest}) => {
   const inbox = useKeyInboxAddress(keyInfo.keyId);
   const network = useNetwork();
   const animation = useAnimation();
-  const ref = useRef();
+  const detailDisclosure = useDisclosure();
+  const ref = useRef(null);
   const assets = Networks.getNetwork(network.chain.id).assets;
   const [tokenBalances, setTokenBalances] = useState({});
   const addTokenBalance = function(arn, data) {
@@ -261,32 +262,46 @@ const BalanceBox = ({keyInfo, ...rest}) => {
       const rect = ref.current.getBoundingClientRect();
       return {
         y: -1 * (rect.y) - window.scrollY,
-        marginTop: '3vh',
-        minWidth: isDesktop ? '0' : '92vw',
-        height: '90vh',
         zIndex: 500,
-        overflow: 'scroll',
+        minWidth: isDesktop ? '0' : '92vw',
+        marginTop: '3vh',
+        height: '90vh',
       }
     },
     close: {
-      overflow: 'hidden',
-      position: null,
       y: 0,
       x: 0,
-      marginTop: 0,
-      height: null,
       zIndex: 0,
+      position: null,
+      height: null,
+      marginTop: '0vh',
     },
     final: {
-      width: null
+      width: null,
+    }
+  };
+
+  const toggleDetail = function() {
+    if (!detailDisclosure.isOpen) {
+      detailDisclosure.onOpen();
+      setTimeout(() => {
+        animation.set('click');
+        animation.start('open');
+      }, 1);
+    } else {
+      detailDisclosure.onClose();
+      setTimeout(async () => {
+        await animation.start('close');
+        animation.start('final');
+      }, 25);
     }
   };
 
   return (
-    <motion.div initial={{x: initialX}} animate={{x: 0}} transition={{delay: 0.125}}>
+    <motion.div> 
       <Box m='1em' mt='2em' bg='white' borderRadius='lg' boxShadow='lg' p='0.8em'>
         <VStack>
-          <ContextBalanceUSD contextId={KEY_CONTEXT} identifier={keyInfo.keyId}
+          position: 'fixed',position: 'fixed',position: 'fixed',<ContextBalanceUSD contextId={KEY_CONTEXT} identifier={keyInfo.keyId}
             skeletonProps={{}} 
             textProps={{
               fontSize: '2xl',
@@ -301,11 +316,12 @@ const BalanceBox = ({keyInfo, ...rest}) => {
             token={t.asset.contractAddress}
             callback={(data) => { addTokenBalance(t.arn, data);}}/>)) }
       { Object.keys(tokenBalances).length > 0 && 
-        <motion.div initial={{opacity: 0, x: 500}} animate={{opacity: 1, x: 0}}>
-          <motion.div key='accept-jiggle-box' animate={animation}>
-          <Box m='1em' mt='2em' bg='white' borderRadius='lg' boxShadow='lg' p='0.8em'
+        <motion.div style={{padding: '1em', paddingBottom: 0}}>
+          <motion.div key='accept-jiggle-box' animate={animation} variants={boxVariants}> 
+          <Box ref={ref} bg='white' borderRadius='lg' boxShadow='lg' p='0.8em'
             pos='relative'
             style={{
+              height: '100%',
               overflow: 'hidden'
             }}>
             { Object.keys(tokenBalances).map((arn,x) => (
@@ -322,10 +338,10 @@ const BalanceBox = ({keyInfo, ...rest}) => {
                   }}>{ assets[arn].icon() }</motion.div>)) }
             <HStack>
               <Spacer/>
-              <Button size='sm' zIndex='100'>Review Token Deposits</Button>
+              <Button size='sm' onClick={toggleDetail}>Review Token Deposits</Button>
             </HStack>
           </Box>
-          </motion.div> 
+          </motion.div>
         </motion.div> }
     </motion.div>
   )
