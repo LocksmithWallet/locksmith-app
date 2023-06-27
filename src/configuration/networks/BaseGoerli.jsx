@@ -53,7 +53,7 @@ export const BaseGoerli = (function() {
       list[getAssetResourceName(assets['usdc'].address, 20, 0)] = {
         name: 'USD Coin',
         symbol: 'USDC',
-        decimals: 6,
+        decimals: 18,
         contractAddress: assets['usdc'].address,
         standard: 20,
         id: 0,

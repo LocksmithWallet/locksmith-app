@@ -265,7 +265,7 @@ const BalanceBox = ({keyInfo, ...rest}) => {
         zIndex: 500,
         minWidth: isDesktop ? '0' : '92vw',
         marginTop: '3vh',
-        height: '90vh',
+        height: '95vh',
       }
     },
     close: {
@@ -340,14 +340,21 @@ const BalanceBox = ({keyInfo, ...rest}) => {
                     zIndex: (Object.keys(tokenBalances).length - x),
                     transition: {duration: 0.3}
                   }}>{ assets[arn].icon() }</motion.div>)) }
-            { detailDisclosure.isOpen && <Text as={motion.div} 
-                initial={{x: '100vw'}} animate={{x: 0}}
-                fontWeight='bold' size='lg'>Accept Token Deposits</Text> }
+            { detailDisclosure.isOpen && <HStack as={motion.div} 
+              initial={{x: '100vw'}} animate={{x: 0}}>
+                <Text fontWeight='bold' size='lg'>Accept Token Deposits</Text> 
+                <Spacer/>
+                <IconButton width='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
+                  onClick={toggleDetail}/>
+              </HStack>
+            }
+            { !detailDisclosure.isOpen && <HStack as={motion.div}
+              initial={{x: '100vw'}} animate={{x: 0}}>
+                <Spacer/>
+                <Button zIndex={9} size='sm' onClick={toggleDetail}>Review Token Deposits</Button>
+              </HStack>
+            }
             </AnimatePresence>
-            <HStack>
-              <Spacer/>
-              <Button zIndex={9} size='sm' onClick={toggleDetail}>Review Token Deposits</Button>
-            </HStack>
             { detailDisclosure.isOpen &&
               <VStack align='stretch' as={motion.div}>
               </VStack> }
