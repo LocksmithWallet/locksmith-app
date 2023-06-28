@@ -237,14 +237,16 @@ const BalanceBox = ({keyInfo, ...rest}) => {
   const ref = useRef(null);
   const assets = Networks.getNetwork(network.chain.id).assets;
   const [tokenBalances, setTokenBalances] = useState({});
-  const addTokenBalance = function(arn, data) {
+  const addTokenBalance = (arn, data) => {
     // don't add it if its zero
     if (data.value.eq(0)) { return; }
 
-    var balances = { ...tokenBalances};
-    balances[arn] = data;
-    setTokenBalances(balances);
-  }
+    setTokenBalances((prev) => {
+      var balances = {... prev};
+      balances[arn] = data;
+      return balances;
+    });
+  };
   
   const boxVariants = {
     start: {
@@ -312,9 +314,10 @@ const BalanceBox = ({keyInfo, ...rest}) => {
       { inbox.isSuccess && supportedTokens.map((t) => (
           <TokenBalanceCollector
             key={'tbc-'+t.arn}
+            arn={t.arn}
             inbox={inbox.data}
             token={t.asset.contractAddress}
-            callback={(data) => { addTokenBalance(t.arn, data);}}/>)) }
+            callback={addTokenBalance}/>)) }
       { Object.keys(tokenBalances).length > 0 && 
         <motion.div style={{padding: '1em', paddingBottom: 0}}>
           <motion.div key='accept-jiggle-box' animate={animation} variants={boxVariants}> 
@@ -357,6 +360,21 @@ const BalanceBox = ({keyInfo, ...rest}) => {
             </AnimatePresence>
             { detailDisclosure.isOpen &&
               <VStack align='stretch' as={motion.div}>
+                <List spacing='1em' mt='2em'>
+                <AnimatePresence>
+                { Object.keys(tokenBalances).map((arn) => <ListItem as={motion.div} 
+                    key={'limfatr-'+arn}
+                    initial={{x: '100vw'}}
+                    animate={{x: 0}} 
+                    exit={{x: '100vw'}}>
+                    <AcceptTokenReview
+                      arn={arn}
+                      balance={tokenBalances[arn]}
+                      key={'atr-'+arn}/>
+                  </ListItem>
+                )}
+                </AnimatePresence>
+                </List>
               </VStack> }
           </Box>
           </motion.div>
@@ -365,7 +383,11 @@ const BalanceBox = ({keyInfo, ...rest}) => {
   )
 }
 
-const TokenBalanceCollector = ({inbox, token, callback, ...rest}) => {
+const AcceptTokenReview = ({arn, balance, ...rest}) => {
+  return <Text>{balance.toString()}</Text>
+}
+
+const TokenBalanceCollector = ({arn, inbox, token, callback, ...rest}) => {
   const balance = useBalance({
     address: inbox, 
     token: token // this won't work for NFTs.
@@ -373,7 +395,7 @@ const TokenBalanceCollector = ({inbox, token, callback, ...rest}) => {
 
   useEffect(() => {
     if (balance.data) {
-      callback(balance.data);
+      callback(arn, balance.data);
     }
   }, [balance.data]);
 }
