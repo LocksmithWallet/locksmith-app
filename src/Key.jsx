@@ -247,7 +247,7 @@ const BalanceBox = ({keyInfo, ...rest}) => {
       return balances;
     });
   };
-  
+ 
   const boxVariants = {
     start: {
     },
@@ -271,15 +271,15 @@ const BalanceBox = ({keyInfo, ...rest}) => {
       }
     },
     close: {
-      y: 0,
       x: 0,
+      y: 0,
       zIndex: 0,
       position: null,
       height: null,
       marginTop: '0vh',
     },
     final: {
-      width: null,
+      width: null, 
     }
   };
 
@@ -294,11 +294,21 @@ const BalanceBox = ({keyInfo, ...rest}) => {
       detailDisclosure.onClose();
       setTimeout(async () => {
         await animation.start('close');
-        animation.start('final');
+        animation.set('final');
       }, 25);
     }
   };
 
+  const swipeProps = useBreakpointValue({base: {
+    drag: 'y',
+    onDragEnd: function(event, info) {
+      console.log("hi");
+      if (Math.abs(info.offset.y) >= 10 ) {
+        toggleDetail();
+      }
+    }
+  }, md: {}});
+  
   return (
     <LayoutGroup> 
       <Box m='1em' mt='2em' bg='white' borderRadius='lg' boxShadow='lg' p='0.8em'>
@@ -320,7 +330,8 @@ const BalanceBox = ({keyInfo, ...rest}) => {
             callback={addTokenBalance}/>)) }
       { Object.keys(tokenBalances).length > 0 && 
         <motion.div style={{padding: '1em', paddingBottom: 0}}>
-          <motion.div key='accept-jiggle-box' animate={animation} variants={boxVariants}> 
+          <motion.div key='accept-jiggle-box' animate={animation} variants={boxVariants}
+            {... (detailDisclosure.isOpen ? swipeProps : {})}> 
           <Box ref={ref} bg='white' borderRadius='lg' boxShadow='lg' p='0.8em'
             pos='relative'
             style={{
@@ -347,8 +358,8 @@ const BalanceBox = ({keyInfo, ...rest}) => {
               initial={{x: '100vw'}} animate={{x: 0}}>
                 <Text fontWeight='bold' fontSize='lg'>Accept Token Deposits</Text> 
                 <Spacer/>
-                <IconButton width='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
-                  onClick={toggleDetail}/>
+                { isDesktop && <IconButton width='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
+                  onClick={toggleDetail}/> }
               </HStack>
             }
             { !detailDisclosure.isOpen && <HStack as={motion.div}
@@ -378,9 +389,14 @@ const BalanceBox = ({keyInfo, ...rest}) => {
                 )}
                 </AnimatePresence>
                 </List>
-                <Box p='0em 1em'>
+                <AnimatePresence>
+                <Box p='0em 1em' key='accept-tokens-button-final' as={motion.div} 
+                  initial={{y: '50vh', opacity: 0}}
+                  animate={{y: 0, opacity: 1}}
+                  exit={{y: '50vh', opacity: 0}}>
                   <Button colorScheme='blue' size='lg' width='100%'>Accept Tokens</Button>
                 </Box>
+                </AnimatePresence>
               </VStack> }
           </Box>
           </motion.div>
