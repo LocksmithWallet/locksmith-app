@@ -345,7 +345,7 @@ const BalanceBox = ({keyInfo, ...rest}) => {
                   }}>{ assets[arn].icon() }</motion.div>)) }
             { detailDisclosure.isOpen && <HStack as={motion.div} 
               initial={{x: '100vw'}} animate={{x: 0}}>
-                <Text fontWeight='bold' size='lg'>Accept Token Deposits</Text> 
+                <Text fontWeight='bold' fontSize='lg'>Accept Token Deposits</Text> 
                 <Spacer/>
                 <IconButton width='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
                   onClick={toggleDetail}/>
@@ -360,21 +360,27 @@ const BalanceBox = ({keyInfo, ...rest}) => {
             </AnimatePresence>
             { detailDisclosure.isOpen &&
               <VStack align='stretch' as={motion.div}>
-                <List spacing='1em' mt='2em'>
+                <List spacing='0' mt='2em' padding='1em'>
                 <AnimatePresence>
-                { Object.keys(tokenBalances).map((arn) => <ListItem as={motion.div} 
+                { Object.keys(tokenBalances).map((arn,x) => <ListItem as={motion.div} 
+                    borderBottom={x === Object.keys(tokenBalances).length - 1 ? '0px' : '1px'}
+                    borderColor='gray.200'
                     key={'limfatr-'+arn}
-                    initial={{x: '100vw'}}
-                    animate={{x: 0}} 
-                    exit={{x: '100vw'}}>
+                    initial={{x: '-20vw'}}
+                    animate={{x: 0, transition: {duration: 0.3}}} 
+                    exit={{x: '-20vw', transition: {duration: 0.3}}}>
                     <AcceptTokenReview
                       arn={arn}
+                      asset={assets[arn]}
                       balance={tokenBalances[arn]}
                       key={'atr-'+arn}/>
                   </ListItem>
                 )}
                 </AnimatePresence>
                 </List>
+                <Box p='0em 1em'>
+                  <Button colorScheme='blue' size='lg' width='100%'>Accept Tokens</Button>
+                </Box>
               </VStack> }
           </Box>
           </motion.div>
@@ -383,8 +389,25 @@ const BalanceBox = ({keyInfo, ...rest}) => {
   )
 }
 
-const AcceptTokenReview = ({arn, balance, ...rest}) => {
-  return <Text>{balance.toString()}</Text>
+const AcceptTokenReview = ({arn, asset, balance, ...rest}) => {
+  const assetPrice = useCoinCapPrice(asset.coinCapId);
+  const assetValue = assetPrice.isSuccess ? USDFormatter.format(assetPrice.data * balance.formatted) : null;
+  
+  return <HStack padding='1em 0em'> 
+    {asset.icon()}
+    <Text fontWeight='bold' fontSize='md'>{asset.name}</Text>
+    <Spacer/>
+    <VStack align='stretch'>
+      <HStack>
+        <Spacer/>
+        <Text fontSize='sm'>{balance.formatted} {balance.symbol}</Text>
+      </HStack>
+      <HStack>
+        <Spacer/>
+        { assetValue && <Text as={motion.div} fontSize='sm' color='gray' fontStyle='italic'>worth {assetValue}</Text> }
+      </HStack>
+    </VStack>
+  </HStack>
 }
 
 const TokenBalanceCollector = ({arn, inbox, token, callback, ...rest}) => {
