@@ -38,7 +38,7 @@ export const LocksmithInterface = (function() {
     //////////////////////////
     // getAbi 
     // 
-    // Returns the contract interface for a given name, 
+    // Returns the contract interface for a given name
     //////////////////////////
     getAbi: function(contract) {
       return interfaces[contract]; 

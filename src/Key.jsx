@@ -59,6 +59,7 @@ import { useKeyInboxAddress } from './hooks/contracts/PostOffice';
 import {
   useSend,
   useSendToken,
+  useAcceptTokenBatch,
 } from './hooks/contracts/VirtualKeyAddress';
 import { 
   KEY_CONTEXT,
@@ -227,28 +228,52 @@ export function KeyHeader({keyInfo}) {
 }
 
 const BalanceBox = ({keyInfo, ...rest}) => {
+  const transactions = useContext(TransactionListContext);
   const isDesktop = useBreakpointValue({base: false, md: true});
   const initialX = useBreakpointValue({base: '140vw', md: '100vw'});
   const supportedTokens = useSupportedTokens();
   const inbox = useKeyInboxAddress(keyInfo.keyId);
   const network = useNetwork();
+  const tokenVaultAddress = Networks.getContractAddress(network.chain.id, 'TokenVault');
   const animation = useAnimation();
   const detailDisclosure = useDisclosure();
   const ref = useRef(null);
   const assets = Networks.getNetwork(network.chain.id).assets;
   const [tokenBalances, setTokenBalances] = useState({});
-  const addTokenBalance = (arn, data) => {
+  const addTokenBalance = (arn, token, data) => {
     // don't add it if its zero
     if (data.value.eq(0)) { return; }
 
     setTokenBalances((prev) => {
       var balances = {... prev};
-      balances[arn] = data;
+      balances[arn] = {
+        data: data,
+        token: token
+      };
       return balances;
     });
   };
- 
+
+  const acceptTokens = useAcceptTokenBatch(inbox.data,
+    Object.values(tokenBalances).map((t) => t.token), 
+    tokenVaultAddress,
+    (error) => {
+      console.log('error');
+      console.log(error);
+    }, (data) => {
+      transactions.addTransaction({
+        type: 'ACCEPT_TOKEN',
+        title: 'Accept Tokens',
+        subtitle: 'Deposit ' + Object.keys(tokenBalances).length + " token types", 
+        data: data
+      });
+      toggleDetail(true);
+    }); 
+
   const boxVariants = {
+    bye: {
+      x: '150vh'
+    },
     start: {
     },
     click: function() {
@@ -283,7 +308,7 @@ const BalanceBox = ({keyInfo, ...rest}) => {
     }
   };
 
-  const toggleDetail = function() {
+  const toggleDetail = function(destroy=false) {
     if (!detailDisclosure.isOpen) {
       detailDisclosure.onOpen();
       setTimeout(() => {
@@ -295,6 +320,13 @@ const BalanceBox = ({keyInfo, ...rest}) => {
       setTimeout(async () => {
         await animation.start('close');
         animation.set('final');
+
+        if(destroy) {
+          setTimeout(async() => {
+            await animation.start('bye');
+            setTokenBalances({});
+          }, 5);
+        }
       }, 25);
     }
   };
@@ -302,7 +334,6 @@ const BalanceBox = ({keyInfo, ...rest}) => {
   const swipeProps = useBreakpointValue({base: {
     drag: 'y',
     onDragEnd: function(event, info) {
-      console.log("hi");
       if (Math.abs(info.offset.y) >= 10 ) {
         toggleDetail();
       }
@@ -370,8 +401,8 @@ const BalanceBox = ({keyInfo, ...rest}) => {
             }
             </AnimatePresence>
             { detailDisclosure.isOpen &&
-              <VStack align='stretch' as={motion.div}>
-                <List spacing='0' mt='2em' padding='1em'>
+              <VStack width='100%' as={motion.div}>
+                <List spacing='0' mt='2em' padding='1em' width='20em'>
                 <AnimatePresence>
                 { Object.keys(tokenBalances).map((arn,x) => <ListItem as={motion.div} 
                     borderBottom={x === Object.keys(tokenBalances).length - 1 ? '0px' : '1px'}
@@ -383,18 +414,22 @@ const BalanceBox = ({keyInfo, ...rest}) => {
                     <AcceptTokenReview
                       arn={arn}
                       asset={assets[arn]}
-                      balance={tokenBalances[arn]}
+                      balance={tokenBalances[arn].data}
                       key={'atr-'+arn}/>
                   </ListItem>
                 )}
                 </AnimatePresence>
                 </List>
                 <AnimatePresence>
-                <Box p='0em 1em' key='accept-tokens-button-final' as={motion.div} 
+                <Box p='0em 1em' width='20em' key='accept-tokens-button-final' as={motion.div} 
                   initial={{y: '50vh', opacity: 0}}
                   animate={{y: 0, opacity: 1}}
                   exit={{y: '50vh', opacity: 0}}>
-                  <Button colorScheme='blue' size='lg' width='100%'>Accept Tokens</Button>
+                  <Button 
+                    isDisabled={!acceptTokens.write}
+                    isLoading={acceptTokens.isLoading}
+                    onClick={() => { acceptTokens.write?.(); }} 
+                    colorScheme='blue' size='lg' width='100%'>Accept Tokens</Button>
                 </Box>
                 </AnimatePresence>
               </VStack> }
@@ -429,12 +464,13 @@ const AcceptTokenReview = ({arn, asset, balance, ...rest}) => {
 const TokenBalanceCollector = ({arn, inbox, token, callback, ...rest}) => {
   const balance = useBalance({
     address: inbox, 
-    token: token // this won't work for NFTs.
+    token: token, // this won't work for NFTs.
+    watch: true,
   });
 
   useEffect(() => {
     if (balance.data) {
-      callback(arn, balance.data);
+      callback(arn, token, balance.data);
     }
   }, [balance.data]);
 }
@@ -876,7 +912,7 @@ export const DepositGasButton = ({keyInfo, asset, amount, toggleDetail, ...rest}
       console.log(error);
     }, (data) => {
       transactions.addTransaction({
-        type: 'DEPSOT_ASSET',
+        type: 'DEPOSIT_ASSET',
         title: 'Deposit ' + asset.name,
         subtitle: amount + " " + asset.symbol, 
         data: data

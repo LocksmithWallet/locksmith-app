@@ -1,9 +1,11 @@
 import {
+  useLocksmithContract,
   useLocksmithWrite
 }from '../Utils';
 import {
   useNetwork,
 } from 'wagmi';
+import { LocksmithInterface } from '../../configuration/LocksmithInterface';
 import { Networks } from '../../configuration/Networks';
 import {ethers} from 'ethers';
 
@@ -31,4 +33,24 @@ export function useSendToken(inboxAddress, provider, token, amount, destination,
       [provider, token, amount, destination],
       inboxAddress && (provider !== null) && amount && token && amount.gt(0) && (destination !== null),
       errorFunc, successFunc, inboxAddress);
+}
+
+/**
+ * useAcceptTokenBatch
+ *
+ * Accepts tokens sitting in a virtual inbox and puts them into the
+ * designated collateral provider.
+ */
+export function useAcceptTokenBatch(inboxAddress, tokens, provider, errorFunc, successFunc) {
+  const inbox = useLocksmithContract('VirtualKeyAddress', inboxAddress);
+  return useLocksmithWrite('VirtualKeyAddress', 'multicall',
+    [[], tokens.map((t) => {
+      return {
+        target: inboxAddress,
+        callData: inbox.interface.encodeFunctionData("acceptToken", [t, provider]),
+        msgValue: 0
+      };
+    })],
+    tokens.length > 0 && inboxAddress,
+    errorFunc, successFunc, inboxAddress);
 }
