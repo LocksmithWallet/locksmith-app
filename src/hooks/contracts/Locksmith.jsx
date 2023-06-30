@@ -88,3 +88,12 @@ export function useTrustInfo(trustId) {
 export function useTrustKeys(trustId) {
   return useLocksmithRead('Locksmith', 'getKeys', [trustId], trustId != null);
 }
+
+/**
+ * useKeyHolders
+ *
+ * Hook into the addresses holding the given key.
+ */
+export function useKeyHolders(keyId) {
+  return useLocksmithRead('KeyVault', 'getHolders', [keyId], keyId != null);
+}

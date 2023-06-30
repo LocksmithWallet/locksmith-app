@@ -29,17 +29,21 @@ import {
 import { Networks } from './configuration/Networks';
 import { LocksmithInterface } from './configuration/LocksmithInterface';
 
-import { 
+import {
+  useKeyHolders,
   useTrustInfo,
   useTrustKeys,
+  useInspectKey,
 } from './hooks/contracts/Locksmith';
 import {
   TRUST_CONTEXT,
+  KEY_CONTEXT,
 } from './hooks/contracts/Ledger';
 
 import { ContextBalanceUSD } from './components/Ledger';
+import { KeyIcon } from './components/Key';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AiOutlineNumber } from 'react-icons/ai';
 
 export function Trust() {
@@ -52,10 +56,10 @@ export function Trust() {
       <TrustHeader trustId={trustId} trustInfo={trustInfo}/>
       <TrustBalanceBox trustId={trustId}/>
       { trustInfo && trustKeys.isSuccess &&
-          <TrustKeyList
-            trustId={trustId}
-            trustInfo={trustInfo}
-            trustKeys={trustKeys.data}/> }
+        <TrustKeyList
+          trustId={trustId}
+          trustInfo={trustInfo}
+          trustKeys={trustKeys.data}/> }
     </Box>
   </motion.div>) 
 }
@@ -94,13 +98,43 @@ const TrustHeader = ({trustId, trustInfo, ...rest}) => {
 }
 
 const TrustKeyList = ({trustId, trustInfo, trustKeys, ...rest}) => {
-  return (<List spacing='1em'>
-    { trustKeys.map((k) => <ListItem key={'tkli-'+k.toString()}>
-      <TrustKeyListItem keyId={k}/>
-    </ListItem>) }
+  return (<List spacing='1.8em' m='1em' mt='2em'>
+    <AnimatePresence>
+      { trustKeys.map((k,x) => <ListItem key={'tkli-'+k.toString()} as={motion.div}
+        initial={{x: '100vh'}}
+        animate={{x: 0, transition: {delay: 0.125 + 0.05*x}}}
+        exit={{x: '100vh'}}>
+          <TrustKeyListItem keyId={k}/>
+      </ListItem>) }
+    </AnimatePresence>
   </List>)
 }
 
 const TrustKeyListItem = ({keyId, ...rest}) => {
-  
+  const keyInfo = useInspectKey(keyId);
+
+  return (<Box bg='white' borderRadius='lg' boxShadow='lg' p='0.8em' overflow='hidden' pos='relative'>
+    {keyInfo &&
+      <motion.div key={'kmo'+keyId} initial={{x: '100vw'}} animate={{x: 0}} transition={{duration: 0.2, delay: 0.3}}> 
+        <KeyIcon keyInfo={keyInfo} size='80px' 
+          style={{
+            filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5))',
+            opacity: 0.5,
+            position: 'absolute',
+            left: '-16px',
+            top: '-20px'
+          }
+        }/>
+        <Text pos='absolute' left='14px' top='2px' fontSize='xs'>#{keyId.toString()}</Text>
+      </motion.div> }
+    <HStack pl='4em'>
+      <Text fontWeight='bold'>{keyInfo && keyInfo.alias}</Text>
+      <Spacer/>
+      <ContextBalanceUSD contextId={KEY_CONTEXT} identifier={keyId}
+        skeletonProps={{}}
+        textProps={{
+          fontSize: 'md',
+        }}/>
+    </HStack>
+  </Box>)
 }
