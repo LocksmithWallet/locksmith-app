@@ -77,3 +77,14 @@ export function useTrustInfo(trustId) {
 
   return trustData;
 }
+
+/**
+ * useTrustKeys
+ *
+ * Returns an array of Key IDs for a given
+ * trust Id. Returns null if the trust ID is null.
+ * This is useful when chaining hooks.
+ */
+export function useTrustKeys(trustId) {
+  return useLocksmithRead('Locksmith', 'getKeys', [trustId], trustId != null);
+}
