@@ -3,7 +3,8 @@
 //////////////////////////////////////
 import { React, useState, useEffect } from 'react';
 import {
-  useParams
+  useParams,
+  useNavigate,
 } from 'react-router-dom';
 import {
   Box,
@@ -39,6 +40,7 @@ import { AttentionSeeker } from 'react-awesome-reveal';
 
 export function RevealTrust() {
   // state
+  const navigate = useNavigate();
   const provider = useProvider();
   const trustCreatorAddress = Networks.getContractAddress(useNetwork().chain.id, 'TrustCreator');
   const { txn } = useParams();
@@ -108,6 +110,7 @@ export function RevealTrust() {
             <motion.div 
               whileHover={ trust && key && {scale: 1.1}}
               whileTap={ trust && key && {scale: 0.95}}
+              onClick={() => { navigate('/key/' + key.keyId.toString()); }}
               style={{cursor: 'pointer', y: -30}} 
               initial={{scale: 0, opacity: 0}}
               animate={{
