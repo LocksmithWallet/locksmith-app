@@ -254,7 +254,7 @@ const BalanceBox = ({keyInfo, ...rest}) => {
     });
   };
 
-  const acceptTokens = useAcceptTokenBatch(inbox.data,
+  const acceptTokens = useAcceptTokenBatch(inbox.data || ethers.constants.AddressZero,
     Object.values(tokenBalances).map((t) => t.token), 
     tokenVaultAddress,
     (error) => {
