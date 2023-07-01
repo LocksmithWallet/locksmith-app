@@ -15,6 +15,7 @@ import {
   Button,
   Heading,
   HStack,
+  IconButton,
   Image,
   Input,
   List,
@@ -56,6 +57,7 @@ import {
   useAnimation,
 } from 'framer-motion';
 import { AiOutlineNumber } from 'react-icons/ai';
+import { IoMdArrowRoundBack } from 'react-icons/io';
 
 export function Trust() {
   const { trustId } = useParams();
@@ -215,6 +217,10 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
             fontSize: 'md',
           }}/>
       </HStack>
+      { detailDisclosure.isOpen && isDesktop && <motion.div key='asset-detail-back'>
+          <IconButton pos='absolute' top='1em' right='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
+            onClick={toggleDetail}/>
+          </motion.div> }
     </Box>
   </motion.div>)
 }
