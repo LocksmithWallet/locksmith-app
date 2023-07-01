@@ -125,7 +125,9 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
             top: '-20px'
           }
         }/>
-        <Text pos='absolute' left='14px' top='2px' fontSize='xs'>#{keyId.toString()}</Text>
+        <VStack pos='absolute' width='3em' top='2px'>
+          <Text fontSize='xs'>#{keyId.toString()}</Text>
+        </VStack>
       </motion.div> }
     <HStack pl='4em'>
       <Text fontWeight='bold'>{keyInfo && keyInfo.alias}</Text>
