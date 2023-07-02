@@ -181,6 +181,28 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
     }
   };
 
+  const balanceVariants = {
+    open: function() {
+      const rect = ref.current.getBoundingClientRect();
+      return {
+        y: 100,
+        x: -1 * (rect.width / 2) + 12,
+        translateX: '50%',
+        scale: 2,
+        fontWeight: 'bold',
+        transition: {duration: 0.25}
+      };
+    },
+    close: {
+      y: 0,
+      x: 0,
+      translateX: '0%',
+      scale: 1,
+      fontWeight: null,
+      transition: {duration: 0.25}
+    }
+  };
+
   const swipeProps = useBreakpointValue({base: {
     drag: 'y',
     onDragEnd: function(event, info) {
@@ -211,11 +233,11 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
       <HStack pl='4em'>
         <Text fontWeight='bold'>{keyInfo && keyInfo.alias}</Text>
         <Spacer/>
-        <ContextBalanceUSD contextId={KEY_CONTEXT} identifier={keyId}
-          skeletonProps={{}}
-          textProps={{
-            fontSize: 'md',
-          }}/>
+        <AnimatePresence>
+          <motion.div animate={animation} variants={balanceVariants}>
+            <ContextBalanceUSD contextId={KEY_CONTEXT} identifier={keyId}/>
+          </motion.div>
+        </AnimatePresence>
       </HStack>
       { detailDisclosure.isOpen && isDesktop && <motion.div key='asset-detail-back'>
           <IconButton pos='absolute' top='1em' right='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
