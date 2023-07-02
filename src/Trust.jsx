@@ -226,7 +226,7 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
 
   return (<motion.div key={'jiggle-box-'+keyId} animate={animation} variants={boxVariants}
     {... (detailDisclosure.isOpen ? swipeProps : {})}>
-    <Box ref={ref} bg='white' borderRadius='lg' boxShadow='lg' p='0.8em' overflow='hidden' 
+    <Box ref={ref} bg='white' borderRadius='lg' boxShadow='lg' overflow='hidden' 
       style={{height: '100%', zIndex: 0, cursor: detailDisclosure.isOpen ? null : 'pointer'}} pos='relative'
       onClick={() => { if(!detailDisclosure.isOpen) { toggleDetail(); } }}>
       {keyInfo && <motion.div key={'kmo'+keyId} initial={{x: '100vw'}} animate={{x: 0}} transition={{duration: 0.2, delay: 0.3}}> 
@@ -234,15 +234,15 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
           style={{
             opacity: 0.5,
             position: 'absolute',
-            left: '-16px',
-            top: '-20px'
+            left: '-10px',
+            top: '-7px'
           }
         }/>
-        <VStack pos='absolute' width='3em' top='4px'>
+        <VStack pos='absolute' width='3.6em' top='0.85em'>
           <Text fontSize='xs'>#{keyId.toString()}</Text>
         </VStack>
       </motion.div> }
-      <HStack pl='4em'>
+      <HStack p='0.8em' pl='4em'>
         <Text fontWeight='bold'>{keyInfo && keyInfo.alias}</Text>
         <Spacer/>
         <AnimatePresence>
