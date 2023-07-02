@@ -53,7 +53,14 @@ import {
   TRUST_CONTEXT,
   KEY_CONTEXT,
 } from './hooks/contracts/Ledger';
+import {
+  useKeyInboxAddress
+} from './hooks/contracts/PostOffice';
 
+import {
+  DisplayAddress,
+} from './components/Address';
+import { AddressExplorerButton, CopyButton } from './components/Key';
 import { ContextBalanceUSD } from './components/Ledger';
 import { KeyIcon } from './components/Key';
 
@@ -131,6 +138,7 @@ const TrustKeyList = ({trustId, trustInfo, trustKeys, ...rest}) => {
 
 const TrustKeyListItem = ({keyId, ...rest}) => {
   const keyInfo = useInspectKey(keyId);
+  const keyInboxAddress = useKeyInboxAddress(keyId);
   const isDesktop = useBreakpointValue({base: false, md: true});
   const animation = useAnimation();
   const detailDisclosure = useDisclosure();
@@ -232,18 +240,29 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
       {keyInfo && <motion.div key={'kmo'+keyId} initial={{x: '100vw'}} animate={{x: 0}} transition={{duration: 0.2, delay: 0.3}}> 
         <KeyIcon keyInfo={keyInfo} size='80px' 
           style={{
-            opacity: 0.5,
+            opacity: detailDisclosure.isOpen ? 1 : 0.5,
             position: 'absolute',
             left: '-10px',
-            top: '-7px'
+            top: detailDisclosure.isOpen ? '3px' : '-7px'
           }
         }/>
-        <VStack pos='absolute' width='3.6em' top='0.85em'>
+        <VStack pos='absolute' width='3.6em' top={detailDisclosure.isOpen ? '1.6em' : '0.9em'}>
           <Text fontSize='xs'>#{keyId.toString()}</Text>
         </VStack>
       </motion.div> }
-      <HStack p='0.8em' pl='4em'>
-        <Text fontWeight='bold'>{keyInfo && keyInfo.alias}</Text>
+      <HStack p='0.8em' ml='3.5em'>
+        <VStack align='stretch' spacing='0em'>
+          <HStack spacing='1em'>
+            <Text fontWeight='bold' {... detailDisclosure.isOpen ? {fontSize: '22px'} : {}}>{keyInfo && keyInfo.alias}</Text>
+            { detailDisclosure.isOpen && <AddressExplorerButton address={keyInboxAddress.data}/> }
+          </HStack>
+          { keyInboxAddress.data && detailDisclosure.isOpen && (
+            <HStack>
+              <Text><DisplayAddress address={keyInboxAddress.data}/></Text>
+              <CopyButton content={keyInboxAddress.data}/>
+            </HStack>)
+          }
+        </VStack>
         <Spacer/>
         <AnimatePresence>
           <motion.div animate={animation} variants={balanceVariants}>

@@ -28,7 +28,7 @@ export const KeyTrustName = ({keyInfo, ...rest}) => {
   return trustInfo && <Text {... rest}>{trustInfo.name}</Text>
 }
 
-export const AddressExplorerButton = ({address, ...rest}) => {
+export const AddressExplorerButton = ({address, size, ...rest}) => {
   const network = useNetwork();
   const url = Networks.getNetwork(network.chain.id).getAddressExplorerUrl(address);
   return ( address &&
@@ -39,7 +39,7 @@ export const AddressExplorerButton = ({address, ...rest}) => {
       whileTap={{scale: 0.9}} 
       href={url}
       target='_blank'>
-      <FiExternalLink size='24px'/>
+      <FiExternalLink size={size || '24px'}/>
     </motion.a>
   )
 }
