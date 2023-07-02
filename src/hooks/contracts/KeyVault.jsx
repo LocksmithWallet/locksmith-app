@@ -17,3 +17,12 @@ export function useWalletKeys(address) {
   const wallet     = address || account.address;
   return useLocksmithRead('KeyVault', 'getKeys', [wallet], wallet != null, true); 
 }
+
+/**
+ * useKeyHolders
+ *
+ * Hook into the addresses holding the given key.
+ */
+export function useKeyHolders(keyId) {
+  return useLocksmithRead('KeyVault', 'getHolders', [keyId], keyId != null);
+}

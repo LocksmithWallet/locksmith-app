@@ -11,6 +11,17 @@ export const TRUST_CONTEXT  = 1;
 export const KEY_CONTEXT    = 2;
 
 /**
+ * useContextArnRegistry
+ *
+ * Calls the Ledger, and gets a list of ARNs for a given
+ * context.
+ */
+export function useContextArnRegistry(context, context_id, collateralProvider = ethers.constants.AddressZero) {
+  return useLocksmithRead('Ledger', 'getContextArnRegistry', [context, context_id, collateralProvider], 
+    context_id, true);
+}
+
+/**
  * useContextBalanceSheet
  *
  * Calls the Ledger, and for a given context returns

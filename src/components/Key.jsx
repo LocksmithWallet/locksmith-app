@@ -44,7 +44,7 @@ export const AddressExplorerButton = ({address, size, ...rest}) => {
   )
 }
 
-export const CopyButton = ({content, ...rest}) => {
+export const CopyButton = ({content, size, ...rest}) => {
   const network = useNetwork();
   const toast = useToast();
 
@@ -64,7 +64,7 @@ export const CopyButton = ({content, ...rest}) => {
         })
       }}
       style={{cursor: 'pointer'}}>
-      <FiCopy size='24px'/>
+      <FiCopy size={size || '24px'}/>
     </motion.a>
   )
 }

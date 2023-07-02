@@ -37,6 +37,7 @@ import {
 } from '@chakra-ui/react';
 import { ethers } from 'ethers';
 import {
+  useAccount,
   useProvider,
   useNetwork,
 } from 'wagmi';
@@ -44,7 +45,9 @@ import { Networks } from './configuration/Networks';
 import { LocksmithInterface } from './configuration/LocksmithInterface';
 
 import {
-  useKeyHolders,
+  useKeyHolders
+} from './hooks/contracts/KeyVault';
+import {
   useTrustInfo,
   useTrustKeys,
   useInspectKey,
@@ -52,6 +55,7 @@ import {
 import {
   TRUST_CONTEXT,
   KEY_CONTEXT,
+  useContextArnRegistry,
 } from './hooks/contracts/Ledger';
 import {
   useKeyInboxAddress
@@ -139,10 +143,23 @@ const TrustKeyList = ({trustId, trustInfo, trustKeys, ...rest}) => {
 const TrustKeyListItem = ({keyId, ...rest}) => {
   const keyInfo = useInspectKey(keyId);
   const keyInboxAddress = useKeyInboxAddress(keyId);
+  const keyHolders = useKeyHolders(keyId);
+  const keyArns = useContextArnRegistry(KEY_CONTEXT, keyId);
+
   const isDesktop = useBreakpointValue({base: false, md: true});
-  const animation = useAnimation();
   const detailDisclosure = useDisclosure();
+  const animation = useAnimation();
   const ref = useRef(null);
+
+  // we want to cross reference the holder list
+  // with the one for the key-inbox address, and
+  // reliably remove it
+  const [filteredHolders, setFilteredHolders] = useState(null);
+  useEffect(() => {
+    if (keyHolders.data && keyInboxAddress.data) {
+      setFilteredHolders(keyHolders.data.filter((h) => h !== keyInboxAddress.data));
+    }
+  }, [keyHolders.data, keyInboxAddress.data]);
 
   const boxVariants = {
     start: {
@@ -277,8 +294,8 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
       { detailDisclosure.isOpen && <motion.div animate={animation} variants={detailVariants}>
         <Tabs align='center' position='relative' variant='enclosed' size='lg'>
           <TabList>
-            <Tab>Holders</Tab>
-            <Tab>Assets</Tab>
+            <Tab>{ filteredHolders && <Tag mr='0.5em'>{filteredHolders.length.toString()}</Tag> }Holders</Tab>
+            <Tab>{ keyArns.data && <Tag mr='0.5em'>{keyArns.data.length.toString()}</Tag> }Assets</Tab>
           </TabList>
           <TabIndicator
             mt="-1.5px"
@@ -287,7 +304,7 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
             borderRadius="1px"/>
             <TabPanels>
               <TabPanel maxWidth='20em'>
-                <Text>Holders</Text>
+                { filteredHolders && <KeyHoldersDetail keyId={keyId} holders={filteredHolders}/> }
               </TabPanel>
               <TabPanel maxWidth='20em'>
                 <Text>Assets</Text>
@@ -297,4 +314,27 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
       </motion.div> }
     </Box>
   </motion.div>)
+}
+
+const KeyHoldersDetail = ({keyId, holders, ...rest}) => {
+  return (<List spacing='1em'>
+    <AnimatePresence>
+      { holders.map((h) => (
+        <motion.div key={'khd-'+keyId+h} initial={{x: '100vw'}} animate={{x: 0}} exit={{x: '100vw'}}>
+          <KeyHolderListItem key={'khli'+keyId+h} keyId={keyId} holder={h}/>
+        </motion.div>)) }
+    </AnimatePresence>
+  </List>)
+}
+
+const KeyHolderListItem = ({keyId, holder, ...rest}) => {
+  const account = useAccount();  
+
+  return (<ListItem>
+    <HStack>
+      <Text fontWeight='bold'><DisplayAddress address={holder}/></Text> 
+      { account.address === holder &&  <Text fontSize='sm' color='gray' fontStyle='italic'>(you)</Text> }
+      <CopyButton content={holder} size={'16px'}/>
+    </HStack>
+  </ListItem>)
 }
