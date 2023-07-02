@@ -26,3 +26,12 @@ export function useWalletKeys(address) {
 export function useKeyHolders(keyId) {
   return useLocksmithRead('KeyVault', 'getHolders', [keyId], keyId != null);
 }
+
+/**
+ * useKeyBalance
+ *
+ * Gets the key balance of an address
+ **/
+export function useKeyBalance(keyId, address) {
+  return useLocksmithRead('KeyVault', 'balanceOf', [address, keyId], keyId != null);
+}

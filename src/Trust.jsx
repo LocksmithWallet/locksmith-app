@@ -47,7 +47,8 @@ import { Networks } from './configuration/Networks';
 import { LocksmithInterface } from './configuration/LocksmithInterface';
 
 import {
-  useKeyHolders
+  useKeyHolders,
+  useKeyBalance,
 } from './hooks/contracts/KeyVault';
 import {
   useTrustInfo,
@@ -76,7 +77,10 @@ import {
   AnimatePresence,
   useAnimation,
 } from 'framer-motion';
-import { AiOutlineNumber } from 'react-icons/ai';
+import { 
+  AiOutlineNumber,
+  AiOutlineFire,
+} from 'react-icons/ai';
 import { IoMdArrowRoundBack } from 'react-icons/io';
 
 export function Trust() {
@@ -330,13 +334,14 @@ const KeyHoldersDetail = ({keyId, holders, ...rest}) => {
 
 const KeyHolderListItem = ({keyId, holder, ...rest}) => {
   const account = useAccount();  
+  const keyCount = useKeyBalance(keyId, holder);
 
   return (<ListItem>
     <HStack>
       <VStack spacing='0em'>
         { account.address === holder && <Spinner
           pos='absolute'
-          top='-4px'
+          top='7px'
           thickness='2px'
           speed='2s'
           color='blue.500'
@@ -344,10 +349,16 @@ const KeyHolderListItem = ({keyId, holder, ...rest}) => {
         /> }
         <AddressAvatar address={holder}/>
       </VStack>
-      <HStack>
-        <Text fontWeight='bold'><DisplayAddress address={holder}/></Text>
-        <CopyButton content={holder} size={'16px'}/>
-      </HStack>
+      <VStack spacing='0' align='stretch'> 
+        <HStack>
+          <Text fontWeight='bold'><DisplayAddress address={holder}/></Text>
+          <CopyButton content={holder} size={'16px'}/>
+        </HStack>
+        { keyCount.data && 
+        <Text align='left' fontSize='sm' color='gray' fontStyle='italic'>Holds <b>{keyCount.data.toString()}</b> {keyCount.data.gt(1) ? "keys" : "key"}</Text> }
+      </VStack>
+      <Spacer/>
+      <IconButton size='sm' icon={<AiOutlineFire size='22px' color='#ff7b47'/>} borderRadius='full' boxShadow='md'/>
     </HStack>
   </ListItem>)
 }
