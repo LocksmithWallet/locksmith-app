@@ -3,10 +3,11 @@ import {
   Text,
   useToast
 } from '@chakra-ui/react';
-import { useAccount, useNetwork } from 'wagmi';
+import { useAccount, useNetwork, useProvider } from 'wagmi';
 import { Networks } from '../configuration/Networks';
 import { motion } from 'framer-motion';
 
+import { Image } from '@davatar/react';
 import { FiExternalLink } from 'react-icons/fi';
 
 export function DisplayAddress({address, ...rest}) {
@@ -53,4 +54,14 @@ export const TransactionExplorerButton = ({hash, ...rest}) => {
       <FiExternalLink size='24px' {... rest}/>
     </motion.a>
   )
+}
+
+export function AddressAvatar({address, size, ...rest}) {
+  const provider = useProvider();
+
+  return <Image
+    size={size||24}
+    address={address}
+    generatedAvatarType='jazzicon'
+  />
 }

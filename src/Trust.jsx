@@ -31,10 +31,12 @@ import {
   TabPanel,
   Text,
   Spacer,
+  Spinner,
   VStack,
   useBreakpointValue,
   useDisclosure,
 } from '@chakra-ui/react';
+
 import { ethers } from 'ethers';
 import {
   useAccount,
@@ -63,6 +65,7 @@ import {
 
 import {
   DisplayAddress,
+  AddressAvatar,
 } from './components/Address';
 import { AddressExplorerButton, CopyButton } from './components/Key';
 import { ContextBalanceUSD } from './components/Ledger';
@@ -220,7 +223,6 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
         x: -1 * (rect.width / 2) + 12,
         translateX: '50%',
         scale: 2,
-        fontWeight: 'bold',
         transition: {duration: 0.25}
       };
     },
@@ -229,7 +231,6 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
       x: 0,
       translateX: '0%',
       scale: 1,
-      fontWeight: null,
       transition: {duration: 0.25}
     }
   };
@@ -303,10 +304,10 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
             bg="white"
             borderRadius="1px"/>
             <TabPanels>
-              <TabPanel maxWidth='20em'>
+              <TabPanel maxWidth='20em' p='0em'>
                 { filteredHolders && <KeyHoldersDetail keyId={keyId} holders={filteredHolders}/> }
               </TabPanel>
-              <TabPanel maxWidth='20em'>
+              <TabPanel maxWidth='20em' p='0em'>
                 <Text>Assets</Text>
               </TabPanel>
             </TabPanels>
@@ -317,7 +318,7 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
 }
 
 const KeyHoldersDetail = ({keyId, holders, ...rest}) => {
-  return (<List spacing='1em'>
+  return (<List spacing='2em' mt='2em'>
     <AnimatePresence>
       { holders.map((h) => (
         <motion.div key={'khd-'+keyId+h} initial={{x: '100vw'}} animate={{x: 0}} exit={{x: '100vw'}}>
@@ -332,9 +333,21 @@ const KeyHolderListItem = ({keyId, holder, ...rest}) => {
 
   return (<ListItem>
     <HStack>
-      <Text fontWeight='bold'><DisplayAddress address={holder}/></Text> 
-      { account.address === holder &&  <Text fontSize='sm' color='gray' fontStyle='italic'>(you)</Text> }
-      <CopyButton content={holder} size={'16px'}/>
+      <VStack spacing='0em'>
+        { account.address === holder && <Spinner
+          pos='absolute'
+          top='-4px'
+          thickness='2px'
+          speed='2s'
+          color='blue.500'
+          size='lg'
+        /> }
+        <AddressAvatar address={holder}/>
+      </VStack>
+      <HStack>
+        <Text fontWeight='bold'><DisplayAddress address={holder}/></Text>
+        <CopyButton content={holder} size={'16px'}/>
+      </HStack>
     </HStack>
   </ListItem>)
 }
