@@ -23,6 +23,12 @@ import {
   Tag,
   TagLabel,
   TagLeftIcon,
+  Tab,
+  Tabs,
+  TabList,
+  TabIndicator,
+  TabPanels,
+  TabPanel,
   Text,
   Spacer,
   VStack,
@@ -203,6 +209,12 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
     }
   };
 
+  const detailVariants = {
+    open: {
+      marginTop: '8em'
+    }
+  };
+
   const swipeProps = useBreakpointValue({base: {
     drag: 'y',
     onDragEnd: function(event, info) {
@@ -215,7 +227,7 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
   return (<motion.div key={'jiggle-box-'+keyId} animate={animation} variants={boxVariants}
     {... (detailDisclosure.isOpen ? swipeProps : {})}>
     <Box ref={ref} bg='white' borderRadius='lg' boxShadow='lg' p='0.8em' overflow='hidden' 
-      style={{height: '100%', zIndex: 0}} pos='relative'
+      style={{height: '100%', zIndex: 0, cursor: detailDisclosure.isOpen ? null : 'pointer'}} pos='relative'
       onClick={() => { if(!detailDisclosure.isOpen) { toggleDetail(); } }}>
       {keyInfo && <motion.div key={'kmo'+keyId} initial={{x: '100vw'}} animate={{x: 0}} transition={{duration: 0.2, delay: 0.3}}> 
         <KeyIcon keyInfo={keyInfo} size='80px' 
@@ -243,6 +255,27 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
           <IconButton pos='absolute' top='1em' right='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
             onClick={toggleDetail}/>
           </motion.div> }
+      { detailDisclosure.isOpen && <motion.div animate={animation} variants={detailVariants}>
+        <Tabs align='center' position='relative' variant='enclosed' size='lg'>
+          <TabList>
+            <Tab>Holders</Tab>
+            <Tab>Assets</Tab>
+          </TabList>
+          <TabIndicator
+            mt="-1.5px"
+            height="5px"
+            bg="white"
+            borderRadius="1px"/>
+            <TabPanels>
+              <TabPanel maxWidth='20em'>
+                <Text>Holders</Text>
+              </TabPanel>
+              <TabPanel maxWidth='20em'>
+                <Text>Assets</Text>
+              </TabPanel>
+            </TabPanels>
+        </Tabs>
+      </motion.div> }
     </Box>
   </motion.div>)
 }
