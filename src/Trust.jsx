@@ -371,8 +371,9 @@ const KeyHolderListItem = ({keyId, holder, ...rest}) => {
 }
 
 const KeyAssetDetail = ({keyId, balanceSheet, ...rest}) => {
-  return (<List mt='2em' spacing='2em'>
-    { balanceSheet[0].map((arn, x) => <ListItem key={'kadli-'+keyId+arn}>
+  return (<List mt='1em' spacing='0em'>
+    { balanceSheet[0].map((arn, x) => <ListItem key={'kadli-'+keyId+arn} pt='1em' pb='1em' 
+      {... x !== balanceSheet[0].length - 1 ? {borderBottom: '1px', borderColor: '#EFEFEF'} : {}}>
         <KeyAssetListItem
           keyId={keyId}
           arn={arn}
