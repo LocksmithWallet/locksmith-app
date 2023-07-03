@@ -341,7 +341,7 @@ const KeyHolderListItem = ({keyId, holder, ...rest}) => {
       <VStack spacing='0em'>
         { account.address === holder && <Spinner
           pos='absolute'
-          top='7px'
+          top='6px'
           thickness='2px'
           speed='2s'
           color='blue.500'
