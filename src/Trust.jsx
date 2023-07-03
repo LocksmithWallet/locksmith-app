@@ -47,6 +47,9 @@ import { Networks } from './configuration/Networks';
 import { LocksmithInterface } from './configuration/LocksmithInterface';
 
 import {
+  useAssetMetadata
+} from './hooks/Utils';
+import {
   useKeyHolders,
   useKeyBalance,
 } from './hooks/contracts/KeyVault';
@@ -58,11 +61,15 @@ import {
 import {
   TRUST_CONTEXT,
   KEY_CONTEXT,
-  useContextArnRegistry,
+  useContextBalanceSheet,
 } from './hooks/contracts/Ledger';
 import {
   useKeyInboxAddress
 } from './hooks/contracts/PostOffice';
+import {
+  USDFormatter,
+  useCoinCapPrice
+} from './hooks/Prices';
 
 import {
   DisplayAddress,
@@ -151,7 +158,7 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
   const keyInfo = useInspectKey(keyId);
   const keyInboxAddress = useKeyInboxAddress(keyId);
   const keyHolders = useKeyHolders(keyId);
-  const keyArns = useContextArnRegistry(KEY_CONTEXT, keyId);
+  const balanceSheet = useContextBalanceSheet(KEY_CONTEXT, keyId);
 
   const isDesktop = useBreakpointValue({base: false, md: true});
   const detailDisclosure = useDisclosure();
@@ -300,7 +307,7 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
         <Tabs align='center' position='relative' variant='enclosed' size='lg'>
           <TabList>
             <Tab>{ filteredHolders && <Tag mr='0.5em'>{filteredHolders.length.toString()}</Tag> }Holders</Tab>
-            <Tab>{ keyArns.data && <Tag mr='0.5em'>{keyArns.data.length.toString()}</Tag> }Assets</Tab>
+            <Tab>{ balanceSheet.data && <Tag mr='0.5em'>{balanceSheet.data[0].length.toString()}</Tag> }Assets</Tab>
           </TabList>
           <TabIndicator
             mt="-1.5px"
@@ -312,7 +319,7 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
                 { filteredHolders && <KeyHoldersDetail keyId={keyId} holders={filteredHolders}/> }
               </TabPanel>
               <TabPanel maxWidth='20em' p='0em'>
-                <Text>Assets</Text>
+                { balanceSheet.data && <KeyAssetDetail keyId={keyId} balanceSheet={balanceSheet.data}/> }
               </TabPanel>
             </TabPanels>
         </Tabs>
@@ -361,4 +368,32 @@ const KeyHolderListItem = ({keyId, holder, ...rest}) => {
       <IconButton size='sm' icon={<AiOutlineFire size='22px' color='#ff7b47'/>} borderRadius='full' boxShadow='md'/>
     </HStack>
   </ListItem>)
+}
+
+const KeyAssetDetail = ({keyId, balanceSheet, ...rest}) => {
+  return (<List mt='2em' spacing='2em'>
+    { balanceSheet[0].map((arn, x) => <ListItem key={'kadli-'+keyId+arn}>
+        <KeyAssetListItem
+          keyId={keyId}
+          arn={arn}
+          balance={balanceSheet[1][x]}/>
+      </ListItem>) }
+  </List>)
+}
+
+const KeyAssetListItem = ({keyId, arn, balance, ...rest}) => {
+  const asset = useAssetMetadata(arn);
+  const assetPrice = useCoinCapPrice(asset.coinCapId);
+  const assetAmountFormatted = ethers.utils.formatUnits(balance, asset.decimals);
+  const amountUSD = !assetPrice.isSuccess ? 0 : assetPrice.data * assetAmountFormatted;
+
+  return (<HStack>
+    {asset.icon()}
+    <Text fontWeight='bold'>{asset.name}</Text>
+    <Spacer/>
+    <VStack align='stretch' spacing='0em'>
+      <HStack><Spacer/><Text>{USDFormatter.format(amountUSD)}</Text></HStack>
+      <HStack><Spacer/><Text align='right' fontSize='sm' color='gray'>{assetAmountFormatted} {asset.symbol}</Text></HStack>
+    </VStack>
+  </HStack>)
 }

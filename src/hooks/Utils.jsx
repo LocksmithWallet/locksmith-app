@@ -85,6 +85,11 @@ export function useLocksmithContract(contract, addressOverride = null) {
   });
 }
 
+export function useAssetMetadata(arn) {
+  const network = useNetwork();
+  return Networks.getAsset(network.chain.id, arn);
+}
+
 export function useDebounce(value, delay) {
   // State and setters for debounced value
   const [debouncedValue, setDebouncedValue] = useState(value);
