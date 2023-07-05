@@ -99,6 +99,7 @@ export function Trust() {
     <Box ml={{base: 0, md: 72}} pos='relative'>
       <TrustHeader trustId={trustId} trustInfo={trustInfo}/>
       <TrustBalanceBox trustId={trustId}/>
+      <CreateKeyButton trustId={trustId} trustInfo={trustInfo}/>
       { trustInfo && trustKeys.isSuccess &&
         <TrustKeyList
           trustId={trustId}
@@ -106,6 +107,12 @@ export function Trust() {
           trustKeys={trustKeys.data}/> }
     </Box>
   </motion.div>) 
+}
+
+const CreateKeyButton = ({trustId, trustInfo, ...rest}) => {
+  return (<Box m='1em' mt='2em' mb='0em'>
+    <Button boxShadow='lg' width='100%' colorScheme='blue'>Create Key</Button>
+  </Box>)
 }
 
 const TrustBalanceBox = ({trustId, ...rest}) => {
@@ -317,6 +324,7 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
             <TabPanels>
               <TabPanel maxWidth='20em' p='0em'>
                 { filteredHolders && <KeyHoldersDetail keyId={keyId} holders={filteredHolders}/> }
+                <Button mt='2em' colorScheme='blue' width='100%'>Add Key Holder</Button>
               </TabPanel>
               <TabPanel maxWidth='20em' p='0em'>
                 { balanceSheet.data && <KeyAssetDetail keyId={keyId} balanceSheet={balanceSheet.data}/> }
