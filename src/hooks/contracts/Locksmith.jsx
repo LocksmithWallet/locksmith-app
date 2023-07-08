@@ -88,3 +88,21 @@ export function useTrustInfo(trustId) {
 export function useTrustKeys(trustId) {
   return useLocksmithRead('Locksmith', 'getKeys', [trustId], trustId != null);
 }
+
+/**
+ * useCopyKey
+ *
+ * Prepares and writes to the Locksmith contract,
+ * calling #copyKey.
+ *
+ * The caller must take the query and eventually call write?() to initate
+ * the wallet interaction.
+ *
+ * This transaction is going to fail if the holder isn't root.
+ */
+export function useCopyKey(rootKeyId, keyId, address, soulbind, errorFunc, successFunc) {
+   return useLocksmithWrite('Locksmith', 'copyKey',
+      [rootKeyId, keyId, address, soulbind],
+      rootKeyId !== null && keyId !== null && address !== null, 
+      errorFunc, successFunc); 
+}

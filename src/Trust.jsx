@@ -89,6 +89,7 @@ import {
   AiOutlineFire,
 } from 'react-icons/ai';
 import { IoMdArrowRoundBack } from 'react-icons/io';
+import { FaAnchor } from 'react-icons/fa';
 
 export function Trust() {
   const { trustId } = useParams();
@@ -323,8 +324,7 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
             borderRadius="1px"/>
             <TabPanels>
               <TabPanel maxWidth='20em' p='0em'>
-                { filteredHolders && <KeyHoldersDetail keyId={keyId} holders={filteredHolders}/> }
-                <Button mt='2em' colorScheme='blue' width='100%'>Add Key Holder</Button>
+                <KeyHoldersDetail keyId={keyId} keyInfo={keyInfo} holders={filteredHolders || []}/>
               </TabPanel>
               <TabPanel maxWidth='20em' p='0em'>
                 { balanceSheet.data && <KeyAssetDetail keyId={keyId} balanceSheet={balanceSheet.data}/> }
@@ -336,15 +336,109 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
   </motion.div>)
 }
 
-const KeyHoldersDetail = ({keyId, holders, ...rest}) => {
-  return (<List spacing='2em' mt='2em'>
-    <AnimatePresence>
-      { holders.map((h) => (
-        <motion.div key={'khd-'+keyId+h} initial={{x: '100vw'}} animate={{x: 0}} exit={{x: '100vw'}}>
-          <KeyHolderListItem key={'khli'+keyId+h} keyId={keyId} holder={h}/>
-        </motion.div>)) }
-    </AnimatePresence>
-  </List>)
+const KeyHoldersDetail = ({keyId, keyInfo, holders, ...rest}) => {
+  const account = useAccount();
+  const [step, setStep] = useState(0);
+  const [previousStep, setPreviousStep] = useState(0);
+
+  const [destination, setDestination] = useState(null);
+  const [anchored, setAnchored] = useState(true);
+  const isValidAddress = ethers.utils.isAddress(destination);
+
+  const processStep = (newStep) => {
+    setPreviousStep(step);
+    setStep(newStep);
+  }
+
+  return (<AnimatePresence mode='wait'>
+    { step === 0 && <motion.div layout key={'khd0-'+keyId} 
+      initial={{x: 800, opacity: 0}}
+      animate={{x: 0, opacity: 1}}
+      exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}> 
+      <List spacing='2em' mt='2em'>
+        <AnimatePresence>
+          { holders.map((h) => (
+            <motion.div key={'khd-'+keyId+h} initial={{x: '100vw'}} animate={{x: 0}} exit={{x: '100vw'}}>
+              <KeyHolderListItem key={'khli'+keyId+h} keyId={keyId} holder={h}/>
+            </motion.div>)) }
+        </AnimatePresence>
+      </List>
+      <Button 
+        mt='2em' colorScheme='blue' width='100%' onClick={() => {processStep(1);}}>Add Key Holder</Button>
+    </motion.div> }
+    { step === 1 && <motion.div layout key={'khd1-'+keyId}
+      initial={{x: 800, opacity: 0}} 
+      animate={{x: 0, opacity:1}}
+      exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}>
+      <Button mt='2em' width='100%' onClick={() => {
+        setDestination(account.address);
+        processStep(3);
+      }}>Send Key to Me</Button>
+      <Button mt='2em' width='100%' onClick={() => {processStep(2);}}>Send Key to Someone Else</Button>
+      <Button mt='2em' colorScheme='blue' width='100%' onClick={() => {processStep(0);}}>Nevermind</Button>
+    </motion.div> }
+    { step === 2 && <motion.div layout key={'khd2-'+keyId} 
+      initial={{x: 800, opacity: 0}}
+      animate={{x: 0, opacity: 1}}
+      exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}>
+        <Input mt='2em' value={destination} size='md' mb='0.5em' placeholder='0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+          onChange={(e) => {setDestination(e.target.value);}}/>
+        { isValidAddress && 
+            <Text fontWeight='bold' textColor='green.600' fontSize='sm'>
+              <DisplayAddress address={destination || ''}/></Text> }
+        { !isValidAddress && <Text textColor='red.600' fontStyle='italic' fontSize='sm'>Enter valid destination address</Text> }
+        <Button mt='2em' width='100%' onClick={() => {processStep(previousStep);}}>Back</Button>
+        <Button mt='2em' isDisabled={!isValidAddress} 
+          colorScheme='blue' width='100%' onClick={() => {processStep(3);}}>Next</Button>
+    </motion.div> }
+    { step === 3 && <motion.div layout key={'khd3-'+keyId} 
+      initial={{x: 800, opacity: 0}}
+      animate={{x: 0, opacity: 1}}
+      exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}>
+      <VStack mt='2em'>
+        <Text>Do you want to <b>anchor</b> this copy?</Text>
+        <FaAnchor style={{filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5))'}} color='#4299E1' size='160px'/>
+        <Text>Anchored keys cannot be transferred unless unanchored by a root key holder.</Text>
+        <HStack pt='1em' width='100%'>
+          <Button width='50%' onClick={() => {setAnchored(false); processStep(4);}}>No</Button>
+          <Button width='50%' onClick={() => {setAnchored(true); processStep(4); }} colorScheme='blue'>Yes</Button>
+        </HStack>
+      </VStack>
+    </motion.div> }
+    { step === 4 && <motion.div layout key={'khd4-'+keyId} 
+      initial={{x: 800, opacity: 0}}
+      animate={{x: 0, opacity: 1}}
+      exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}>
+      <VStack mt='1em' spacing='2em'> 
+        <HStack fontSize='lg'>
+          <Text>Send copy of</Text>
+          <KeyIcon keyInfo={keyInfo} size={32}/>
+          <Text><b>{keyInfo.alias}</b> to:</Text>
+        </HStack>
+        <HStack pos='relative'>
+          <VStack spacing='0em'>
+            { account.address === destination && <Spinner
+              pos='absolute'
+              top='-4px'
+              thickness='2px'
+              speed='2s'
+              color='blue.500'
+              size='lg'
+            /> }
+            <AddressAvatar address={destination}/>
+          </VStack>
+          <VStack spacing='0' align='stretch'>
+            <HStack>
+              <Text fontWeight='bold'><DisplayAddress address={destination}/></Text>
+              <CopyButton content={destination} size={'16px'}/>
+            </HStack>
+          </VStack>
+        </HStack>
+      </VStack>
+      <Button mt='2em' width='100%' onClick={() => {processStep(previousStep);}}>Back</Button>
+      <Button mt='2em' colorScheme='blue' width='100%' onClick={() => {}}>Confirm</Button>
+    </motion.div> }
+  </AnimatePresence>)
 }
 
 const KeyHolderListItem = ({keyId, holder, ...rest}) => {
