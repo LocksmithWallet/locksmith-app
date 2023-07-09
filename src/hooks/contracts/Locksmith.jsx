@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import { useAccount } from 'wagmi';
-import { useLocksmithRead } from '../Utils';
+import { useLocksmithRead, useLocksmithWrite } from '../Utils';
 
 /**
  * useWalletKeys
@@ -101,7 +101,7 @@ export function useTrustKeys(trustId) {
  * This transaction is going to fail if the holder isn't root.
  */
 export function useCopyKey(rootKeyId, keyId, address, soulbind, errorFunc, successFunc) {
-   return useLocksmithWrite('Locksmith', 'copyKey',
+  return useLocksmithWrite('Locksmith', 'copyKey',
       [rootKeyId, keyId, address, soulbind],
       rootKeyId !== null && keyId !== null && address !== null, 
       errorFunc, successFunc); 

@@ -3,6 +3,7 @@
 //////////////////////////////////////
 import {
   React, 
+  useContext,
   useState,
   useEffect,
   useRef
@@ -45,6 +46,9 @@ import {
 } from 'wagmi';
 import { Networks } from './configuration/Networks';
 import { LocksmithInterface } from './configuration/LocksmithInterface';
+import {
+  TransactionListContext
+} from './components/TransactionProvider';
 
 import {
   useAssetMetadata
@@ -57,6 +61,7 @@ import {
   useTrustInfo,
   useTrustKeys,
   useInspectKey,
+  useCopyKey,
 } from './hooks/contracts/Locksmith';
 import {
   TRUST_CONTEXT,
@@ -89,7 +94,7 @@ import {
   AiOutlineFire,
 } from 'react-icons/ai';
 import { IoMdArrowRoundBack } from 'react-icons/io';
-import { FaAnchor } from 'react-icons/fa';
+import { FiEdit2 } from 'react-icons/fi';
 
 export function Trust() {
   const { trustId } = useParams();
@@ -155,14 +160,14 @@ const TrustKeyList = ({trustId, trustInfo, trustKeys, ...rest}) => {
     <List spacing='1.8em' m='1em' mt='2em'>
       <AnimatePresence>
         { trustKeys.map((k,x) => <ListItem key={'tkli-'+k.toString()} pos='relative'>
-          <TrustKeyListItem keyId={k}/>
+          <TrustKeyListItem trustInfo={trustInfo} keyId={k}/>
         </ListItem>) }
       </AnimatePresence>
     </List>
   </motion.div>)
 }
 
-const TrustKeyListItem = ({keyId, ...rest}) => {
+const TrustKeyListItem = ({trustInfo, keyId, ...rest}) => {
   const keyInfo = useInspectKey(keyId);
   const keyInboxAddress = useKeyInboxAddress(keyId);
   const keyHolders = useKeyHolders(keyId);
@@ -324,7 +329,7 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
             borderRadius="1px"/>
             <TabPanels>
               <TabPanel maxWidth='20em' p='0em'>
-                <KeyHoldersDetail keyId={keyId} keyInfo={keyInfo} holders={filteredHolders || []}/>
+                <KeyHoldersDetail trustInfo={trustInfo} keyId={keyId} keyInfo={keyInfo} holders={filteredHolders || []}/>
               </TabPanel>
               <TabPanel maxWidth='20em' p='0em'>
                 { balanceSheet.data && <KeyAssetDetail keyId={keyId} balanceSheet={balanceSheet.data}/> }
@@ -336,14 +341,38 @@ const TrustKeyListItem = ({keyId, ...rest}) => {
   </motion.div>)
 }
 
-const KeyHoldersDetail = ({keyId, keyInfo, holders, ...rest}) => {
+const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
+ const transactions = useContext(TransactionListContext);
+
+  // hook and contract state
   const account = useAccount();
+  const userKeyBalance = useKeyBalance(keyId, account.address);
+
+  // step state
   const [step, setStep] = useState(0);
   const [previousStep, setPreviousStep] = useState(0);
 
+  // transaction input
   const [destination, setDestination] = useState(null);
-  const [anchored, setAnchored] = useState(true);
   const isValidAddress = ethers.utils.isAddress(destination);
+
+  // validation state
+  const destinationKeyBalance = useKeyBalance(keyId, destination);
+
+  // contract call
+  const copyKey = useCopyKey(trustInfo.rootKeyId, keyId, destination, !keyInfo.isRoot,
+    (error) => {
+      console.log('error');
+      console.log(error);
+    }, (data) => {
+      transactions.addTransaction({
+        type: 'COPY_KEY',
+        title: 'Copy ' + keyInfo.alias,
+        subtitle: 'Send to ' + destination.substring(0,6) + '...' + destination.substring(destination.length - 4), 
+        data: data
+      });
+      processStep(0);
+    });
 
   const processStep = (newStep) => {
     setPreviousStep(step);
@@ -370,9 +399,11 @@ const KeyHoldersDetail = ({keyId, keyInfo, holders, ...rest}) => {
       initial={{x: 800, opacity: 0}} 
       animate={{x: 0, opacity:1}}
       exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}>
-      <Button mt='2em' width='100%' onClick={() => {
-        setDestination(account.address);
-        processStep(3);
+      <Button mt='2em' width='100%' 
+        isDisabled={!userKeyBalance.isSuccess || userKeyBalance.data.gt(0)}
+        onClick={() => {
+          setDestination(account.address);
+          processStep(3);
       }}>Send Key to Me</Button>
       <Button mt='2em' width='100%' onClick={() => {processStep(2);}}>Send Key to Someone Else</Button>
       <Button mt='2em' colorScheme='blue' width='100%' onClick={() => {processStep(0);}}>Nevermind</Button>
@@ -381,42 +412,33 @@ const KeyHoldersDetail = ({keyId, keyInfo, holders, ...rest}) => {
       initial={{x: 800, opacity: 0}}
       animate={{x: 0, opacity: 1}}
       exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}>
-        <Input mt='2em' value={destination} size='md' mb='0.5em' placeholder='0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+        <Input mt='2em' value={destination || ''} size='md' mb='0.5em' placeholder='0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
           onChange={(e) => {setDestination(e.target.value);}}/>
         { isValidAddress && 
             <Text fontWeight='bold' textColor='green.600' fontSize='sm'>
               <DisplayAddress address={destination || ''}/></Text> }
         { !isValidAddress && <Text textColor='red.600' fontStyle='italic' fontSize='sm'>Enter valid destination address</Text> }
-        <Button mt='2em' width='100%' onClick={() => {processStep(previousStep);}}>Back</Button>
-        <Button mt='2em' isDisabled={!isValidAddress} 
+        { (destinationKeyBalance.isSuccess && destinationKeyBalance.data.gt(0)) && (
+          <Text mt='1em' textColor='red.600' fontStyle='italic' fontSize='sm'>This address already holds this key.</Text>
+        ) }
+        <Button mt='2em' width='100%' onClick={() => {processStep(1);}}>Back</Button>
+        <Button mt='2em' isDisabled={!isValidAddress || !destinationKeyBalance.isSuccess || !destinationKeyBalance.data.eq(0)} 
           colorScheme='blue' width='100%' onClick={() => {processStep(3);}}>Next</Button>
     </motion.div> }
     { step === 3 && <motion.div layout key={'khd3-'+keyId} 
       initial={{x: 800, opacity: 0}}
       animate={{x: 0, opacity: 1}}
       exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}>
-      <VStack mt='2em'>
-        <Text>Do you want to <b>anchor</b> this copy?</Text>
-        <FaAnchor style={{filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5))'}} color='#4299E1' size='160px'/>
-        <Text>Anchored keys cannot be transferred unless unanchored by a root key holder.</Text>
-        <HStack pt='1em' width='100%'>
-          <Button width='50%' onClick={() => {setAnchored(false); processStep(4);}}>No</Button>
-          <Button width='50%' onClick={() => {setAnchored(true); processStep(4); }} colorScheme='blue'>Yes</Button>
-        </HStack>
-      </VStack>
-    </motion.div> }
-    { step === 4 && <motion.div layout key={'khd4-'+keyId} 
-      initial={{x: 800, opacity: 0}}
-      animate={{x: 0, opacity: 1}}
-      exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}>
-      <VStack mt='1em' spacing='2em'> 
-        <HStack fontSize='lg'>
-          <Text>Send copy of</Text>
+      <VStack mt='1em' spacing='0em'> 
+        <Text fontSize='lg' fontWeight='bold'>Send</Text>
+        <HStack width='100%' pt='1em'>
           <KeyIcon keyInfo={keyInfo} size={32}/>
-          <Text><b>{keyInfo.alias}</b> to:</Text>
+          <Text><b>{keyInfo.alias}</b></Text>
+          <Text fontSize='sm' color='gray' fontStyle='italic'>(#{keyInfo.keyId.toString()})</Text>
+          <Spacer/>
+          <Button size='md' borderRadius='full' onClick={() => {processStep(0);}}><IoMdArrowRoundBack/></Button>
         </HStack>
-        <HStack pos='relative'>
-          <VStack spacing='0em'>
+        <HStack pl='0.3em' pos='relative' width='100%' pt='2em'>
             { account.address === destination && <Spinner
               pos='absolute'
               top='-4px'
@@ -425,32 +447,28 @@ const KeyHoldersDetail = ({keyId, keyInfo, holders, ...rest}) => {
               color='blue.500'
               size='lg'
             /> }
-            <AddressAvatar address={destination}/>
-          </VStack>
-          <VStack spacing='0' align='stretch'>
-            <HStack>
-              <Text fontWeight='bold'><DisplayAddress address={destination}/></Text>
-              <CopyButton content={destination} size={'16px'}/>
-            </HStack>
-          </VStack>
+          <AddressAvatar address={destination}/>
+          <Text pl='0.3em' fontWeight='bold'><DisplayAddress address={destination}/></Text>
+          <CopyButton content={destination} size={'16px'}/>
+          <Spacer/>
+          <Button size='md' borderRadius='full' onClick={() => {processStep(previousStep);}}><FiEdit2/></Button>
         </HStack>
       </VStack>
-      <Button mt='2em' width='100%' onClick={() => {processStep(previousStep);}}>Back</Button>
-      <Button mt='2em' colorScheme='blue' width='100%' onClick={() => {}}>Confirm</Button>
+      <Button isDisabled={!copyKey.write} isLoading={copyKey.isLoading}
+        mt='2em' colorScheme='blue' width='100%' onClick={() => {copyKey.write?.();}}>Confirm</Button>
     </motion.div> }
   </AnimatePresence>)
 }
 
 const KeyHolderListItem = ({keyId, holder, ...rest}) => {
   const account = useAccount();  
-  const keyCount = useKeyBalance(keyId, holder);
 
   return (<ListItem>
     <HStack>
       <VStack spacing='0em'>
         { account.address === holder && <Spinner
           pos='absolute'
-          top='6px'
+          top='0px'
           thickness='2px'
           speed='2s'
           color='blue.500'
@@ -458,14 +476,10 @@ const KeyHolderListItem = ({keyId, holder, ...rest}) => {
         /> }
         <AddressAvatar address={holder}/>
       </VStack>
-      <VStack spacing='0' align='stretch'> 
-        <HStack>
-          <Text fontWeight='bold'><DisplayAddress address={holder}/></Text>
-          <CopyButton content={holder} size={'16px'}/>
-        </HStack>
-        { keyCount.data && 
-        <Text align='left' fontSize='sm' color='gray' fontStyle='italic'>Holds <b>{keyCount.data.toString()}</b> {keyCount.data.gt(1) ? "keys" : "key"}</Text> }
-      </VStack>
+      <HStack>
+        <Text fontWeight='bold'><DisplayAddress address={holder}/></Text>
+        <CopyButton content={holder} size={'16px'}/>
+      </HStack>
       <Spacer/>
       <IconButton size='sm' icon={<AiOutlineFire size='22px' color='#ff7b47'/>} borderRadius='full' boxShadow='md'/>
     </HStack>

@@ -24,7 +24,7 @@ export function useWalletKeys(address) {
  * Hook into the addresses holding the given key.
  */
 export function useKeyHolders(keyId) {
-  return useLocksmithRead('KeyVault', 'getHolders', [keyId], keyId != null);
+  return useLocksmithRead('KeyVault', 'getHolders', [keyId], keyId != null, true);
 }
 
 /**
@@ -33,5 +33,5 @@ export function useKeyHolders(keyId) {
  * Gets the key balance of an address
  **/
 export function useKeyBalance(keyId, address) {
-  return useLocksmithRead('KeyVault', 'balanceOf', [address, keyId], keyId != null);
+  return useLocksmithRead('KeyVault', 'balanceOf', [address, keyId], keyId !== null && address !== null);
 }
