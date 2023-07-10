@@ -35,6 +35,7 @@ import {
   Select,
   Skeleton,
   Spacer,
+  Spinner,
   Switch,
   VStack,
   useBreakpointValue,
@@ -99,7 +100,7 @@ import {
   KeyIcon,
   KeyTrustName,
 } from './components/Key';
-import { DisplayAddress } from './components/Address';
+import { DisplayAddress, AddressAvatar } from './components/Address';
 import { ContextBalanceUSD } from './components/Ledger';
 import {
   TransactionListContext
@@ -990,6 +991,7 @@ export const DepositTokenInternal = ({keyInfo, asset, amount, toggleDetail, ...r
 }
 
 export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, toggleDetail, ...rest}) => {
+  const account = useAccount();
   const [step, setStep] = useState(0);
   const stepZeroAnimate = useAnimation();
   const stepZeroReview = useAnimation();
@@ -1100,9 +1102,18 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, t
     </motion.div> 
     }
     { step >= 2 && <motion.div key='send-step-2-review' animate={stepOneReview} initial={stepInitial} variants={stepVariants}>
-      <HStack mt='1em'>
+      <HStack mt='1em' pl='0.2em' position='relative'>
         { isSendKey && <ReviewSelectedKeyInfo keyId={key}/> }
-        { !isSendKey && <ImQrcode size={32}/> }
+        { !isSendKey && <AddressAvatar address={destination} size={24}/> }
+        { !isSendKey && (account.address === destination) && <Spinner
+              pos='absolute'
+              top='4px'
+              left='-8px'
+              thickness='2px'
+              speed='2s'
+              color='blue.500'
+              size='lg'
+            /> }
         { !isSendKey && <Text fontWeight='bold' fontSize='0.8em'><DisplayAddress address={destination}/></Text> }
         <Spacer/>
         <Button borderRadius='full' onClick={() => {processStep(1);}}><FiEdit2/></Button>
