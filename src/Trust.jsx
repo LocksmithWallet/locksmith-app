@@ -91,10 +91,9 @@ import {
 } from 'framer-motion';
 import { 
   AiOutlineNumber,
-  AiOutlineFire,
 } from 'react-icons/ai';
 import { IoMdArrowRoundBack } from 'react-icons/io';
-import { FiEdit2 } from 'react-icons/fi';
+import { FiEdit2, FiTrash2 } from 'react-icons/fi';
 
 export function Trust() {
   const { trustId } = useParams();
@@ -481,7 +480,7 @@ const KeyHolderListItem = ({keyId, holder, ...rest}) => {
         <CopyButton content={holder} size={'16px'}/>
       </HStack>
       <Spacer/>
-      <IconButton size='sm' icon={<AiOutlineFire size='22px' color='#ff7b47'/>} borderRadius='full' boxShadow='md'/>
+      <IconButton size='sm' icon={<FiTrash2 size='22px' color='#ff7b47'/>} borderRadius='full' boxShadow='md'/>
     </HStack>
   </ListItem>)
 }
