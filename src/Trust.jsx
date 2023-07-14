@@ -108,7 +108,6 @@ export function Trust() {
     <Box ml={{base: 0, md: 72}} pos='relative'>
       <TrustHeader trustId={trustId} trustInfo={trustInfo}/>
       <TrustBalanceBox trustId={trustId}/>
-      <CreateKeyButton trustId={trustId} trustInfo={trustInfo}/>
       { trustInfo && trustKeys.isSuccess &&
         <TrustKeyList
           trustId={trustId}
@@ -116,12 +115,6 @@ export function Trust() {
           trustKeys={trustKeys.data}/> }
     </Box>
   </motion.div>) 
-}
-
-const CreateKeyButton = ({trustId, trustInfo, ...rest}) => {
-  return (<Box m='1em' mt='2em' mb='0em'>
-    <Button boxShadow='lg' width='100%' colorScheme='blue'>Create Key</Button>
-  </Box>)
 }
 
 const TrustBalanceBox = ({trustId, ...rest}) => {
@@ -138,23 +131,88 @@ const TrustBalanceBox = ({trustId, ...rest}) => {
 }
 
 const TrustHeader = ({trustId, trustInfo, ...rest}) => {
-  return (<>
-    <motion.div key={'trust-detail-'+trustId} initial={{y: -250}} animate={{y: 0}} transition={{delay: 0.25}}>
-      <VStack pos='absolute' top='-16px' left='28px'>
+  const isDesktop = useBreakpointValue({base: false, md: true});
+  const detailDisclosure = useDisclosure();
+  const animation = useAnimation();
+  const ref = useRef(null);
+
+  const toggleDetail = function() {
+    if (!detailDisclosure.isOpen) {
+      detailDisclosure.onOpen();
+      setTimeout(() => {
+        animation.set('click');
+        animation.start('open');
+      }, 1);
+    } else {
+      detailDisclosure.onClose();
+      setTimeout(async () => {
+        await animation.start('close');
+        animation.set('final');
+      }, 25);
+    }
+  };
+
+  const swipeProps = useBreakpointValue({base: {
+    drag: 'y',
+    onDragEnd: function(event, info) {
+      if (Math.abs(info.offset.y) >= 10 ) {
+        toggleDetail();
+      }
+    }
+  }, md: {}});
+
+  const boxVariants = {
+    click: function() {
+      const rect = ref.current.getBoundingClientRect();
+      return {
+        position: 'fixed',
+        width: rect.width,
+        height: rect.height,
+        zIndex: 101,
+      };
+    },
+    open: function() {
+      const rect = ref.current.getBoundingClientRect();
+      return {
+        y: -1.5 * (rect.y) - window.scrollY,
+        zIndex: 500,
+        minWidth: isDesktop ? '0' : '92vw',
+        marginTop: '3vh',
+        height: '95vh',
+      }
+    },
+    close: {
+      x: 0,
+      y: 0,
+      zIndex: 0,
+      height: null,
+      position: null,
+      marginTop: '0vh',
+    },
+    final: {
+      width: null,
+    }
+  };
+
+  return (<motion.div key={'jiggle-box-'+trustId} animate={animation} variants={boxVariants}
+    {... (detailDisclosure.isOpen ? swipeProps : {})} style={{marginLeft: '1em', marginRight: '1em'}}>
+    <motion.div key={'trust-detail-'+trustId} initial={{y: -250, position: 'relative'}} animate={{y: 0}} transition={{delay: 0.25}}>
+      <VStack pos='absolute' left='15px' top='-10px'>
         <Image src='/gold-lock-large.png' width='60px' style={{filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5)'}}/>
       </VStack>
     </motion.div>
-    <Box m='1em' mt='2em' bg='white' borderRadius='lg' boxShadow='lg' p='0.8em' pl='6em'>
-      <HStack>
+    <Box ref={ref} bg='white' borderRadius='lg' boxShadow='lg' p='0.8em' height='100%'> 
+      <HStack pl='5.2em'>
         <Text fontWeight='bold' fontSize='lg'>{trustInfo && trustInfo.name}</Text>
+        <Text fontStyle='italic' color='gray.500'>#{trustId.toString()}</Text>
         <Spacer/>
-        <Tag size='md' variant='subtle' colorScheme='gray'>
-          <TagLeftIcon as={AiOutlineNumber}/>
-          <TagLabel>{trustId}</TagLabel>
-        </Tag>
+        <Button size='sm' colorScheme='blue' onClick={toggleDetail}>New Key</Button>
       </HStack>
+      { detailDisclosure.isOpen && <VStack align='stretch' mt='2em'>
+          <Text>Create Key Flow.</Text>
+      </VStack> }
     </Box>
-  </>)
+  </motion.div>)
 }
 
 const TrustKeyList = ({trustId, trustInfo, trustKeys, ...rest}) => {
