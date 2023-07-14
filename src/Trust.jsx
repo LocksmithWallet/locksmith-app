@@ -202,17 +202,87 @@ const TrustHeader = ({trustId, trustInfo, ...rest}) => {
       </VStack>
     </motion.div>
     <Box ref={ref} bg='white' borderRadius='lg' boxShadow='lg' p='0.8em' height='100%'> 
-      <HStack pl='5.2em'>
+      <HStack pl='5.2em' mt={detailDisclosure.isOpen? '1em' : '0em'}>
         <Text fontWeight='bold' fontSize='lg'>{trustInfo && trustInfo.name}</Text>
         <Text fontStyle='italic' color='gray.500'>#{trustId.toString()}</Text>
         <Spacer/>
-        <Button size='sm' colorScheme='blue' onClick={toggleDetail}>New Key</Button>
+        { !detailDisclosure.isOpen &&
+          <Button size='sm' colorScheme='blue' onClick={toggleDetail}>New Key</Button> }
+        { detailDisclosure.isOpen && isDesktop && 
+          <IconButton pos='absolute' top='1em' right='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
+            onClick={toggleDetail}/> }
       </HStack>
-      { detailDisclosure.isOpen && <VStack align='stretch' mt='2em'>
-          <Text>Create Key Flow.</Text>
-      </VStack> }
+      { detailDisclosure.isOpen && <CreateKeyFlow trustId={trustId} trustInfo={trustInfo}/> } 
     </Box>
   </motion.div>)
+}
+
+const CreateKeyFlow = ({trustId, trustInfo, ...rest}) => {
+  const [step, setStep] = useState(0);
+  const [keyName, setKeyName] = useState('');
+  const [destination, setDestination] = useState('');
+  const stepAnimation = {
+    initial: {x: '100vw'},
+    animate: {x: 0},
+    exit: {x: '-100vw'}
+  };
+
+  const nameTooShort = (keyName||'').length < 3;
+  const isValidAddress = ethers.utils.isAddress(destination);
+  
+  return (
+    <VStack mt='2em' pos='relative' overflow='hidden' height='100%' m='-0.90em'>
+      <AnimatePresence mode='wait'>
+      { step === 0 && (<motion.div key='create-key-0' style={{position: 'relative'}}>
+        <Box as={motion.div} initial={{y:'100vh'}} animate={{y: 0, transition: {duration: 0.25}}} exit={{x: '-100vh'}} pos='relative'>
+          <KeyIcon keyInfo={{isRoot: false}} size='500px' style={{filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5))'}}/>
+          <Text pos='absolute' top='50px' left='195px' color='white'>Name Your Key</Text>
+          <Input pos='absolute' top='84px' left='160px' border='1px' borderColor={nameTooShort ? 'red' : 'gray.300'}
+              bgColor='white' textAlign='center'
+              placeholder='My Key' width='10em' size='lg'
+              maxLength={15}
+              p='1.4em'
+              value={keyName}
+              onChange={(e) => {
+                setKeyName(e.target.value);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && !nameTooShort) {
+                  setStep(1); 
+                }
+              }}
+            />
+            <Button pos='absolute' top='160px' left='160px' width='180px' 
+              isDisabled={nameTooShort} boxShadow='lg' colorScheme='blue'
+              onClick={() => {setStep(1);}}>Next</Button>
+        </Box>
+      </motion.div>) }
+      { step > 0 && (<motion.div key='review-key-0' {... stepAnimation}>
+        <VStack mt='4em' mb='2em'><Text fontWeight='bold'>Create New Key</Text></VStack>
+        <HStack width='20em'>
+          <KeyIcon keyInfo={{isRoot: false}} size={32}/>
+          <Text fontWeight='bold'>{keyName}</Text>
+          <Spacer/>
+          <Button borderRadius='full' onClick={() => {setStep(0);}}><FiEdit2/></Button>
+        </HStack>
+      </motion.div>) }
+        { step === 1 && (<motion.div key='create-key-1' {... stepAnimation} style={{marginTop: '2em'}}>
+          <VStack spacing='1em'>
+            <Text>Destination Wallet:</Text>
+            <Input fontSize='xs' width='26em' value={destination} size='md' mb='0.5em' placeholder='0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+              onChange={(e) => {
+                setDestination(e.target.value);
+            }}/>
+            { isValidAddress && <Text fontWeight='bold' textColor='green.600' fontSize='sm'><DisplayAddress address={destination || ''}/></Text> }
+          { !isValidAddress && <Text textColor='red.600' fontStyle='italic' fontSize='sm'>Enter valid destination address</Text> }
+          <Button isDisabled={!isValidAddress} width='100%' colorScheme='blue' onClick={() => {setStep(2);}}>Next</Button>
+        </VStack>
+      </motion.div>) }
+      { step === 2 && (<motion.div key='create-key-1'>
+
+      </motion.div>) }
+      </AnimatePresence>
+    </VStack>)
 }
 
 const TrustKeyList = ({trustId, trustInfo, trustKeys, ...rest}) => {
