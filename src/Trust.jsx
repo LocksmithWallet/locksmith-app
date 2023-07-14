@@ -12,6 +12,8 @@ import {
   useParams
 } from 'react-router-dom';
 import {
+  Alert,
+  AlertIcon,
   Box,
   Button,
   Heading,
@@ -62,6 +64,7 @@ import {
   useTrustKeys,
   useInspectKey,
   useCopyKey,
+  useBurnKey,
 } from './hooks/contracts/Locksmith';
 import {
   TRUST_CONTEXT,
@@ -87,6 +90,7 @@ import { KeyIcon } from './components/Key';
 import { 
   motion,
   AnimatePresence,
+  LayoutGroup,
   useAnimation,
 } from 'framer-motion';
 import { 
@@ -351,6 +355,9 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
   const [step, setStep] = useState(0);
   const [previousStep, setPreviousStep] = useState(0);
 
+  // selection state
+  const [burnAddress, setBurnAddress] = useState(null);
+
   // transaction input
   const [destination, setDestination] = useState(null);
   const isValidAddress = ethers.utils.isAddress(destination);
@@ -379,20 +386,25 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
   }
 
   return (<AnimatePresence mode='wait'>
-    { step === 0 && <motion.div layout key={'khd0-'+keyId} 
+    { step === 0 && !burnAddress && <motion.div key={'khd0-'+keyId} 
       initial={{x: 800, opacity: 0}}
       animate={{x: 0, opacity: 1}}
       exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}> 
       <List spacing='2em' mt='2em'>
-        <AnimatePresence>
           { holders.map((h) => (
-            <motion.div key={'khd-'+keyId+h} initial={{x: '100vw'}} animate={{x: 0}} exit={{x: '100vw'}}>
-              <KeyHolderListItem key={'khli'+keyId+h} keyId={keyId} holder={h}/>
+            <motion.div layout key={'khd-'+keyId+h} initial={{x: '100vw'}} animate={{x: 0}} exit={{x: '-100vw'}}>
+              <KeyHolderListItem key={'khli'+keyId+h} keyId={keyId} holder={h} burnAddress={burnAddress} setBurnAddress={setBurnAddress}/>
             </motion.div>)) }
-        </AnimatePresence>
       </List>
-      <Button 
-        mt='2em' colorScheme='blue' width='100%' onClick={() => {processStep(1);}}>Add Key Holder</Button>
+      { burnAddress === null && <Button 
+          mt='2em' colorScheme='blue' width='100%' onClick={() => {processStep(1);}}>Add Key Holder</Button> }
+    </motion.div> }
+    { burnAddress !== null && <motion.div layout key={'bhc-'+burnAddress+keyId}
+      initial={{x: 800, opacity: 0}}
+      animate={{x: 0, opacity: 1}}
+      exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}>
+        <BurnHolderConfirmation rootKeyId={trustInfo.rootKeyId} keyId={keyId} keyInfo={keyInfo} 
+          holder={burnAddress} setBurnAddress={setBurnAddress}/>
     </motion.div> }
     { step === 1 && <motion.div layout key={'khd1-'+keyId}
       initial={{x: 800, opacity: 0}} 
@@ -459,15 +471,15 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
   </AnimatePresence>)
 }
 
-const KeyHolderListItem = ({keyId, holder, ...rest}) => {
+const KeyHolderListItem = ({keyId, holder, burnAddress, setBurnAddress, ...rest}) => {
   const account = useAccount();  
 
   return (<ListItem>
-    <HStack>
+    <HStack pos='relative'>
       <VStack spacing='0em'>
         { account.address === holder && <Spinner
           pos='absolute'
-          top='0px'
+          top='-4px'
           thickness='2px'
           speed='2s'
           color='blue.500'
@@ -479,10 +491,59 @@ const KeyHolderListItem = ({keyId, holder, ...rest}) => {
         <Text fontWeight='bold'><DisplayAddress address={holder}/></Text>
         <CopyButton content={holder} size={'16px'}/>
       </HStack>
-      <Spacer/>
-      <IconButton size='sm' icon={<FiTrash2 size='22px' color='#ff7b47'/>} borderRadius='full' boxShadow='md'/>
+      {burnAddress !== holder && <IconButton size='sm' right='0px' pos='absolute' icon={<FiTrash2 size='22px' color='#ff7b47'/>} borderRadius='full' boxShadow='md'
+        onClick={()=>{setBurnAddress(holder);}}/> }
     </HStack>
   </ListItem>)
+}
+
+const BurnHolderConfirmation = ({rootKeyId, keyId, keyInfo, holder, setBurnAddress, ...rest}) => {
+  const transactions = useContext(TransactionListContext);
+  const account = useAccount();
+  const keyBalance = useKeyBalance(keyId, holder);
+  const burnKeys = useBurnKey(rootKeyId, keyId, holder, keyBalance.isSuccess ? keyBalance.data : null,
+     (error) => {
+      console.log('error');
+      console.log(error);
+    }, (data) => {
+      transactions.addTransaction({
+        type: 'BURN_KEY',
+        title: 'Remove Access',
+        subtitle: 'Revoke ' + keyInfo.alias + ' from ' + holder.substring(0,6) + '...' + holder.substring(holder.length - 4),
+        data: data
+      });
+      setBurnAddress(null);
+    });
+
+  return <VStack mt='2em' spacing='2em'> 
+    <VStack fontSize='lg'>
+      <HStack><Text>Revoke</Text><KeyIcon size={32} keyInfo={keyInfo}/><Text><b>{keyInfo.alias}</b></Text></HStack>
+      <Text>from wallet</Text>
+      <HStack>
+        <Box pos='relative'>
+          { account.address === holder && <Spinner
+            pos='absolute'
+            left='-4px'
+            top='-4px'
+            thickness='2px'
+            speed='2s'
+            color='blue.500'
+            size='lg'
+          /> }
+          <AddressAvatar address={holder}/>
+        </Box>
+        <Text><b><DisplayAddress address={holder}/></b>?</Text></HStack>
+    </VStack>
+    { account.address === holder && <Alert status={keyInfo.isRoot ? 'error' : 'warning'}>
+      <AlertIcon/>
+      { !keyInfo.isRoot ? 'Careful. This is your own wallet.' :
+          'Danger! You will lose admin rights!' }
+    </Alert> }
+    <Button width='100%' onClick={() =>{setBurnAddress(null);}}>Nevermind</Button>
+    <Button isDisabled={!burnKeys.write} isLoading={burnKeys.isLoading} 
+      onClick={() => {burnKeys.write?.();}}
+      width='100%' colorScheme='red'>Revoke Access</Button>
+  </VStack>
 }
 
 const KeyAssetDetail = ({keyId, balanceSheet, ...rest}) => {

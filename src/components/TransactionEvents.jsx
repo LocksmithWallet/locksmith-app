@@ -39,8 +39,9 @@ export const TransferSingleEvent = ({event}) => {
 
   // see if we can name the destination in some way
 
-  // check to make sure its not a mint event, because the key minted event will cover it
-  if (event.topics.from === ethers.constants.AddressZero) {
+  // check to make sure its not a mint or burn event, because the key minted event will cover it
+  if (event.topics.from === ethers.constants.AddressZero ||
+    event.topics.to === ethers.constants.AddressZero) {
     return '';
   }
 
@@ -309,8 +310,22 @@ export const ApprovalEvent = ({event, receipt}) => {
   </HStack>)
 }
 
+export const KeyBurnedEvent = ({event, receipt}) => {
+  const keyInfo = useInspectKey(event.topics.keyId);
+
+  return (<HStack pos='relative'>
+    <Skeleton isLoaded={keyInfo} width='2em' height='2.5em'>
+      {keyInfo && <KeyIcon keyInfo={keyInfo} size='32px'/> }
+      <Box pos='absolute' left='12px' top='15px'><ImMinus size='16px' color='#FF6666'/></Box>
+    </Skeleton>
+    <VStack align='stretch' spacing='0em' fontSize='0.8em'>
+      <Text fontWeight='bold'>Key Revoked</Text>
+      <Text fontStyle='italic' textColor='gray.500'>From <AddressAlias address={event.topics.target}/></Text>
+    </VStack>
+  </HStack>)
+}
+
 export const TransferEvent = ({event, receipt}) => {
-  console.log(receipt);
   return (<HStack pos='relative'>
     <FcMoneyTransfer size='24px'/>
     <VStack align='stretch' spacing='0em' fontSize='0.8em'>

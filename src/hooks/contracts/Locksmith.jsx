@@ -106,3 +106,21 @@ export function useCopyKey(rootKeyId, keyId, address, soulbind, errorFunc, succe
       rootKeyId !== null && keyId !== null && address !== null, 
       errorFunc, successFunc); 
 }
+
+/**
+ * useBurnKey
+ *
+ * Prepares and writes to the Locksmith contract,
+ * calling #burnKey.
+ *
+ * The caller must take the query and eventually call write?() to initate
+ * the wallet interaction.
+ *
+ * This transaction is going to fail if the holder isn't root.
+ */
+export function useBurnKey(rootKeyId, keyId, address, burnAmount, errorFunc, successFunc) {
+  return useLocksmithWrite('Locksmith', 'burnKey',
+      [rootKeyId, keyId, address, burnAmount],
+      rootKeyId !== null && keyId !== null && address !== null && burnAmount !== null, 
+      errorFunc, successFunc); 
+}
