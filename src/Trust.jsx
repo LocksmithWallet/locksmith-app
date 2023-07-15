@@ -218,6 +218,7 @@ const TrustHeader = ({trustId, trustInfo, ...rest}) => {
 }
 
 const CreateKeyFlow = ({trustId, trustInfo, ...rest}) => {
+  const account = useAccount();
   const [step, setStep] = useState(0);
   const [keyName, setKeyName] = useState('');
   const [destination, setDestination] = useState('');
@@ -266,19 +267,33 @@ const CreateKeyFlow = ({trustId, trustInfo, ...rest}) => {
           <Button borderRadius='full' onClick={() => {setStep(0);}}><FiEdit2/></Button>
         </HStack>
       </motion.div>) }
-        { step === 1 && (<motion.div key='create-key-1' {... stepAnimation} style={{marginTop: '2em'}}>
+      { step === 1 && (<motion.div key='create-key-2' {... stepAnimation} style={{margin: '1em', width: '20em'}}>
+        <Button width='100%'
+          onClick={() => {
+            setDestination(account.address);
+            setStep(3);
+        }}>Send Key to Me</Button>
+        <Button mt='2em' width='100%' onClick={() => {setStep(2);}}>Send Key to Someone Else</Button>
+      </motion.div>) }
+      { step === 2 && (<motion.div key='create-key-3' {... stepAnimation} style={{marginTop: '2em'}}>
           <VStack spacing='1em'>
             <Text>Destination Wallet:</Text>
             <Input fontSize='xs' width='26em' value={destination} size='md' mb='0.5em' placeholder='0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
               onChange={(e) => {
                 setDestination(e.target.value);
-            }}/>
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && isValidAddress) {
+                  setStep(3);
+                }
+              }} 
+            />
             { isValidAddress && <Text fontWeight='bold' textColor='green.600' fontSize='sm'><DisplayAddress address={destination || ''}/></Text> }
-          { !isValidAddress && <Text textColor='red.600' fontStyle='italic' fontSize='sm'>Enter valid destination address</Text> }
+            { !isValidAddress && <Text textColor='red.600' fontStyle='italic' fontSize='sm'>Enter valid destination address</Text> }
           <Button isDisabled={!isValidAddress} width='100%' colorScheme='blue' onClick={() => {setStep(2);}}>Next</Button>
         </VStack>
       </motion.div>) }
-      { step === 2 && (<motion.div key='create-key-1'>
+      { step === 3 && (<motion.div key='create-key-1'>
 
       </motion.div>) }
       </AnimatePresence>

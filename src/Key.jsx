@@ -1189,7 +1189,7 @@ export const SendGasButton = ({keyInfo, inbox, destination, arn, asset, amount, 
   const transactions = useContext(TransactionListContext);
   const network = useNetwork();
   const sendToken = useSend(inbox, Networks.getContractAddress(network.chain.id, 'EtherVault'),
-    ethers.utils.parseUnits(amount.toString(), asset.decimals), destination,
+    ethers.utils.parseUnits(Number(amount).toFixed(asset.decimals), asset.decimals), destination,
     (error) => {
       console.log('error');
       console.log(error);
@@ -1197,7 +1197,7 @@ export const SendGasButton = ({keyInfo, inbox, destination, arn, asset, amount, 
       transactions.addTransaction({
         type: 'SEND_ASSET',
         title: 'Send ' + asset.name,
-        subtitle: amount.toString() + " " + asset.symbol,
+        subtitle: Number(amount).toFixed(asset.decimals) + " " + asset.symbol,
         data: data
       });
       toggleDetail();
@@ -1213,7 +1213,7 @@ export const SendTokenButton = ({keyInfo, inbox, destination, arn, asset, amount
   const network = useNetwork();
   const sendToken = useSendToken(inbox, Networks.getContractAddress(network.chain.id, 'TokenVault'),
     asset.contractAddress,
-    ethers.utils.parseUnits(amount.toString(), asset.decimals), destination,
+    ethers.utils.parseUnits(Number(amount).toFixed(asset.decimals), asset.decimals), destination,
     (error) => {
       console.log('error');
       console.log(error);
@@ -1221,7 +1221,7 @@ export const SendTokenButton = ({keyInfo, inbox, destination, arn, asset, amount
       transactions.addTransaction({
         type: 'SEND_ASSET',
         title: 'Send ' + asset.name,
-        subtitle: amount.toString() + " " + asset.symbol,
+        subtitle: Number(amount).toFixed(asset.decimals) + " " + asset.symbol,
         data: data
       });
       toggleDetail();
@@ -1233,11 +1233,11 @@ export const SendTokenButton = ({keyInfo, inbox, destination, arn, asset, amount
 export const SendToKeyConfirmationButton = ({keyInfo, destinationKey, arn, asset, amount, toggleDetail}) => {
   const network = useNetwork();
   const transactions = useContext(TransactionListContext);
- 
+  
   // the assumption about which provider we are using is going to break at some point in the near
   // future
   const distribution = useDistribute(Networks.getContractAddress(network.chain.id, asset.standard === 0 ? 'EtherVault' : 'TokenVault'),
-    arn, keyInfo.keyId, [destinationKey], [ethers.utils.parseUnits(parseFloat(amount).toString(), asset.decimals)],
+    arn, keyInfo.keyId, [destinationKey], [ethers.utils.parseUnits(Number(amount).toFixed(asset.decimals), asset.decimals)],
     (error) => { 
       console.log('error');
       console.log(error);
@@ -1245,7 +1245,7 @@ export const SendToKeyConfirmationButton = ({keyInfo, destinationKey, arn, asset
       transactions.addTransaction({
         type: 'SEND_ASSET',
         title: 'Send ' + asset.name,
-        subtitle: amount.toString() + " " + asset.symbol,
+        subtitle: Number(amount).toFixed(asset.decimals) + " " + asset.symbol,
         data: data
       });
       toggleDetail();
