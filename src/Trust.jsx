@@ -224,8 +224,8 @@ const CreateKeyFlow = ({trustId, trustInfo, ...rest}) => {
   const [destination, setDestination] = useState('');
   const stepAnimation = {
     initial: {x: '100vw'},
-    animate: {x: 0},
-    exit: {x: '-100vw'}
+    animate: {x: 0, transition:{duration: 0.2, delay: 0.15}},
+    exit: {x: '-100vw', transition: {duration: 0.1}},
   };
 
   const nameTooShort = (keyName||'').length < 3;
@@ -233,9 +233,9 @@ const CreateKeyFlow = ({trustId, trustInfo, ...rest}) => {
   
   return (
     <VStack mt='2em' pos='relative' overflow='hidden' height='100%' m='-0.90em'>
-      <AnimatePresence mode='wait'>
+      <AnimatePresence>
       { step === 0 && (<motion.div key='create-key-0' style={{position: 'relative'}}>
-        <Box as={motion.div} initial={{y:'100vh'}} animate={{y: 0, transition: {duration: 0.25}}} exit={{x: '-100vh'}} pos='relative'>
+        <Box as={motion.div} {... stepAnimation} pos='relative'>
           <KeyIcon keyInfo={{isRoot: false}} size='500px' style={{filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5))'}}/>
           <Text pos='absolute' top='50px' left='195px' color='white'>Name Your Key</Text>
           <Input pos='absolute' top='84px' left='160px' border='1px' borderColor={nameTooShort ? 'red' : 'gray.300'}
@@ -259,12 +259,30 @@ const CreateKeyFlow = ({trustId, trustInfo, ...rest}) => {
         </Box>
       </motion.div>) }
       { step > 0 && (<motion.div key='review-key-0' {... stepAnimation}>
-        <VStack mt='4em' mb='2em'><Text fontWeight='bold'>Create New Key</Text></VStack>
-        <HStack width='20em'>
+        <HStack mt='4em' mb='1em'width='20em'>
           <KeyIcon keyInfo={{isRoot: false}} size={32}/>
           <Text fontWeight='bold'>{keyName}</Text>
           <Spacer/>
           <Button borderRadius='full' onClick={() => {setStep(0);}}><FiEdit2/></Button>
+        </HStack>
+      </motion.div>) }
+      { step > 2 && (<motion.div key='review-key-3' {... stepAnimation}>
+        <HStack width='20em' pl='0.3em'>
+          <Box pos='relative'>
+            { account.address === destination && <Spinner
+              pos='absolute'
+              thickness='2px'
+              top='-4px'
+              left='-4px'
+              speed='2s'
+              color='blue.500'
+              size='lg'
+            /> } 
+            <AddressAvatar address={destination}/>
+          </Box>
+          <Text fontWeight='bold' pl='0.1em'><DisplayAddress address={destination}/></Text>
+          <Spacer/>
+          <Button borderRadius='full' onClick={() => {setStep(1);}}><FiEdit2/></Button>
         </HStack>
       </motion.div>) }
       { step === 1 && (<motion.div key='create-key-2' {... stepAnimation} style={{margin: '1em', width: '20em'}}>
@@ -275,9 +293,8 @@ const CreateKeyFlow = ({trustId, trustInfo, ...rest}) => {
         }}>Send Key to Me</Button>
         <Button mt='2em' width='100%' onClick={() => {setStep(2);}}>Send Key to Someone Else</Button>
       </motion.div>) }
-      { step === 2 && (<motion.div key='create-key-3' {... stepAnimation} style={{marginTop: '2em'}}>
+      { step === 2 && (<motion.div key='create-key-3' {... stepAnimation} style={{marginTop: '2em', width: '20em'}}>
           <VStack spacing='1em'>
-            <Text>Destination Wallet:</Text>
             <Input fontSize='xs' width='26em' value={destination} size='md' mb='0.5em' placeholder='0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
               onChange={(e) => {
                 setDestination(e.target.value);
@@ -290,11 +307,12 @@ const CreateKeyFlow = ({trustId, trustInfo, ...rest}) => {
             />
             { isValidAddress && <Text fontWeight='bold' textColor='green.600' fontSize='sm'><DisplayAddress address={destination || ''}/></Text> }
             { !isValidAddress && <Text textColor='red.600' fontStyle='italic' fontSize='sm'>Enter valid destination address</Text> }
-          <Button isDisabled={!isValidAddress} width='100%' colorScheme='blue' onClick={() => {setStep(2);}}>Next</Button>
+          <Button width='100%' onClick={() => {setStep(1);}}>Back</Button>
+          <Button isDisabled={!isValidAddress} width='100%' colorScheme='blue' onClick={() => {setStep(3);}}>Next</Button>
         </VStack>
       </motion.div>) }
-      { step === 3 && (<motion.div key='create-key-1'>
-
+      { step === 3 && (<motion.div key='create-key-3' {... stepAnimation} style={{marginTop:'2em', width: '20em'}}>
+          <Button width='100%' colorScheme='blue' onClick={() => {}}>Create Key</Button>
       </motion.div>) }
       </AnimatePresence>
     </VStack>)
