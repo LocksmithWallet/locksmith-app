@@ -39,7 +39,7 @@ export const AnimatedRoutes = () => {
   };
 
   return (<AnimatePresence mode='wait'><Routes key={location.pathname} location={location}>
-    { account.isConnected && <Route path='/reveal/:txn' element={
+    { account.isConnected && <Route path='/reveal/:txn/:trustId?/:trustName?' element={
       <motion.div key='reveal' initial={{y: '-100vh'}} animate={{y: 100}} exit={{y: '100vh', transition: pageTransition}}>
         <RevealTrust/>
       </motion.div>

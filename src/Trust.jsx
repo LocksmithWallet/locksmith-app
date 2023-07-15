@@ -9,7 +9,8 @@ import {
   useRef
 } from 'react';
 import {
-  useParams
+  useParams,
+  useNavigate,
 } from 'react-router-dom';
 import {
   Alert,
@@ -74,6 +75,9 @@ import {
 import {
   useKeyInboxAddress
 } from './hooks/contracts/PostOffice';
+import {
+  useMegaKeyCreator
+} from './hooks/contracts/MegaKeyCreator';
 import {
   USDFormatter,
   useCoinCapPrice
@@ -312,10 +316,37 @@ const CreateKeyFlow = ({trustId, trustInfo, ...rest}) => {
         </VStack>
       </motion.div>) }
       { step === 3 && (<motion.div key='create-key-3' {... stepAnimation} style={{marginTop:'2em', width: '20em'}}>
-          <Button width='100%' colorScheme='blue' onClick={() => {}}>Create Key</Button>
+        <CreateKeyConfirmationButton 
+          trustId={trustId}
+          trustInfo={trustInfo}
+          keyName={keyName}
+          destination={destination}/>
       </motion.div>) }
       </AnimatePresence>
     </VStack>)
+}
+
+const CreateKeyConfirmationButton = ({trustId, trustInfo, keyName, destination, ...rest}) => {
+  const transactions = useContext(TransactionListContext);
+  const navigate = useNavigate();
+
+  // we are just going to assume its soulbound for now
+  const keyCreator = useMegaKeyCreator(trustInfo.rootKeyId, keyName, destination, true,
+    (error) => {
+      console.log('error');
+      console.log(error);
+    }, (data) => {
+      transactions.addTransaction({
+        type: 'CREATE_KEY',
+        title: 'Mint ' + keyName,
+        subtitle: 'Send to ' + destination.substring(0,6) + '...' + destination.substring(destination.length - 4),
+        data: data
+      });
+      setTimeout(()=> {navigate('/reveal/'+data.hash+'/'+trustId+'/'+ethers.utils.formatBytes32String(trustInfo.name));}, 500);
+    });
+
+  return (<Button isDisabled={!keyCreator.write} isLoading={keyCreator.isLoading}
+    width='100%' colorScheme='blue' onClick={() => {keyCreator.write?.();}}>Create Key</Button>)
 }
 
 const TrustKeyList = ({trustId, trustInfo, trustKeys, ...rest}) => {

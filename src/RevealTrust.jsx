@@ -28,6 +28,7 @@ import { getReceiptEvents } from './hooks/Utils';
 
 import { BsHammer } from 'react-icons/bs';
 import { FcKey } from 'react-icons/fc';
+import { KeyIcon } from './components/Key';
 import { 
   motion, 
   AnimatePresence, 
@@ -43,9 +44,12 @@ export function RevealTrust() {
   const navigate = useNavigate();
   const provider = useProvider();
   const trustCreatorAddress = Networks.getContractAddress(useNetwork().chain.id, 'TrustCreator');
-  const { txn } = useParams();
+  const { txn, trustId, trustName } = useParams();
   const [key, setKey] = useState(null);
-  const [trust, setTrust] = useState(null);
+  const [trust, setTrust] = useState(trustId && trustName ? {
+    trustName: trustName,
+    trustId: trustId
+  } : null);
 
   // animations
   const lockShadow = useAnimation();
@@ -72,10 +76,14 @@ export function RevealTrust() {
         (async (transactionHash) => {
           const receipt = await provider.waitForTransaction(txn);
         
+          console.log(getReceiptEvents(receipt, 'Locksmith', 'keyMinted'));
+
           // recover the trust and key information
           setKey(getReceiptEvents(receipt, 'Locksmith', 'keyMinted')
-            .filter((e) => e.receiver === trustCreatorAddress)[0]);
-          setTrust(getReceiptEvents(receipt, 'Locksmith', 'trustCreated')[0]);
+            .filter((e) => trustId || (e.receiver === trustCreatorAddress))[0]);
+          if (!trust) {
+            setTrust(getReceiptEvents(receipt, 'Locksmith', 'trustCreated')[0]);
+          }
 
           // trigger the shadow
           lockShadow.start({filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.5))'});
@@ -88,7 +96,7 @@ export function RevealTrust() {
       <motion.div initial={{filter: 'drop-shadow(0 10px 5px rgba(0,0,0,0.5))'}} transition={{type: 'spring'}}>
         <Image src='/gold-lock-large.png'/>
         <VStack pos='relative' top='-245'>
-          { trust &&  
+          { trust && key && 
             <Text as={motion.div} initial={{scale: 0}} animate={{scale: [0, 1.2, 1]}} color='yellow.300' fontSize='32px' fontWeight='bold' 
               fontFamily='Copperplate' pos='relative' top='-3' textAlign='center'>
               {trust && ethers.utils.parseBytes32String(trust.trustName)}
@@ -120,9 +128,9 @@ export function RevealTrust() {
                 filter: ['drop-shadow(0 0 0 rgba(255,200,0, 0.0))','drop-shadow(0 0 50px rgba(255,255,0, 0.9))',
                   'drop-shadow(0 0 15px rgba(255,215,0, 0.6))']
               }}>
-              <FcKey size='150px'/><VStack>
+              <KeyIcon keyInfo={{isRoot: !trustId}} size='150px'/><VStack>
               { key && <Text as={motion.div} initial={{opacity: 0, y: 30, scale: 0 }} animate={{opacity: 1, y: 0, scale: [0, 1.2, 1]}}
-                pos='relative' top='-108' fontWeight='bold' color='yellow.800'>
+                pos='relative' top='-108' fontWeight='bold' color={trustId ? 'black' : 'yellow.800'}>
                   {ethers.utils.parseBytes32String(key.keyName)}</Text> }</VStack>
             </motion.div> }
           { trust && key && <div style={{position: 'relative', top: -120}}><HStack width='220px'>
