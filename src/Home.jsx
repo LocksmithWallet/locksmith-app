@@ -225,7 +225,7 @@ const CreateAccount = ({}) => {
         onClick={() => { mintTrust.write?.(); } }
         style={{
           top: -80
-        }}>{mintTrust.isLoading ? 'Signing' : 'Mint Key'}</Button>
+        }}>{mintTrust.isLoading ? 'Signing' : 'Create Trust'}</Button>
       </motion.div>
     </VStack> }
     </motion.div> } </AnimatePresence>
