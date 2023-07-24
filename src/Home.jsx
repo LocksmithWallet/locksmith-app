@@ -156,7 +156,7 @@ const CreateAccount = ({}) => {
           'start': {}
         }}
         initial={{visiblility: 'hidden', y: 80}} animate={controls}>
-        <Text fontWeight='bold' size='lg'>Name Your Treasury</Text>
+        <Text fontWeight='bold' size='lg'>Name Your Trust</Text>
       </motion.div> }
       </VStack>
       <HStack spacing='0'>
@@ -196,7 +196,7 @@ const CreateAccount = ({}) => {
           top: -94
         }}>
         <Input border='1px' borderColor='yellow.300' bgColor='white' textAlign='center' 
-          placeholder='My Treasury' width='10em' size='lg'
+          placeholder='My Trust' width='10em' size='lg'
           maxLength={15}
           onChange={(e) => { 
             setName(e.target.value); 
