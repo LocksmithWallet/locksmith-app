@@ -15,13 +15,14 @@ import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
 // Supported Network Configurations
 import { Networks } from './configuration/Networks'
 import { HardHat } from './configuration/networks/Hardhat'
-import { Filecoin } from './configuration/networks/Filecoin'
 import { BaseGoerli } from './configuration/networks/BaseGoerli'
+import { Base } from './configuration/networks/Base';
 
 // Locksmith App Component
 import App from './App'
 
 // Add Network Support
+Networks.addNetwork(Base);
 Networks.addNetwork(BaseGoerli);
 Networks.addNetwork(HardHat);
 
