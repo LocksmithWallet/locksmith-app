@@ -164,7 +164,7 @@ export const TransactionHistoryEntry = ({txn, selectedHash, selectHash, ...rest}
 
 export const TransactionEventDetail = ({receipt, ...rest}) => {
   const events = getLocksmithEvents(receipt);
-  console.log(events);
+  // console.log(events);
   
   return (<List spacing='1em'>
     { events.map((e,x) => {
