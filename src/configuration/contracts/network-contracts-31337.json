@@ -1,66 +1,74 @@
 {
   "KeyVault": {
-    "address": "0xCD8a1C3ba11CF5ECfa6267617243239504a98d90",
+    "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
     "codeHash": "0x6205509c7cb7942cac9020a414f5fd490e71e620b421e438a4ebad6dc5a0d21f"
   },
   "Locksmith": {
-    "address": "0x82e01223d51Eb87e16A03E24687EDF0F294da6f1",
-    "codeHash": "0x1cb6a56910e17320512f1962f4b475b90023825508b0a4fc8b0d4c090b19e5c1"
+    "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+    "codeHash": "0x52368c9879b94a8aad52018bc181d82af4781317e74e23cfc09791232f20c815"
   },
   "Notary": {
-    "address": "0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3",
+    "address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
     "codeHash": "0x6b0c7004dc24a84d6eaf8809e13432011fbe1ff2aa2932c59c2df16c9794b73a"
   },
   "Ledger": {
-    "address": "0x7969c5eD335650692Bc04293B07F5BF2e7A673C0",
+    "address": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
     "codeHash": "0x64060351e2e8bba259d752658704d120590f9698da9385c09e06a36a9999ce75"
   },
   "EtherVault": {
-    "address": "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650",
+    "address": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
     "codeHash": "0xc6e62d4b97dc7d4081953d91abbe2ac25f0f84a4b41c4f580cc32d7f18047c77"
   },
   "TokenVault": {
-    "address": "0xc351628EB244ec633d5f21fBD6621e1a683B1181",
+    "address": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
     "codeHash": "0xc339c7dbaa1192d7dada3f2f6278f56b33485d22c9b5231903a8bdf3eebe027c"
   },
   "TrustEventLog": {
-    "address": "0xFD471836031dc5108809D173A067e8486B9047A3",
+    "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
     "codeHash": "0x92299c2a003352fcf02a933b8136cc6de61875276d84955f8bb2824186361677"
   },
   "AlarmClock": {
-    "address": "0xcbEAF3BDe82155F56486Fb5a1072cb8baAf547cc",
+    "address": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
     "codeHash": "0x9a5b0f5cd209d1dd6775848bc0decf96687e6507e9d4e27e33ba10dc20619f51"
   },
   "KeyOracle": {
-    "address": "0x1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f",
-    "codeHash": "0x6cbf928ecdbbc63423020d06d38f412fd84e1fdd1ecd5e5fb8159e40ab029662"
+    "address": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
+    "codeHash": "0xfb7bb9889f46858c3a55dc5af11cba9bf35aeef88f74a152ca026d311ab533c0"
   },
   "Trustee": {
-    "address": "0xB0D4afd8879eD9F52b28595d31B441D079B2Ca07",
+    "address": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
     "codeHash": "0x22352db25819d004487d8a780835b5238be8a99b53e9e460921b841c4f4e55c3"
   },
   "Allowance": {
-    "address": "0x162A433068F51e18b7d13932F27e66a3f99E6890",
+    "address": "0x59b670e9fA9D0A427751Af201D676719a970857b",
     "codeHash": "0x2fed36e9b2225d0f580adda57fd22a049826b85749424032b5caac6fe3d7c796"
   },
   "Distributor": {
-    "address": "0x922D6956C99E12DFeB3224DEA977D0939758A1Fe",
+    "address": "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44",
     "codeHash": "0x29d22d97a898b55fe9e55b725670cc4385cde63c1dc83f5051d4820cbe526414"
   },
   "PostOffice": {
-    "address": "0x5081a39b8A5f0E35a8D959395a630b68B74Dd30f",
+    "address": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
     "codeHash": "0xefb042a5754c80994f533002764fe43636b714d1319214d4cbafb1b83b8541ca"
   },
   "KeyAddressFactory": {
-    "address": "0x1fA02b2d6A771842690194Cf62D91bdd92BfE28d",
+    "address": "0x09635F643e140090A9A8Dcd712eD6285858ceBef",
     "codeHash": "0xbf88ad1bcc6eaaf86b61a7d77165a9d60892f35fda8f19468490bca17d05d1c6"
   },
   "MegaKeyCreator": {
-    "address": "0xdbC43Ba45381e02825b14322cDdd15eC4B3164E6",
+    "address": "0x67d269191c92Caf3cD7723F116c85e6E9bf55933",
     "codeHash": "0xf74e319abb0ad312fee58155808fba710e60924db548569bbbb6493e895d2cf6"
   },
   "TrustCreator": {
-    "address": "0x04C89607413713Ec9775E14b954286519d836FEf",
+    "address": "0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690",
     "codeHash": "0x7ecc3d8c11b42f6c268cab5ee715ca9d9fc463f4dccc7d79a9593b811e05a39a"
+  },
+  "TrustRecoveryCenter": {
+    "address": "0x9E545E3C0baAB3E08CdfD552C960A1050f373042",
+    "codeHash": "0x5ad90d76d007eec03dee09fbfbee5d54af36e81915efc14c2e2e0cfa9eeea9a3"
+  },
+  "RecoveryPolicyCreator": {
+    "address": "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
+    "codeHash": "0x2cae3bf5e0766fcfa83a123a7db2757803b97afde12909ba9412a8d3276c34a0"
   }
 }

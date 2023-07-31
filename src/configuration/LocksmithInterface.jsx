@@ -9,6 +9,8 @@ import * as Distributor from './interfaces/scribes/Distributor.json';
 import * as TrustCreator from './interfaces/agents/TrustCreator.json';
 import * as MegaKeyCreator from './interfaces/agents/MegaKeyCreator.json';
 import * as VirtualKeyAddress from './interfaces/agents/VirtualKeyAddress.json';
+import * as TrustRecoveryCenter from './interfaces/agents/TrustRecoveryCenter.json';
+import * as RecoveryPolicyCreator from './interfaces/agents/RecoveryPolicyCreator.json';
 import * as ShadowERC from './interfaces/ShadowERC.json';
 import { ethers } from 'ethers';
 
@@ -25,6 +27,8 @@ export const LocksmithInterface = (function() {
     'PostOffice': PostOffice,
     'TrustCreator': TrustCreator,
     'VirtualKeyAddress': VirtualKeyAddress,
+    'TrustRecoveryCenter': TrustRecoveryCenter,
+    'RecoveryPolicyCreator': RecoveryPolicyCreator,
     'ShadowERC': ShadowERC,
   };
 
