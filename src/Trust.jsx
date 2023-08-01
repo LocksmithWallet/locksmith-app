@@ -116,12 +116,12 @@ export function Trust() {
     <Box ml={{base: 0, md: 72}} pos='relative'>
       <TrustHeader trustId={trustId} trustInfo={trustInfo}/>
       <TrustBalanceBox trustId={trustId}/>
+      { trustInfo && <OnlyOnChains chains={[31337]}><RecoveryStatusBox keyId={trustInfo.rootKeyId}/></OnlyOnChains> }
       { trustInfo && trustKeys.isSuccess &&
         <TrustKeyList
           trustId={trustId}
           trustInfo={trustInfo}
           trustKeys={trustKeys.data}/> }
-      { trustInfo && <OnlyOnChains chains={[31337]}><RecoveryStatusBox keyId={trustInfo.rootKeyId}/></OnlyOnChains> }
     </Box>
   </motion.div>) 
 }

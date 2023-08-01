@@ -25,6 +25,9 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Tag,
+  TagLabel,
+  TagLeftIcon,
   Tabs,
   TabList,
   TabIndicator,
@@ -55,7 +58,7 @@ import { LocksmithInterface } from './configuration/LocksmithInterface';
 // hooks
 import { GAS_ARN } from './configuration/AssetResource';
 import { useSupportedTokens } from './hooks/Utils';
-import { useInspectKey } from './hooks/contracts/Locksmith';
+import { useInspectKey, useTrustInfo } from './hooks/contracts/Locksmith';
 import { useKeyInboxAddress } from './hooks/contracts/PostOffice';
 import {
   useSend,
@@ -127,10 +130,22 @@ export function Key() {
       { key.isRoot && (<OnlyOnChains chains={[31337]}><motion.div key='recovery-config'>
         <ConfigureRecoveryAlertIngress keyInfo={key}/>
       </motion.div></OnlyOnChains>) }
+      <TrustBadge keyInfo={key}/>
       <KeyHeader keyInfo={key}/>
       <BalanceContextInformation keyInfo={key}/>
     </Box>
   </motion.div>)
+}
+
+export function TrustBadge ({keyInfo, ...rest}) {
+  const trustInfo = useTrustInfo(keyInfo.trustId);
+
+  return (trustInfo && <VStack>
+    <Tag colorScheme='blackAlpha' boxShadow='base'>
+      <Image src='/gold-lock-large.png' width='24px' mr='0.5em' style={{filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5)'}}/>  
+      <TagLabel>{trustInfo.name}</TagLabel>
+    </Tag>
+  </VStack>)
 }
 
 export function BalanceContextInformation({keyInfo, ...rest}) {

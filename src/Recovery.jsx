@@ -85,7 +85,7 @@ export const ConfigureRecoveryAlertIngress = ({keyInfo, ...rest}) => {
   const policy = useRecoveryPolicy(keyInfo.keyId);
   const navigate = useNavigate();
   return (policy && !policy.isValid) && (
-    <Alert status='info'>
+    <Alert status='info' mb='1em'>
       <MdHealthAndSafety size='40px' color='#3186CE' style={{filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.5))'}}/>
       <HStack width='100%' ml='0.5em'>
         <Text fontStyle='italic'>Enable recovery.</Text>
@@ -104,7 +104,7 @@ export const RecoveryStatusBox = ({keyId, ...rest}) => {
 
   return (<motion.div initial={{x: initialX}} animate={{x: 0}} transition={{delay: 0.35}}>
     <Box ref={ref} mt='2em' 
-      overflow='hidden' pos='relative'
+      overflow='hidden' pos='relative' zIndex='0'
       bg='white' borderRadius='lg' boxShadow='lg' p='0.8em' height='100%' style={{marginLeft: '1em', marginRight: '1em'}}>
       <HStack>
         <motion.div key={'kmo'+keyId} initial={{x: '100vw'}} animate={{x: 0}} transition={{duration: 0.2, delay: 0.3}} style={{position: 'relative'}}>
