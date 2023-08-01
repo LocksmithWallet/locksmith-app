@@ -116,7 +116,6 @@ export function Trust() {
     <Box ml={{base: 0, md: 72}} pos='relative'>
       <TrustHeader trustId={trustId} trustInfo={trustInfo}/>
       <TrustBalanceBox trustId={trustId}/>
-      { trustInfo && <OnlyOnChains chains={[31337]}><RecoveryStatusBox keyId={trustInfo.rootKeyId}/></OnlyOnChains> }
       { trustInfo && trustKeys.isSuccess &&
         <TrustKeyList
           trustId={trustId}
@@ -358,11 +357,14 @@ const TrustKeyList = ({trustId, trustInfo, trustKeys, ...rest}) => {
   const initialX = useBreakpointValue({base: '140vw', md: '100vw'});
   return (<motion.div initial={{x: initialX}} animate={{x: 0}} transition={{delay: 0.25}}>
     <List spacing='1.8em' m='1em' mt='2em'>
-      <AnimatePresence>
         { trustKeys.map((k,x) => <ListItem key={'tkli-'+k.toString()} pos='relative'>
           <TrustKeyListItem trustInfo={trustInfo} keyId={k}/>
         </ListItem>) }
-      </AnimatePresence>
+        <OnlyOnChains chains={[31337]}>
+          <ListItem key={'recovery-key'} pos='relative'>
+            <RecoveryStatusBox keyId={trustInfo.rootKeyId}/>
+          </ListItem>
+        </OnlyOnChains>
     </List>
   </motion.div>)
 }

@@ -98,14 +98,82 @@ export const ConfigureRecoveryAlertIngress = ({keyInfo, ...rest}) => {
 }
 
 export const RecoveryStatusBox = ({keyId, ...rest}) => {
-  const initialX = useBreakpointValue({base: '140vw', md: '100vw'});
+  // jiggler
   const ref = useRef(null);  
+  const isDesktop = useBreakpointValue({base: false, md: true});
+  const detailDisclosure = useDisclosure();
+  const animation = useAnimation();
+
+  // data hooks
   const policy = useRecoveryPolicy(keyId);
 
-  return (<motion.div initial={{x: initialX}} animate={{x: 0}} transition={{delay: 0.35}}>
-    <Box ref={ref} mt='2em' 
-      overflow='hidden' pos='relative' zIndex='0'
-      bg='white' borderRadius='lg' boxShadow='lg' p='0.8em' height='100%' style={{marginLeft: '1em', marginRight: '1em'}}>
+  const boxVariants = {
+    start: {
+    },
+    click: function() {
+      const rect = ref.current.getBoundingClientRect();
+      return {
+        position: 'fixed',
+        width: rect.width,
+        height: rect.height,
+        zIndex: 101,
+      };
+    },
+    open: function() {
+      const rect = ref.current.getBoundingClientRect();
+      return {
+        y: -1 * (rect.y) - window.scrollY,
+        zIndex: 500,
+        minWidth: isDesktop ? '0' : '92vw',
+        marginTop: '3vh',
+        height: '95vh',
+      }
+    },
+    close: {
+      x: 0,
+      y: 0,
+      zIndex: 0,
+      position: null,
+      height: null,
+      marginTop: '0vh',
+    },
+    final: {
+      width: null,
+    }
+  };
+
+  const toggleDetail = function() {
+    if (!detailDisclosure.isOpen) {
+      detailDisclosure.onOpen();
+      setTimeout(() => {
+        animation.set('click');
+        animation.start('open');
+      }, 1);
+    } else {
+      detailDisclosure.onClose();
+      setTimeout(async () => {
+        await animation.start('close');
+        animation.set('final');
+      }, 1);
+    }
+  };
+
+  const swipeProps = useBreakpointValue({base: {
+    drag: 'y',
+    onDragEnd: function(event, info) {
+      if (Math.abs(info.offset.y) >= 10 ) {
+        toggleDetail();
+      }
+    }
+  }, md: {}});
+
+  return (<motion.div key={'jiggle-recovery-'+keyId} animate={animation} variants={boxVariants}
+    {... (detailDisclosure.isOpen ? swipeProps : {})}>
+    <Box ref={ref}
+      overflow='hidden' pos='relative'
+      style={{height: '100%', zIndex: 0, cursor: detailDisclosure.isOpen ? null : 'pointer'}}
+      bg='white' borderRadius='lg' boxShadow='lg' p='0.8em'
+      onClick={() => { if(!detailDisclosure.isOpen) { toggleDetail(); } }}>
       <HStack>
         <motion.div key={'kmo'+keyId} initial={{x: '100vw'}} animate={{x: 0}} transition={{duration: 0.2, delay: 0.3}} style={{position: 'relative'}}>
           <MdHealthAndSafety size='80px' color='#3186CE' style={{position: 'absolute', top: '-38px', left: '-22px', opacity: 0.6}}/>
@@ -113,11 +181,11 @@ export const RecoveryStatusBox = ({keyId, ...rest}) => {
         <Text fontWeight='bold' pl='3em'>Recovery</Text>
         <Spacer/>
         { policy && !policy.isValid && (
-          <Button size='sm' colorScheme='blue'>Enable</Button>
+          <Text fontStyle='italic' color='gray'>Disabled</Text> 
         ) }
       </HStack>
     </Box>
-  </motion.div>)
+    </motion.div>)
 }
 
 export function Recovery() {
