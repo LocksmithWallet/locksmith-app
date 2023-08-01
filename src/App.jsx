@@ -49,7 +49,7 @@ export const AnimatedRoutes = () => {
         <Key/>
       </motion.div>
     }/> }
-    { account.isConnected && <Route path='/trust/:trustId' element={
+    { account.isConnected && <Route path='/trust/:trustId/:detail?' element={
       <motion.div key='show-trust' initial={{x: '100vh'}} animate={{x: 0}} exit={{y: '100vh', transition: pageTransition}}>
         <Trust/>
       </motion.div>

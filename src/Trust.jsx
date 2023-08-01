@@ -355,6 +355,7 @@ const CreateKeyConfirmationButton = ({trustId, trustInfo, keyName, destination, 
 
 const TrustKeyList = ({trustId, trustInfo, trustKeys, ...rest}) => {
   const initialX = useBreakpointValue({base: '140vw', md: '100vw'});
+  const { detail } = useParams();
   return (<motion.div initial={{x: initialX}} animate={{x: 0}} transition={{delay: 0.25}}>
     <List spacing='1.8em' m='1em' mt='2em'>
         { trustKeys.map((k,x) => <ListItem key={'tkli-'+k.toString()} pos='relative'>
@@ -362,7 +363,7 @@ const TrustKeyList = ({trustId, trustInfo, trustKeys, ...rest}) => {
         </ListItem>) }
         <OnlyOnChains chains={[31337]}>
           <ListItem key={'recovery-key'} pos='relative'>
-            <RecoveryStatusBox keyId={trustInfo.rootKeyId}/>
+            <RecoveryStatusBox keyId={trustInfo.rootKeyId} autoOpen={detail === 'recovery'}/>
           </ListItem>
         </OnlyOnChains>
     </List>

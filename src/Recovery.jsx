@@ -91,13 +91,13 @@ export const ConfigureRecoveryAlertIngress = ({keyInfo, ...rest}) => {
         <Text fontStyle='italic'>Enable recovery.</Text>
         <Spacer/>
         <Button size='sm' colorScheme='blue'
-          onClick={() => { navigate('/trust/' + keyInfo.trustId); }}>Set Up</Button>
+          onClick={() => { navigate('/trust/' + keyInfo.trustId + "/recovery"); }}>Set Up</Button>
       </HStack>
     </Alert>
   )
 }
 
-export const RecoveryStatusBox = ({keyId, ...rest}) => {
+export const RecoveryStatusBox = ({keyId, autoOpen, ...rest}) => {
   // jiggler
   const ref = useRef(null);  
   const isDesktop = useBreakpointValue({base: false, md: true});
@@ -166,6 +166,15 @@ export const RecoveryStatusBox = ({keyId, ...rest}) => {
       }
     }
   }, md: {}});
+
+  // enable auto-open
+  useEffect(() => {
+    if (autoOpen) {
+      setTimeout(() => {
+        toggleDetail();
+      }, 1000);
+    }
+  }, []);
 
   return (<motion.div key={'jiggle-recovery-'+keyId} animate={animation} variants={boxVariants}
     {... (detailDisclosure.isOpen ? swipeProps : {})}>
