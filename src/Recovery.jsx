@@ -198,6 +198,14 @@ export const RecoveryStatusBox = ({keyId, autoOpen, ...rest}) => {
           <Text fontStyle='italic' color='gray'>Disabled</Text> 
         ) }
       </HStack>
+      { detailDisclosure.isOpen && <VStack mt='2em'>
+        <Text fontSize='lg' align='center'>
+          Enable <b>guardians</b> to recover your <b>Master Key</b>.
+        </Text> 
+        <Text fontSize='lg' align='center'>
+          You can choose a combination of <b>inactivity</b> and <b>key confirmations</b> to control when recovery is possible. 
+        </Text> 
+      </VStack>}
     </Box>
     </motion.div>)
 }
