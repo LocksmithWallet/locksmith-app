@@ -185,7 +185,12 @@ export const RecoveryStatusBox = ({keyId, autoOpen, ...rest}) => {
       onClick={() => { if(!detailDisclosure.isOpen) { toggleDetail(); } }}>
       <HStack>
         <motion.div key={'kmo'+keyId} initial={{x: '100vw'}} animate={{x: 0}} transition={{duration: 0.2, delay: 0.3}} style={{position: 'relative'}}>
-          <MdHealthAndSafety size='80px' color='#3186CE' style={{position: 'absolute', top: '-38px', left: '-22px', opacity: 0.6}}/>
+          <MdHealthAndSafety size={detailDisclosure.isOpen ? '50px' : '80px'} color='#3186CE' style={{
+            position: 'absolute', 
+            top: detailDisclosure.isOpen ?  '-24px' : '-38px', 
+            left: detailDisclosure.isOpen ? '-8px' : '-22px', 
+            opacity: detailDisclosure.isOpen ? 1 : 0.6
+          }}/>
         </motion.div>
         <Text fontWeight='bold' pl='3em'>Recovery</Text>
         <Spacer/>
