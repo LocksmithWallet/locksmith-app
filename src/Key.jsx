@@ -105,6 +105,12 @@ import { ContextBalanceUSD } from './components/Ledger';
 import {
   TransactionListContext
 } from './components/TransactionProvider';
+import {
+  ConfigureRecoveryAlertIngress
+} from './Recovery';
+import {
+  OnlyOnChains
+} from './components/SupportedNetworkCheck';
 
 // icons
 import { FiEdit2 } from 'react-icons/fi';
@@ -118,6 +124,9 @@ export function Key() {
   
   return (key && <motion.div key={"key-"+keyId}>
     <Box ml={{base: 0, md: 72}}>
+      { key.isRoot && (<OnlyOnChains chains={[31337]}><motion.div key='recovery-config'>
+        <ConfigureRecoveryAlertIngress keyInfo={key}/>
+      </motion.div></OnlyOnChains>) }
       <KeyHeader keyInfo={key}/>
       <BalanceContextInformation keyInfo={key}/>
     </Box>
@@ -156,7 +165,7 @@ export function KeyHeader({keyInfo}) {
   }; 
   // processing
 
-  return (keyInfo && <motion.div key={"key-"+keyId}>
+  return (keyInfo && <motion.div key={"key-"+keyId} style={{position: 'relative'}}>
     <OverlayBlur disclosure={qrModal} onClose={qrZoomBack}/>
     <motion.div key={'key-detail-'+keyId} initial={{y: -250}} animate={{y: 0}} transition={{delay: 0.25}}>
       <VStack pos='absolute' top='-25px'>

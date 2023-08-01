@@ -90,6 +90,10 @@ import {
 import { AddressExplorerButton, CopyButton } from './components/Key';
 import { ContextBalanceUSD } from './components/Ledger';
 import { KeyIcon } from './components/Key';
+import { OnlyOnChains } from './components/SupportedNetworkCheck';
+import { 
+  RecoveryStatusBox 
+} from './Recovery';
 
 import { 
   motion,
@@ -117,6 +121,7 @@ export function Trust() {
           trustId={trustId}
           trustInfo={trustInfo}
           trustKeys={trustKeys.data}/> }
+      { trustInfo && <OnlyOnChains chains={[31337]}><RecoveryStatusBox keyId={trustInfo.rootKeyId}/></OnlyOnChains> }
     </Box>
   </motion.div>) 
 }

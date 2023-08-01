@@ -14,5 +14,15 @@ export const SupportedNetworkCheck = ({children}) => {
         return ''
   } 
 
-  return children
+  return children;
+}
+
+export const OnlyOnChains = ({chains, children}) => {
+  const network = useNetwork();
+
+  if(chains.includes(network.chain.id)) {
+    return children;
+  }
+
+  return '';
 }
