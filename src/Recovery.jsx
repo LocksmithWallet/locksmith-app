@@ -198,9 +198,12 @@ export const RecoveryStatusBox = ({keyId, autoOpen, ...rest}) => {
         </motion.div>
         <Text fontWeight='bold' pl='3em'>Recovery</Text>
         <Spacer/>
-        { policy && !policy.isValid && (
+        { policy && !policy.isValid && !detailDisclosure.isOpen && (
           <Text fontStyle='italic' color='gray'>Disabled</Text> 
         ) }
+        { detailDisclosure.isOpen && isDesktop &&
+          <IconButton pos='absolute' top='1em' right='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
+            onClick={toggleDetail}/> }
       </HStack>
       { !detailDisclosure.isOpen ? '' : <RecoveryCreateWizard keyId={keyId}/> }
     </Box>
