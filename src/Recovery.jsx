@@ -25,6 +25,9 @@ import {
   List,
   ListItem,
   Text,
+  Tag,
+  TagLabel,
+  TagLeftIcon,
   Spacer,
   Spinner,
   VStack,
@@ -80,6 +83,7 @@ import {
 import { IoMdArrowRoundBack } from 'react-icons/io';
 import { MdHealthAndSafety } from 'react-icons/md';
 import { FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { AiOutlineNumber } from 'react-icons/ai';
 
 export const ConfigureRecoveryAlertIngress = ({keyInfo, ...rest}) => {
   const policy = useRecoveryPolicy(keyInfo.keyId);
@@ -198,16 +202,90 @@ export const RecoveryStatusBox = ({keyId, autoOpen, ...rest}) => {
           <Text fontStyle='italic' color='gray'>Disabled</Text> 
         ) }
       </HStack>
-      { detailDisclosure.isOpen && <VStack mt='2em'>
-        <Text fontSize='lg' align='center'>
-          Enable <b>guardians</b> to recover your <b>Master Key</b>.
-        </Text> 
-        <Text fontSize='lg' align='center'>
-          You can choose a combination of <b>inactivity</b> and <b>key confirmations</b> to control when recovery is possible. 
-        </Text> 
-      </VStack>}
+      { !detailDisclosure.isOpen ? '' : <RecoveryCreateWizard keyId={keyId}/> }
     </Box>
     </motion.div>)
+}
+
+export function RecoveryCreateWizard({keyId, ...rest}) {
+  const [step, setStep] = useState(0);
+  const animations = {
+    initial: {x: '100vw'},
+    animate: {x: '0', transition: {delay: 0.25}},
+    exit: {x: '-100vw'},
+    transition: {duration: 0.2}
+  };
+
+  // transaction parameters
+  const [guardians, setGuardians] = useState([]);
+  const [deadmen, setDeadmen] = useState([]);
+  const [oracles, setOracles] = useState([]);
+
+  return (
+    <VStack mt='4em' spacing='0'>
+      <Box width='20em'>
+        <AnimatePresence>
+          { step === 0 && <motion.div key='add-recovery-0' {... animations}>
+            <StepZeroContent keyId={keyId} setStep={setStep}/>
+          </motion.div> }
+          { step === 1 && <motion.div key='add-recovery-1' {... animations}>
+            <StepOneContent keyId={keyId} setStep={setStep}
+              guardians={guardians} setGuardians={setGuardians}/>
+          </motion.div> }
+        </AnimatePresence>
+      </Box>
+    </VStack>
+  )
+}
+
+export function StepZeroContent({keyId, setStep, ...rest}) {
+  return (
+    <VStack spacing='2em'>
+      <Text fontSize='lg' align='center'>Recover your <b>Master Key</b> easily.</Text>
+      <HStack width='100%'>
+        <Tag size='lg'><TagLabel>1</TagLabel></Tag>
+        <VStack align='stretch' spacing='0em'>
+          <Text fontWeight='bold'>Choose Guardians</Text>
+          <Text fontSize='sm' color='gray'>Enable Master Key recovery.</Text>
+        </VStack>
+      </HStack>
+      <HStack width='100%'>
+        <Tag size='lg'><TagLabel>2</TagLabel></Tag>
+        <VStack align='stretch' spacing='0em'>
+          <Text fontWeight='bold'>Select Conditions</Text>
+          <Text fontSize='sm' color='gray'>Inactivity, signatures, etc.</Text>
+        </VStack>
+      </HStack>
+      <Alert fontSize='sm' status='info'><AlertIcon/>Never share your seed phrase.</Alert>
+      <Button width='100%' colorScheme='blue' onClick={() => {setStep(1);}}>Start</Button>
+    </VStack>
+  )
+}
+
+export function StepOneContent({keyId, setStep, guardians, setGuardians, ...rest}) {
+  const [guardian, setGuardian] = useState(null); 
+  const isValidAddress = ethers.utils.isAddress(guardian);
+
+  return <VStack spacing='2em'>
+    <HStack width='100%'>
+      <Tag size='lg'><TagLabel>1</TagLabel></Tag>
+      <Text fontWeight='bold'>Choose Guardians</Text>
+    </HStack>
+    <Text align='center'>You decide when <i>these</i> addresses can recover your master key.</Text>
+    <Box width='100%'>
+      <Input fontSize='xs' width='100%' size='md' mb='0.5em' placeholder='0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+        onChange={(event) => {setGuardian(event.target.value);}}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' && isValidAddress) {
+            // add it if its valid
+          }
+        }}/>
+      { isValidAddress && <Text align='center' fontWeight='bold' textColor='green.600' fontSize='sm'><DisplayAddress address={guardian || ''}/></Text> }
+      { !isValidAddress && <Text align='center' textColor='red.600' fontStyle='italic' fontSize='sm'>Enter valid address</Text> }
+    </Box>
+    <Button width='100%' onClick={()=>{setStep(0);}}>Back</Button>
+    <Button width='100%' isDisabled={guardians.length < 1} colorScheme='blue' onClick={()=>{setStep(2);}}>Next</Button>
+  </VStack>
 }
 
 export function Recovery() {
