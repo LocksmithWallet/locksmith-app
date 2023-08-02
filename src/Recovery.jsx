@@ -235,6 +235,10 @@ export function RecoveryCreateWizard({keyId, ...rest}) {
             <StepOneContent keyId={keyId} setStep={setStep}
               guardians={guardians} setGuardians={setGuardians}/>
           </motion.div> }
+          { step === 2 && <motion.div key='add-recovery-2' {... animations}>
+            <StepTwoContent keyId={keyId} setStep={setStep}
+              guardians={guardians} setGuardians={setGuardians}/>
+          </motion.div> }
         </AnimatePresence>
       </Box>
     </VStack>
@@ -287,9 +291,56 @@ export function StepOneContent({keyId, setStep, guardians, setGuardians, ...rest
       { !isValidAddress && <Text align='center' textColor='red.600' fontStyle='italic' fontSize='sm'>Enter valid address</Text> }
     </Box>
     <Button width='100%' onClick={()=>{setStep(0);}}>Back</Button>
-    <Button width='100%' isDisabled={guardians.length < 1} colorScheme='blue' onClick={()=>{setStep(2);}}>Next</Button>
+    <Button width='100%' isDisabled={!isValidAddress} colorScheme='blue' onClick={()=>{
+      // we can safely blast away the guardian list here as we are
+      // assuming we are choosing the first one
+      setGuardians([guardian]);
+      setStep(2);
+    }}>Next</Button>
   </VStack>
 }
+
+export function StepTwoContent({keyId, setStep, guardians, setGuardians, ...rest}) {
+  const { address } = useAccount();
+
+  const removeGuardian = function(guardian) {
+    var newGuardians = guardians.filter((g) => g !== guardian);
+
+    // remove the guardian from the array
+    setGuardians(newGuardians);
+
+    // if we have an empty guardian set, then
+    // go back to step one.
+    if(newGuardians.length < 1) { setStep(1); }
+  };
+
+  return <VStack spacing='2em'>
+    <Text fontWeight='bold'>Guardians ({guardians.length})</Text>
+    <List spacing='1em' width='100%'>
+      { guardians.map((g,x) => <ListItem key={'guardian-'+x}>
+        <HStack pos='relative'>
+          <AddressAvatar address={g} size={24}/>
+          { (address === g) && <Spinner
+              pos='absolute'
+              top='-4px'
+              left='-12px'
+              thickness='2px'
+              speed='2s'
+              color='blue.500'
+              size='lg'
+            /> }
+          <Text fontWeight='bold' fontSize='0.8em'><DisplayAddress address={g}/></Text>
+          <Spacer/>
+          <IconButton size='sm' right='0px' pos='absolute' icon={<FiTrash2 size='22px' color='#ff7b47'/>} borderRadius='full' boxShadow='md'
+            onClick={() => {removeGuardian(g);}}/>
+        </HStack>
+      </ListItem>) }
+    </List>
+    <Button width='100%'>Add Guardian</Button>
+    <Button width='100%' colorScheme='blue'>Next</Button> 
+  </VStack>
+}
+
 
 export function Recovery() {
   const { keyId } = useParams();
