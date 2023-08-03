@@ -363,7 +363,7 @@ const TrustKeyList = ({trustId, trustInfo, trustKeys, ...rest}) => {
         </ListItem>) }
         <OnlyOnChains chains={[31337]}>
           <ListItem key={'recovery-key'} pos='relative'>
-            <RecoveryStatusBox keyId={trustInfo.rootKeyId} autoOpen={detail === 'recovery'}/>
+            <RecoveryStatusBox keyId={trustInfo.rootKeyId} trustInfo={trustInfo} autoOpen={detail === 'recovery'}/>
           </ListItem>
         </OnlyOnChains>
     </List>

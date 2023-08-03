@@ -60,6 +60,9 @@ import {
   useInspectKey,
 } from './hooks/contracts/Locksmith';
 import {
+  useTrustedActors,
+} from './hooks/contracts/Notary';
+import {
   useKeyInboxAddress
 } from './hooks/contracts/PostOffice';
 import {
@@ -103,12 +106,13 @@ export const ConfigureRecoveryAlertIngress = ({keyInfo, ...rest}) => {
   )
 }
 
-export const RecoveryStatusBox = ({keyId, autoOpen, ...rest}) => {
+export const RecoveryStatusBox = ({keyId, trustInfo, autoOpen, ...rest}) => {
   // jiggler
   const ref = useRef(null);  
   const isDesktop = useBreakpointValue({base: false, md: true});
   const detailDisclosure = useDisclosure();
   const animation = useAnimation();
+  const network = useNetwork()
 
   // data hooks
   const policy = useRecoveryPolicy(keyId);
@@ -207,12 +211,13 @@ export const RecoveryStatusBox = ({keyId, autoOpen, ...rest}) => {
           <IconButton pos='absolute' top='1em' right='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
             onClick={toggleDetail}/> }
       </HStack>
-      { !detailDisclosure.isOpen ? '' : <RecoveryCreateWizard keyId={keyId}/> }
+      { !detailDisclosure.isOpen ? '' : <RecoveryCreateWizard keyId={keyId} trustInfo={trustInfo}/> }
     </Box>
     </motion.div>)
 }
 
-export function RecoveryCreateWizard({keyId, ...rest}) {
+export function RecoveryCreateWizard({keyId, trustInfo, ...rest}) {
+  const network = useNetwork();
   const [step, setStep] = useState(0);
   const animations = {
     initial: {x: '100vw'},
@@ -224,6 +229,15 @@ export function RecoveryCreateWizard({keyId, ...rest}) {
   // transaction parameters
   const [guardians, setGuardians] = useState([]);
   const [days, setDays] = useState(90);
+
+  // write
+  const alarmClockAddress = Networks.getContractAddress(network.chain.id, 'AlarmClock');
+  const trustedDispatchers = useTrustedActors(Networks.getContractAddress(network.chain.id, 'TrustEventLog'),
+    trustInfo.trustId, 2);
+  const needsAlarmNotary = trustedDispatchers.isSuccess &&
+    (trustedDispatchers.data.indexOf(alarmClockAddress) < 0);
+  // const createPolicy = useRecoveryPolicyCreator(keyId, needsAlarmNotary, false, guardians,
+    
 
   return (
     <VStack mt='4em' spacing='0'>
