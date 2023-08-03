@@ -220,12 +220,12 @@ const TrustHeader = ({trustId, trustInfo, ...rest}) => {
           <IconButton pos='absolute' top='1em' right='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
             onClick={toggleDetail}/> }
       </HStack>
-      { detailDisclosure.isOpen && <CreateKeyFlow trustId={trustId} trustInfo={trustInfo}/> } 
+      { detailDisclosure.isOpen && <CreateKeyFlow trustId={trustId} trustInfo={trustInfo} toggleDetail={toggleDetail}/> } 
     </Box>
   </motion.div>)
 }
 
-const CreateKeyFlow = ({trustId, trustInfo, ...rest}) => {
+const CreateKeyFlow = ({trustId, trustInfo, toggleDetail, ...rest}) => {
   const account = useAccount();
   const [step, setStep] = useState(0);
   const [keyName, setKeyName] = useState('');
@@ -324,13 +324,13 @@ const CreateKeyFlow = ({trustId, trustInfo, ...rest}) => {
           trustId={trustId}
           trustInfo={trustInfo}
           keyName={keyName}
-          destination={destination}/>
+          destination={destination} toggleDetail={toggleDetail}/>
       </motion.div>) }
       </AnimatePresence>
     </VStack>)
 }
 
-const CreateKeyConfirmationButton = ({trustId, trustInfo, keyName, destination, ...rest}) => {
+const CreateKeyConfirmationButton = ({trustId, trustInfo, keyName, destination, toggleDetail, ...rest}) => {
   const transactions = useContext(TransactionListContext);
   const navigate = useNavigate();
 
@@ -346,7 +346,7 @@ const CreateKeyConfirmationButton = ({trustId, trustInfo, keyName, destination, 
         subtitle: 'Send to ' + destination.substring(0,6) + '...' + destination.substring(destination.length - 4),
         data: data
       });
-      setTimeout(()=> {navigate('/reveal/'+data.hash+'/'+trustId+'/'+ethers.utils.formatBytes32String(trustInfo.name));}, 500);
+      toggleDetail();
     });
 
   return (<Button isDisabled={!keyCreator.write} isLoading={keyCreator.isLoading}

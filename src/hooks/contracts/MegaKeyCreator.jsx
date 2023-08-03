@@ -30,7 +30,7 @@ export function useMegaKeyCreator(rootKeyId, keyAlias, receiver, bound, errorFun
     [ethers.utils.formatBytes32String(keyAlias), provider, receiver, bound]);
 
    return useLocksmithWrite('KeyVault', 'safeTransferFrom',
-      [receiver, megaKeyAddress, rootKeyId, 1, data],
+      [address, megaKeyAddress, rootKeyId, 1, data],
       rootKeyId !== null && provider !== null && receiver !== null,
       errorFunc, successFunc);
 }

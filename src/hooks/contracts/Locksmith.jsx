@@ -86,7 +86,7 @@ export function useTrustInfo(trustId) {
  * This is useful when chaining hooks.
  */
 export function useTrustKeys(trustId) {
-  return useLocksmithRead('Locksmith', 'getKeys', [trustId], trustId != null);
+  return useLocksmithRead('Locksmith', 'getKeys', [trustId], trustId != null, true);
 }
 
 /**
