@@ -68,6 +68,9 @@ import {
 import {
   useRecoveryPolicy
 } from './hooks/contracts/TrustRecoveryCenter';
+import {
+  useRecoveryPolicyCreator
+} from './hooks/contracts/RecoveryPolicyCreator';
 
 import {
   DisplayAddress,
@@ -211,12 +214,12 @@ export const RecoveryStatusBox = ({keyId, trustInfo, autoOpen, ...rest}) => {
           <IconButton pos='absolute' top='1em' right='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
             onClick={toggleDetail}/> }
       </HStack>
-      { !detailDisclosure.isOpen ? '' : <RecoveryCreateWizard keyId={keyId} trustInfo={trustInfo}/> }
+      { !detailDisclosure.isOpen ? '' : <RecoveryCreateWizard keyId={keyId} trustInfo={trustInfo} toggleDetail={toggleDetail}/> }
     </Box>
     </motion.div>)
 }
 
-export function RecoveryCreateWizard({keyId, trustInfo, ...rest}) {
+export function RecoveryCreateWizard({keyId, trustInfo, toggleDetail, ...rest}) {
   const network = useNetwork();
   const [step, setStep] = useState(0);
   const animations = {
@@ -236,8 +239,6 @@ export function RecoveryCreateWizard({keyId, trustInfo, ...rest}) {
     trustInfo.trustId, 2);
   const needsAlarmNotary = trustedDispatchers.isSuccess &&
     (trustedDispatchers.data.indexOf(alarmClockAddress) < 0);
-  // const createPolicy = useRecoveryPolicyCreator(keyId, needsAlarmNotary, false, guardians,
-    
 
   return (
     <VStack mt='4em' spacing='0'>
@@ -260,7 +261,7 @@ export function RecoveryCreateWizard({keyId, trustInfo, ...rest}) {
           </motion.div> }
           { step === 4 && <motion.div key='add-recovery-4' {... animations}>
             <StepFourContent keyId={keyId} setStep={setStep}
-              guardians={guardians} days={days}/>
+              guardians={guardians} days={days} needsAlarmNotary={needsAlarmNotary} toggleDetail={toggleDetail}/>
           </motion.div> }
         </AnimatePresence>
       </Box>
@@ -398,10 +399,25 @@ export function StepThreeContent({keyId, setStep, guardians, days, setDays, ...r
   </VStack>
 }
 
-export function StepFourContent({keyId, setStep, guardians, days, ...rest}) {
+export function StepFourContent({keyId, trustInfo, setStep, needsAlarmNotary, guardians, days, toggleDetail, ...rest}) {
   const { address } = useAccount();
-  var date = new Date();
-  date.setDate(date.getDate() + parseInt(days));
+  const transactions = useContext(TransactionListContext);
+  const [time, setTime] = useState(Date.now() + 86400000 * days);
+  
+  // write
+  const createPolicy = useRecoveryPolicyCreator(keyId, needsAlarmNotary, false, guardians, [
+    [ethers.utils.formatBytes32String('Recovery Check-in'), time, days * 86400, keyId]
+  ], [], (error) => {
+      console.log(error);
+    }, (data) => {
+      transactions.addTransaction({
+        type: 'CREATE_RECOVERY',
+        title: 'Enable Recovery',
+        subtitle: 'With ' + guardians.length + " addresses",
+        data: data
+      });
+      toggleDetail();
+    });
 
   return <VStack spacing='2em'>
     <Text fontWeight='bold'>Final Review</Text>
@@ -441,10 +457,11 @@ export function StepFourContent({keyId, setStep, guardians, days, ...rest}) {
         <Text fontWeight='bold' fontSize='sm'>{days} Day Alarm</Text>
       </HStack>
       <Alert status='warning' fontSize='sm'>
-        <AlertIcon/>First check-in: {date.toDateString()}
+        <AlertIcon/>First check-in: {(new Date(time)).toDateString()}
       </Alert>
     </VStack>
-    <Button width='100%' colorScheme='blue'>Enable Recovery Now</Button>
+    <Button isDisabled={!createPolicy.write} isLoading={createPolicy.isLoading}
+      onClick={() => { createPolicy.write?.();}} width='100%' colorScheme='blue'>Enable Recovery Now</Button>
   </VStack>
 }
 
