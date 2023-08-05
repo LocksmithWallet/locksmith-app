@@ -81,11 +81,7 @@ export const KeyNavigator = (onClose) => {
     { unsortedKeys.map((uk) => <KeyInspector key={'ki-'+uk.toString()} keyId={uk} sortKey={sortKey}/>) } 
     <LayoutGroup>
       { Object.keys(sortedKeys).map(
-        (tid, i) => <motion.div 
-          layout 
-          key={'tn'+tid}>
-            <TrustNavigationBox trustId={tid} keys={sortedKeys[tid]} onClose={onClose}/>
-        </motion.div>
+        (tid, i) => <TrustNavigationBox key={'tn-'+tid} trustId={tid} keys={sortedKeys[tid]} onClose={onClose}/>
       )}
     </LayoutGroup>
   </Box>
