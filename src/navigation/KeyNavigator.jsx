@@ -83,10 +83,7 @@ export const KeyNavigator = (onClose) => {
       { Object.keys(sortedKeys).map(
         (tid, i) => <motion.div 
           layout 
-          key={'tn'+tid} 
-          initial={{opacity: 0, x: -100}}
-          animate={{opacity: 1, x: 0}}
-          transition={{type: 'spring', delay: i * 0.05}}>
+          key={'tn'+tid}>
             <TrustNavigationBox trustId={tid} keys={sortedKeys[tid]} onClose={onClose}/>
         </motion.div>
       )}
