@@ -113,17 +113,11 @@ const SidebarContent = ({onClose, ...rest }) => {
       {...rest}>
       <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
         <HStack onClick={() => { onClose(); navigate('/');}} spacing={0} cursor='pointer'>
-          <motion.div  initial={{x: -100}} animate={{x: 0}} transition={{duration: 0.5}}>
-            <Heading fontSize='4xl'>L</Heading>
-          </motion.div>
-          <AttentionSeeker effect='bounce'>
-            <Image style={{filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))'}} src='/gold-lock-tiny.png'/>
-          </AttentionSeeker>
-          <motion.div  initial={{x: 100}} animate={{x: 0}} transition={{duration: 0.5}}>
-            <Heading fontSize="4xl" data-text="cksmith">
-              cksmith
-            </Heading>
-          </motion.div>
+          <Heading fontSize='4xl'>L</Heading>
+          <Image style={{filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))'}} src='/gold-lock-tiny.png'/>
+          <Heading fontSize="4xl" data-text="cksmith">
+            cksmith
+          </Heading>
         </HStack>
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose}/>
       </Flex>

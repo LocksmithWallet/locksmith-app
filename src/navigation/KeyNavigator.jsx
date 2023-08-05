@@ -115,9 +115,7 @@ export const TrustNavigationBox = ({trustId, keys, onClose}) => {
           style={{cursor: 'pointer', scale: '1.5'}}
             whileHover={{scale: 2.2, rotate: 180}}
             whileTap={{scale: 1.25}}
-            onClick={() => { onClose.onClose(); navigate('/trust/' + trustId); }}
-            initial={{opacity: 0, x: 50}}
-            animate={{opacity:1, x:0}}>
+            onClick={() => { onClose.onClose(); navigate('/trust/' + trustId); }}>
           <FcSettings size='20px'/></motion.div> }
       </HStack>
       <List mt='0.5em' pb='0.5em' spacing='1em'>
@@ -138,10 +136,7 @@ export const KeyListItem = ({k, i, onClose, ...rest}) => {
       onMouseEnter={() => { setHover(true); }}
       onMouseLeave={() => { setHover(false); }}
       onClick={() => { onClose.onClose(); navigate('/key/' + k.keyId); }}
-      style={{cursor: 'pointer'}}
-      initial={{opacity: 0, y: -50}}
-      animate={{opacity: 1, y: 0}}
-      transition={{delay: i * 0.05, transition: {layout: {duration: 0.1}}}}>
+      style={{cursor: 'pointer'}}>
       <AnimatePresence>
         { isHover && <motion.div
           layoutId={'key-selection-'+k.trustId}
