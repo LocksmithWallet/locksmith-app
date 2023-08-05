@@ -178,14 +178,15 @@ export function KeyHeader({keyInfo}) {
       setQrZIndex(null);
     }, 400);
   }; 
-  // processing
 
   return (keyInfo && <motion.div key={"key-"+keyId} style={{position: 'relative'}}>
     <OverlayBlur disclosure={qrModal} onClose={qrZoomBack}/>
     <motion.div key={'key-detail-'+keyId} initial={{y: -250}} animate={{y: 0}} transition={{delay: 0.25}}>
       <VStack pos='absolute' top='-25px'>
-        <KeyIcon keyInfo={keyInfo} size='140px' style={{filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5))'}}/> 
-        <Text pos='relative' top='-105px' fontWeight='bold'>#{keyInfo.keyId}</Text>
+        {keyInfo.isRoot && <KeyIcon keyInfo={keyInfo} size='140px' style={{filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5))'}}/>}
+        {!keyInfo.isRoot && keyInboxAddress.data && <Box style={{filter: 'drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5))'}}
+          pos='relative' top='40px' left='40px'><AddressAvatar 
+            address={keyInboxAddress.data} size='60'/></Box> } 
       </VStack>
     </motion.div>
     <Box m='1em' mt='2em' bg='white' borderRadius='lg' boxShadow='lg' p='0.8em' pl='7em'>
@@ -1177,12 +1178,15 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, t
 
 export const ReviewSelectedKeyInfo = ({keyId, ...rest}) => {
   const selectedKeyInfo = useInspectKey(keyId);
-  return selectedKeyInfo && (<>
-  <KeyIcon keyInfo={selectedKeyInfo} size={32}/>
-    <VStack align='stretch' fontSize='0.8em' spacing='0em'>
-      <HStack><Text fontWeight='bold'>#{selectedKeyInfo.keyId}: {selectedKeyInfo.alias}</Text></HStack>
-      <HStack><KeyTrustName keyInfo={selectedKeyInfo} fontStyle='italic' textColor='gray.600'/></HStack>
-    </VStack>
+  const inbox = useKeyInboxAddress(keyId);
+
+  return selectedKeyInfo && inbox.data && (<>
+  { selectedKeyInfo.isRoot && <KeyIcon keyInfo={selectedKeyInfo} size={32}/> }
+  { !selectedKeyInfo.isRoot && <AddressAvatar address={inbox.data}/> }
+  <VStack align='stretch' fontSize='0.8em' spacing='0em'>
+    <HStack><Text fontWeight='bold'>{selectedKeyInfo.alias}</Text></HStack>
+    <HStack><DisplayAddress address={inbox.data} fontStyle='italic' textColor='gray.600'/></HStack>
+  </VStack>
   </>)
 }
 
@@ -1288,7 +1292,7 @@ export const SelectSendDestination = ({keyInfo, isSendKey, setSendKey, destinati
       <Switch size='lg' {... isSendKey ? {defaultChecked: true} : {}} onChange={(e) => {
         setSendKey(e.target.checked);
       }}/>
-      <Text fontSize='sm' {... (isSendKey ? {fontWeight: 'bold'} : {})}>Key</Text>
+      <Text fontSize='sm' {... (isSendKey ? {fontWeight: 'bold'} : {})}>My Trust</Text>
     </HStack>
     <AnimatePresence mode='wait'>
     { !isSendKey && 
@@ -1311,7 +1315,7 @@ export const SelectSendDestination = ({keyInfo, isSendKey, setSendKey, destinati
           transition={{duration: 0.2}}
           animate={{opacity: 1, x: 0}}
           exit={{opacity: 0, x: -500}}> 
-        <Select placeholder='Select Treasury Key' mb='1.75em' 
+        <Select placeholder='Select Trust Account' mb='1.75em' 
             value={(keyDest||'').toString()}
             onChange={(e) => { setKey(e.target.value); }}>
           { keyInfo.trustKeys.filter((k) => k.toString() !== keyInfo.keyId.toString()).map((k) => <KeySelectOption 

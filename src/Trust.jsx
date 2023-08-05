@@ -115,7 +115,6 @@ export function Trust() {
   return (<motion.div key={"trust-"+trustId}>
     <Box ml={{base: 0, md: 72}} pos='relative'>
       <TrustHeader trustId={trustId} trustInfo={trustInfo}/>
-      <TrustBalanceBox trustId={trustId}/>
       { trustInfo && trustKeys.isSuccess &&
         <TrustKeyList
           trustId={trustId}
@@ -212,10 +211,9 @@ const TrustHeader = ({trustId, trustInfo, ...rest}) => {
     <Box ref={ref} bg='white' borderRadius='lg' boxShadow='lg' p='0.8em' height='100%'> 
       <HStack pl='5.2em' mt={detailDisclosure.isOpen? '1em' : '0em'}>
         <Text fontWeight='bold' fontSize='lg'>{trustInfo && trustInfo.name}</Text>
-        <Text fontStyle='italic' color='gray.500'>#{trustId.toString()}</Text>
         <Spacer/>
         { !detailDisclosure.isOpen &&
-          <Button size='sm' colorScheme='blue' onClick={toggleDetail}>New Key</Button> }
+          <Button size='sm' colorScheme='blue' onClick={toggleDetail}>Add Account</Button> }
         { detailDisclosure.isOpen && isDesktop && 
           <IconButton pos='absolute' top='1em' right='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
             onClick={toggleDetail}/> }
@@ -245,10 +243,10 @@ const CreateKeyFlow = ({trustId, trustInfo, toggleDetail, ...rest}) => {
       { step === 0 && (<motion.div key='create-key-0' style={{position: 'relative'}}>
         <Box as={motion.div} {... stepAnimation} pos='relative'>
           <KeyIcon keyInfo={{isRoot: false}} size='500px' style={{filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5))'}}/>
-          <Text pos='absolute' top='50px' left='195px' color='white'>Name Your Key</Text>
+          <Text pos='absolute' top='50px' left='195px' color='white'>Name Your Account</Text>
           <Input pos='absolute' top='84px' left='160px' border='1px' borderColor={nameTooShort ? 'red' : 'gray.300'}
               bgColor='white' textAlign='center'
-              placeholder='My Key' width='10em' size='lg'
+              placeholder='Savings' width='10em' size='lg'
               maxLength={15}
               p='1.4em'
               value={keyName}
@@ -298,8 +296,8 @@ const CreateKeyFlow = ({trustId, trustInfo, toggleDetail, ...rest}) => {
           onClick={() => {
             setDestination(account.address);
             setStep(3);
-        }}>Send Key to Me</Button>
-        <Button mt='2em' width='100%' onClick={() => {setStep(2);}}>Send Key to Someone Else</Button>
+        }}>Add Me</Button>
+        <Button mt='2em' width='100%' onClick={() => {setStep(2);}}>Add Someone Else</Button>
       </motion.div>) }
       { step === 2 && (<motion.div key='create-key-3' {... stepAnimation} style={{marginTop: '2em', width: '20em'}}>
           <VStack spacing='1em'>
@@ -350,7 +348,7 @@ const CreateKeyConfirmationButton = ({trustId, trustInfo, keyName, destination, 
     });
 
   return (<Button isDisabled={!keyCreator.write} isLoading={keyCreator.isLoading}
-    width='100%' colorScheme='blue' onClick={() => {keyCreator.write?.();}}>Create Key</Button>)
+    width='100%' colorScheme='blue' onClick={() => {keyCreator.write?.();}}>Create Account</Button>)
 }
 
 const TrustKeyList = ({trustId, trustInfo, trustKeys, ...rest}) => {
@@ -483,28 +481,32 @@ const TrustKeyListItem = ({trustInfo, keyId, ...rest}) => {
       style={{height: '100%', zIndex: 0, cursor: detailDisclosure.isOpen ? null : 'pointer'}} pos='relative'
       onClick={() => { if(!detailDisclosure.isOpen) { toggleDetail(); } }}>
       {keyInfo && <motion.div key={'kmo'+keyId} initial={{x: '100vw'}} animate={{x: 0}} transition={{duration: 0.2, delay: 0.3}}> 
-        <KeyIcon keyInfo={keyInfo} size='80px' 
+        { keyInfo.isRoot && <KeyIcon keyInfo={keyInfo} size='80px' 
           style={{
             opacity: detailDisclosure.isOpen ? 1 : 0.5,
             position: 'absolute',
             left: '-10px',
             top: detailDisclosure.isOpen ? '3px' : '-7px'
           }
-        }/>
-        <VStack pos='absolute' width='3.6em' top={detailDisclosure.isOpen ? '1.6em' : '0.9em'}>
-          <Text fontSize='xs'>#{keyId.toString()}</Text>
-        </VStack>
+        }/> }
+        { !keyInfo.isRoot && keyInboxAddress.isSuccess && <Box
+          pos='absolute' 
+          left={detailDisclosure.isOpen ? '10px' : '6px'}
+          top={detailDisclosure.isOpen ? '15px' : '5px'}
+          style={{opacity: detailDisclosure.isOpen ? 1 : 0.5}}>
+            <AddressAvatar size={50} address={keyInboxAddress.data}/>
+        </Box> }
       </motion.div> }
-      <HStack p='0.8em' ml='3.5em'>
+      <HStack p={detailDisclosure.isOpen ? '0.8em' : '0.5em'} ml='3.5em'>
         <VStack align='stretch' spacing='0em'>
-          <HStack spacing='1em'>
+          <HStack spacing={detailDisclosure.isOpen ? '1em' : '0em'}>
             <Text fontWeight='bold' {... detailDisclosure.isOpen ? {fontSize: '22px'} : {}}>{keyInfo && keyInfo.alias}</Text>
             { detailDisclosure.isOpen && <AddressExplorerButton address={keyInboxAddress.data}/> }
           </HStack>
-          { keyInboxAddress.data && detailDisclosure.isOpen && (
+          { keyInboxAddress.data && (
             <HStack>
-              <Text><DisplayAddress address={keyInboxAddress.data}/></Text>
-              <CopyButton content={keyInboxAddress.data}/>
+              <Text fontSize={detailDisclosure.isOpen ? 'md' : 'xs'}><DisplayAddress address={keyInboxAddress.data}/></Text>
+              { detailDisclosure.isOpen && <CopyButton content={keyInboxAddress.data}/> }
             </HStack>)
           }
         </VStack>
@@ -522,7 +524,7 @@ const TrustKeyListItem = ({trustInfo, keyId, ...rest}) => {
       { detailDisclosure.isOpen && <motion.div animate={animation} variants={detailVariants}>
         <Tabs align='center' position='relative' variant='enclosed' size='lg'>
           <TabList>
-            <Tab>{ filteredHolders && <Tag mr='0.5em'>{filteredHolders.length.toString()}</Tag> }Holders</Tab>
+            <Tab>{ filteredHolders && <Tag mr='0.5em'>{filteredHolders.length.toString()}</Tag> }Users</Tab>
             <Tab>{ balanceSheet.data && <Tag mr='0.5em'>{balanceSheet.data[0].length.toString()}</Tag> }Assets</Tab>
           </TabList>
           <TabIndicator
@@ -597,7 +599,7 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
             </motion.div>)) }
       </List>
       { burnAddress === null && <Button 
-          mt='2em' colorScheme='blue' width='100%' onClick={() => {processStep(1);}}>Add Key Holder</Button> }
+          mt='2em' colorScheme='blue' width='100%' onClick={() => {processStep(1);}}>Add Account Access</Button> }
     </motion.div> }
     { burnAddress !== null && <motion.div layout key={'bhc-'+burnAddress+keyId}
       initial={{x: 800, opacity: 0}}
@@ -615,8 +617,8 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
         onClick={() => {
           setDestination(account.address);
           processStep(3);
-      }}>Send Key to Me</Button>
-      <Button mt='2em' width='100%' onClick={() => {processStep(2);}}>Send Key to Someone Else</Button>
+      }}>Add Myself</Button>
+      <Button mt='2em' width='100%' onClick={() => {processStep(2);}}>Add Someone Else</Button>
       <Button mt='2em' colorScheme='blue' width='100%' onClick={() => {processStep(0);}}>Nevermind</Button>
     </motion.div> }
     { step === 2 && <motion.div layout key={'khd2-'+keyId} 
@@ -628,9 +630,9 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
         { isValidAddress && 
             <Text fontWeight='bold' textColor='green.600' fontSize='sm'>
               <DisplayAddress address={destination || ''}/></Text> }
-        { !isValidAddress && <Text textColor='red.600' fontStyle='italic' fontSize='sm'>Enter valid destination address</Text> }
+        { !isValidAddress && <Text textColor='red.600' fontStyle='italic' fontSize='sm'>Enter valid ethereum address</Text> }
         { (destinationKeyBalance.isSuccess && destinationKeyBalance.data.gt(0)) && (
-          <Text mt='1em' textColor='red.600' fontStyle='italic' fontSize='sm'>This address already holds this key.</Text>
+          <Text mt='1em' textColor='red.600' fontStyle='italic' fontSize='sm'>This address already has permission.</Text>
         ) }
         <Button mt='2em' width='100%' onClick={() => {processStep(1);}}>Back</Button>
         <Button mt='2em' isDisabled={!isValidAddress || !destinationKeyBalance.isSuccess || !destinationKeyBalance.data.eq(0)} 
@@ -641,7 +643,7 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
       animate={{x: 0, opacity: 1}}
       exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}>
       <VStack mt='1em' spacing='0em'> 
-        <Text fontSize='lg' fontWeight='bold'>Send</Text>
+        <Text fontSize='lg' fontWeight='bold'>Add Permission</Text>
         <HStack width='100%' pt='1em'>
           <KeyIcon keyInfo={keyInfo} size={32}/>
           <Text><b>{keyInfo.alias}</b></Text>

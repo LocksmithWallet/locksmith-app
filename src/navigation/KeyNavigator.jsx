@@ -10,6 +10,7 @@ import {
   ListItem,
   Spacer,
   Text,
+  VStack,
 } from '@chakra-ui/react';
 
 // animations
@@ -26,7 +27,14 @@ import {
   useInspectKey,
   useTrustInfo
 } from '../hooks/contracts/Locksmith';
-
+import {
+  useKeyInboxAddress
+} from '../hooks/contracts/PostOffice';
+import {
+  KEY_CONTEXT,
+} from '../hooks/contracts/Ledger';
+import { ContextBalanceUSD } from '../components/Ledger';
+import { AddressAvatar } from '../components/Address';
 import { FcSettings } from 'react-icons/fc';
 
 // components
@@ -107,9 +115,9 @@ export const TrustNavigationBox = ({trustId, keys, onClose}) => {
         <Heading fontSize='md'>{trust.name}</Heading>
         <Spacer/>
         { hasRoot && <motion.div
-            style={{cursor: 'pointer'}}
-            whileHover={{scale: 1.5, rotate: 360}}
-            whileTap={{scale: 0.95}}
+          style={{cursor: 'pointer', scale: '1.5'}}
+            whileHover={{scale: 2.2, rotate: 180}}
+            whileTap={{scale: 1.25}}
             onClick={() => { onClose.onClose(); navigate('/trust/' + trustId); }}
             initial={{opacity: 0, x: 50}}
             animate={{opacity:1, x:0}}>
@@ -126,6 +134,7 @@ export const TrustNavigationBox = ({trustId, keys, onClose}) => {
 export const KeyListItem = ({k, i, onClose, ...rest}) => {
   const [isHover, setHover] = useState(false);
   const navigate = useNavigate();
+  const inbox = useKeyInboxAddress(k.keyId);
 
   return <ListItem key={'kl'+k.keyId.toString()} pos='relative'>
     <motion.div layout
@@ -152,10 +161,19 @@ export const KeyListItem = ({k, i, onClose, ...rest}) => {
           }}/>}
       </AnimatePresence>
       <HStack px='0.5em'>
-        <KeyIcon keyInfo={k} size='30px' style={{zIndex: 1}}/>
-        <Text fontSize='lg' style={{zIndex: 1}}>{k.alias}</Text>
-        <Spacer/>
-        <Text style={{zIndex: 1}} fontSize='sm' fontStyle='italic' textColor='gray.400'>#{k.keyId}</Text>
+        { k.isRoot && <KeyIcon keyInfo={k} size='30px' style={{zIndex: 1}}/> }
+        { !k.isRoot && inbox.data && <Box zIndex='1'><AddressAvatar size='30' address={inbox.data}/></Box> }
+        <VStack spacing='0' align='stretch'>
+          <Text fontSize='lg' style={{zIndex: 1}}>{k.alias}</Text>
+          <ContextBalanceUSD contextId={KEY_CONTEXT} identifier={k.keyId}
+            skeletonProps={{}}
+            textProps={{
+              fontSize: 'sm',
+              fontStyle: 'italic',
+              textColor: 'gray.400',
+              zIndex: 1
+          }}/>
+        </VStack>
       </HStack>
      </motion.div>
    </ListItem>

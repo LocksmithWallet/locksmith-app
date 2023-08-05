@@ -5,6 +5,9 @@ import {
   useInspectKey,
   useTrustInfo
 } from '../hooks/contracts/Locksmith';
+import {
+  useKeyInboxAddress
+} from '../hooks/contracts/PostOffice';
 import { DisplayAddress } from './Address';
 import { 
   Text,
@@ -17,9 +20,10 @@ import {
 
 export const KeySelectOption = ({keyId, selected, ...rest}) => {
   const keyInfo = useInspectKey(keyId);
+  const inbox = useKeyInboxAddress(keyId);
 
-  return keyInfo && (
-    <option value={keyId.toString()} {... selected ? {selected: true} : {}}>{keyId.toString()}: {keyInfo.alias}</option>
+  return keyInfo && inbox.data && (
+    <option value={keyId.toString()} {... selected ? {selected: true} : {}}>{keyInfo.alias} (<DisplayAddress address={inbox.data}/>)</option>
   )
 }
 
