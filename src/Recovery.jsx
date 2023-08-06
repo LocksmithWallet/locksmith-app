@@ -71,6 +71,12 @@ import {
 import {
   useRecoveryPolicyCreator
 } from './hooks/contracts/RecoveryPolicyCreator';
+import {
+  useEventInfo
+} from './hooks/contracts/TrustEventLog';
+import {
+  useAlarmClock
+} from './hooks/contracts/AlarmClock';
 
 import {
   DisplayAddress,
@@ -223,7 +229,20 @@ export const RecoveryStatusBox = ({keyId, trustInfo, autoOpen, ...rest}) => {
 }
 
 export function RecoveryStatusPreview({keyId, trustInfo, policy, ...rest}) {
-  
+  // Note: This will break if and when recovery policy UI has more than
+  //       a single event configuraiton. We are going to assume the first
+  //       event hash is a deadman configuration, and there aren't any others.
+  const eventInfo = useEventInfo(policy.events[0]);
+  const alarmInfo = useAlarmClock(policy.events[0]);
+
+  if (eventInfo && alarmInfo) {
+    console.log(eventInfo);
+    console.log((new Date(alarmInfo.alarmTime*1000)));
+  }
+  return eventInfo && alarmInfo && (<>
+    { eventInfo.fired && <Text fontColor='red'>Awaiting Recovery</Text> }
+    { !eventInfo.fired && <Text>{(new Date(alarmInfo.alarmTime*1000)).toDateString()}</Text> }
+  </>)
 }
 
 export function RecoveryCreateWizard({keyId, trustInfo, toggleDetail, ...rest}) {
@@ -410,10 +429,10 @@ export function StepFourContent({keyId, trustInfo, setStep, needsAlarmNotary, gu
   const { address } = useAccount();
   const transactions = useContext(TransactionListContext);
   const [time, setTime] = useState(Date.now() + 86400000 * days);
-  
+ 
   // write
   const createPolicy = useRecoveryPolicyCreator(keyId, needsAlarmNotary, false, guardians, [
-    [ethers.utils.formatBytes32String('Recovery Check-in'), time, days * 86400, keyId]
+    [ethers.utils.formatBytes32String('Recovery Check-in'), Math.floor((new Date(time)).getTime() / 1000), days * 86400, keyId]
   ], [], (error) => {
       console.log(error);
     }, (data) => {

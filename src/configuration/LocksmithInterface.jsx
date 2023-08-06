@@ -4,6 +4,8 @@ import * as EtherVault from './interfaces/providers/EtherVault.json';
 import * as TokenVault from './interfaces/providers/TokenVault.json';
 import * as Notary from './interfaces/Notary.json';
 import * as Ledger from './interfaces/Ledger.json';
+import * as TrustEventLog from './interfaces/TrustEventLog.json';
+import * as AlarmClock from './interfaces/dispatchers/AlarmClock.json';
 import * as PostOffice from './interfaces/PostOffice.json';
 import * as Distributor from './interfaces/scribes/Distributor.json';
 import * as TrustCreator from './interfaces/agents/TrustCreator.json';
@@ -22,6 +24,8 @@ export const LocksmithInterface = (function() {
     'TokenVault': TokenVault,
     'Notary': Notary,
     'Ledger': Ledger,
+    'TrustEventLog': TrustEventLog,
+    'AlarmClock': AlarmClock,
     'MegaKeyCreator': MegaKeyCreator,
     'Distributor': Distributor,
     'PostOffice': PostOffice,

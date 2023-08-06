@@ -18,8 +18,8 @@ export function useEventInfo(eventHash) {
 
     setEventData({
       isValid: eventInfo.data[0],
-      description: ethers.utils.parseBytes32String(eventInfo.data[1]);,
-      dispatcher: eventInfo.data[2]; 
+      description: ethers.utils.parseBytes32String(eventInfo.data[1]),
+      dispatcher: eventInfo.data[2],
       fired: eventInfo.data[3]
     });
   }, [eventInfo.data]);
