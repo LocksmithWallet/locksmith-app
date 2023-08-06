@@ -108,7 +108,7 @@ export const TrustNavigationBox = ({trustId, keys, onClose}) => {
         <Heading fontSize='md'>{trust.name}</Heading>
         <Spacer/>
         { hasRoot && <motion.div
-          style={{cursor: 'pointer', scale: '1.5'}}
+          style={{cursor: 'pointer', scale: 1.5}}
             whileHover={{scale: 2.2, rotate: 180}}
             whileTap={{scale: 1.25}}
             onClick={() => { onClose.onClose(); navigate('/trust/' + trustId); }}>
