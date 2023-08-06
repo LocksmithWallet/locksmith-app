@@ -210,6 +210,9 @@ export const RecoveryStatusBox = ({keyId, trustInfo, autoOpen, ...rest}) => {
         { policy && !policy.isValid && !detailDisclosure.isOpen && (
           <Text fontStyle='italic' color='gray'>Disabled</Text> 
         ) }
+        { policy && policy.isValid && !detailDisclosure.isOpen && (
+          <RecoveryStatusPreview keyId={keyId} trusInfo={trustInfo} policy={policy} />
+        ) }
         { detailDisclosure.isOpen && isDesktop &&
           <IconButton pos='absolute' top='1em' right='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
             onClick={toggleDetail}/> }
@@ -217,6 +220,10 @@ export const RecoveryStatusBox = ({keyId, trustInfo, autoOpen, ...rest}) => {
       { !detailDisclosure.isOpen ? '' : <RecoveryCreateWizard keyId={keyId} trustInfo={trustInfo} toggleDetail={toggleDetail}/> }
     </Box>
     </motion.div>)
+}
+
+export function RecoveryStatusPreview({keyId, trustInfo, policy, ...rest}) {
+  
 }
 
 export function RecoveryCreateWizard({keyId, trustInfo, toggleDetail, ...rest}) {
