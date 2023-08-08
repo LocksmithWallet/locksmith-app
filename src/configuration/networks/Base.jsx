@@ -7,6 +7,7 @@ import {
 import * as contracts from '../contracts/network-contracts-8453.json';
 
 import { ETH } from '../../components/icons/ETH';
+import { USDC } from '../../components/icons/USDC';
 
 export const Base = (function() {
   return {
@@ -44,6 +45,19 @@ export const Base = (function() {
           return <ETH {...props} color='#716b94'/>;
         }
       }
+
+      list[getAssetResourceName('0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA', 20, 0)] = {
+        name: 'USD Base Coin',
+        symbol: 'USDbC',
+        decimals: 6,
+        contractAddress: '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA', 
+        standard: 20,
+        id: 0,
+        coinCapId: 'usd-coin',
+        icon: function(props = {}) {
+          return <USDC color='#2775ca' {...props}/>;
+        }
+      };
 
       return list;
     })(),
