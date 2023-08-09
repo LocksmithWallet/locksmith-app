@@ -3,7 +3,8 @@
 //////////////////////////////////////
 import { React, useState, useContext, useEffect, useRef } from 'react';
 import {
-  useParams
+  useParams,
+  useNavigate
 } from 'react-router-dom';
 import {
   Box,
@@ -139,9 +140,11 @@ export function Key() {
 
 export function TrustBadge ({keyInfo, ...rest}) {
   const trustInfo = useTrustInfo(keyInfo.trustId);
+  const navigate = useNavigate();
 
   return (trustInfo && <VStack>
-    <Tag colorScheme='blackAlpha' boxShadow='base'>
+    <Tag colorScheme='blackAlpha' boxShadow='base' style={{cursor: 'pointer'}} 
+      onClick={() => { navigate('/trust/' + keyInfo.trustId); }}>
       <Image src='/gold-lock-large.png' width='24px' mr='0.5em' style={{filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5)'}}/>  
       <TagLabel>{trustInfo.name}</TagLabel>
     </Tag>
