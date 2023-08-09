@@ -654,7 +654,8 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
         <HStack pl='0.3em' pos='relative' width='100%' pt='2em'>
             { account.address === destination && <Spinner
               pos='absolute'
-              top='-4px'
+              left='8px'
+              top='36px'
               thickness='2px'
               speed='2s'
               color='blue.500'
