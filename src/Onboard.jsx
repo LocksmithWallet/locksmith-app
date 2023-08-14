@@ -192,7 +192,7 @@ export function MintMasterKey({name, ...rest}) {
 
   return (<VStack width='100%' pt='1em'>
     <HStack width='100%'>
-      <Text>Cost:</Text>
+      <Text>Estimate:</Text>
       <Spacer/>
       <Skeleton isLoaded={mintTrust.gasPrice && mintTrust.gasLimit && gasAssetPrice.data}>
         <Text>{mintCostUsd} (~{parseFloat(totalGas).toFixed(5)} {Networks.getAsset(network.chain.id, GAS_ARN).symbol})</Text>
