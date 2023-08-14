@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import {
   useAccount,
+  useFeeData,
   useNetwork,
   usePrepareContractWrite,
   useContract,
@@ -114,6 +115,7 @@ export function useDebounce(value, delay) {
 export function useLocksmithWrite(contract, method, args, enabled, errorFunc, successFunc, addressOverride = null) {
   const account = useAccount();
   const network = useNetwork();
+  const feeData = useFeeData();
   const config = Networks.getNetwork(account.isConnected ? network.chain.id : null);
   const preparation = usePrepareContractWrite({
     address: addressOverride !== null ? addressOverride : 
@@ -129,7 +131,7 @@ export function useLocksmithWrite(contract, method, args, enabled, errorFunc, su
     }
   });
 
-  return useContractWrite({...preparation.config,
+  var ucw = useContractWrite({...preparation.config,
     onError(error) {
       errorFunc(error);
     },
@@ -137,6 +139,13 @@ export function useLocksmithWrite(contract, method, args, enabled, errorFunc, su
       successFunc(data);
     }
   });
+  if(preparation.config.request) {
+    ucw.gasLimit = preparation.config.request.gasLimit;
+  }
+  if(feeData.data) {
+    ucw.gasPrice = feeData.data.gasPrice;
+  }
+  return ucw;
 }
 
 export function useLocksmithRead(contract, method, args, enabled = true, watch = false) {

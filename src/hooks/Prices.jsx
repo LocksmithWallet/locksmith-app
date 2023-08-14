@@ -1,4 +1,9 @@
 import { useQuery } from 'react-query';
+import {
+  useNetwork
+} from 'wagmi';
+import { GAS_ARN } from '../configuration/AssetResource';
+import { Networks } from '../configuration/Networks';
 
 ////////////////////////////////////////////////
 // Prices
@@ -41,3 +46,7 @@ export function useCoinCapPrice(coinCapId) {
   });
 }
 
+export function useNetworkGasTokenPrice() {
+  const network = useNetwork();
+  return useCoinCapPrice(Networks.getAsset(network.chain.id, GAS_ARN).coinCapId);
+}
