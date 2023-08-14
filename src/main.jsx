@@ -24,7 +24,11 @@ import App from './App'
 // Add Network Support
 Networks.addNetwork(Base);
 Networks.addNetwork(BaseGoerli);
-Networks.addNetwork(HardHat);
+
+// only add this network if we are local
+if(window.location.href.match(/localhost/)) {
+  Networks.addNetwork(HardHat);
+}
 
 // Generate Wagmi Controllers
 const {chains, provider, webSocketProvider} = configureChains(Networks.wagmiChains(),[
