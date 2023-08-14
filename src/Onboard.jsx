@@ -104,7 +104,7 @@ export function Onboard() {
           <Text color='gray.600' fontSize='sm'>Recover all of your accounts if you lose access to your wallet.</Text>
         </VStack>
       </HStack>
-      <HStack width='100%' pt='1em' as={motion.div} {... intros(4)}>
+      <HStack width='100%' as={motion.div} {... intros(4)}>
         <Button width='100%'
           as={motion.button}
           whileHover={{scale: 1.1}}
