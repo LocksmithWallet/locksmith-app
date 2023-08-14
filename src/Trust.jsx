@@ -587,11 +587,17 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
     setStep(newStep);
   }
 
+
   return (<AnimatePresence mode='wait'>
     { step === 0 && !burnAddress && <motion.div key={'khd0-'+keyId} 
       initial={{x: 800, opacity: 0}}
       animate={{x: 0, opacity: 1}}
-      exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}> 
+      exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}>
+      <Alert mt='1em' status={keyId.eq(trustInfo.rootKeyId) ? 'warning' : 'info'}>
+        <AlertIcon/>
+        { keyId.eq(trustInfo.rootKeyId) ? 'These addresses have full admin permissions to your Trust.' :
+            'These addresses have full access to the funds in this account.' }
+      </Alert>
       <List spacing='2em' mt='2em'>
           { holders.map((h) => (
             <motion.div layout key={'khd-'+keyId+h} initial={{x: '100vw'}} animate={{x: 0}} exit={{x: '-100vw'}}>
@@ -668,6 +674,11 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
           <Button size='md' borderRadius='full' onClick={() => {processStep(previousStep);}}><FiEdit2/></Button>
         </HStack>
       </VStack>
+      <Alert mt='1em' status={keyId.eq(trustInfo.rootKeyId) ? 'warning' : 'info'}>
+        <AlertIcon/>
+        { keyId.eq(trustInfo.rootKeyId) ? 'This user will become an admin of your Trust.' :
+            'This user have full access to the funds in this account.' }
+      </Alert>
       <Button isDisabled={!copyKey.write} isLoading={copyKey.isLoading}
         mt='2em' colorScheme='blue' width='100%' onClick={() => {copyKey.write?.();}}>Confirm</Button>
     </motion.div> }
