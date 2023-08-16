@@ -366,6 +366,7 @@ const TrustKeyListItem = ({trustInfo, keyId, ...rest}) => {
   const keyHolders = useKeyHolders(keyId);
   const balanceSheet = useContextBalanceSheet(KEY_CONTEXT, keyId);
 
+  const navigate = useNavigate();
   const isDesktop = useBreakpointValue({base: false, md: true});
   const detailDisclosure = useDisclosure();
   const animation = useAnimation();
@@ -504,7 +505,7 @@ const TrustKeyListItem = ({trustInfo, keyId, ...rest}) => {
         </VStack>
         <Spacer/>
         <AnimatePresence>
-          <motion.div animate={animation} variants={balanceVariants}>
+          <motion.div key={'key-balance-'+keyId} animate={animation} variants={balanceVariants}>
             <ContextBalanceUSD contextId={KEY_CONTEXT} identifier={keyId}/>
           </motion.div>
         </AnimatePresence>
@@ -513,6 +514,9 @@ const TrustKeyListItem = ({trustInfo, keyId, ...rest}) => {
           <IconButton pos='absolute' top='1em' right='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
             onClick={toggleDetail}/>
           </motion.div> }
+      { detailDisclosure.isOpen && (<VStack pos='relative' top='6em'>
+          <Button size='sm' width='10em' onClick={() => {navigate('/key/' + keyId.toString() + '/deposit');}} >Deposit</Button> 
+      </VStack>) }
       { detailDisclosure.isOpen && <motion.div animate={animation} variants={detailVariants}>
         <Tabs align='center' position='relative' variant='enclosed' size='lg'>
           <TabList>

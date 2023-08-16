@@ -505,12 +505,19 @@ const TokenBalanceCollector = ({arn, inbox, token, callback, ...rest}) => {
 }
 
 const DepositButtonAndModal = ({keyInfo, ...rest}) => {
+  const { action } = useParams();
   const initialX = useBreakpointValue({base: '140vw', md: '100vw'});
   const disclosure = useDisclosure();
   const network = useNetwork();
   const assets = Networks.getNetwork(network.chain.id).assets;
   const ref = useRef(null);
   const [selectedArn, setSelectedArn] = useState(null);
+
+  useEffect(() => {
+    if(action === 'deposit') {
+      setTimeout(disclosure.onOpen, 750);
+    }
+  }, []);
 
   return (
     <motion.div initial={{x: initialX}} animate={{x: 0}} transition={{delay: 0.375}}>
