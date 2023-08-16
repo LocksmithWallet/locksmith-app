@@ -625,6 +625,7 @@ const ViewCarousel = ({keyInfo, balanceSheet, ...rest}) => {
 }
 
 const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
+  const { action, actionAsset } = useParams();
   const isDesktop = useBreakpointValue({base: false, md: true});
   const assetPrice = useCoinCapPrice(asset.coinCapId);
   const detailDisclosure = useDisclosure();
@@ -632,6 +633,12 @@ const AssetView = ({ keyInfo, arn, balance, asset, ...rest }) => {
   const formatted = ethers.utils.formatUnits(balance, asset.decimals);
   const assetValue = assetPrice.isSuccess ? USDFormatter.format(assetPrice.data * formatted) : null;
   const ref = useRef(null);
+
+  useEffect(() => {
+    if(action === 'send' && actionAsset === arn) {
+      setTimeout(toggleDetail, 750);
+    }
+  }, []);
 
   const logoVariants = {
     start: {

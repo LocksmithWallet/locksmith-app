@@ -105,7 +105,7 @@ import {
   AiOutlineNumber,
 } from 'react-icons/ai';
 import { IoMdArrowRoundBack } from 'react-icons/io';
-import { FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiSend } from 'react-icons/fi';
 
 export function Trust() {
   const { trustId } = useParams();
@@ -759,6 +759,7 @@ const KeyAssetDetail = ({keyId, balanceSheet, ...rest}) => {
 }
 
 const KeyAssetListItem = ({keyId, arn, balance, ...rest}) => {
+  const navigate = useNavigate();
   const asset = useAssetMetadata(arn);
   const assetPrice = useCoinCapPrice(asset.coinCapId);
   const assetAmountFormatted = ethers.utils.formatUnits(balance, asset.decimals);
@@ -768,9 +769,11 @@ const KeyAssetListItem = ({keyId, arn, balance, ...rest}) => {
     {asset.icon()}
     <Text fontWeight='bold'>{asset.name}</Text>
     <Spacer/>
-    <VStack align='stretch' spacing='0em'>
+    <VStack align='stretch' spacing='0em' pr='0.25em'>
       <HStack><Spacer/><Text>{USDFormatter.format(amountUSD)}</Text></HStack>
       <HStack><Spacer/><Text align='right' fontSize='sm' color='gray'>{assetAmountFormatted} {asset.symbol}</Text></HStack>
     </VStack>
+    <Button borderRadius='full' boxShadow='md' size='sm'
+      onClick={() => {navigate('/key/' + keyId.toString() + '/send/' + arn);}}><FiSend/></Button>
   </HStack>)
 }
