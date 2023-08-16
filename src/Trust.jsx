@@ -475,7 +475,7 @@ const TrustKeyListItem = ({trustInfo, keyId, ...rest}) => {
     }
   }, md: {}});
 
-  return (<motion.div key={'jiggle-box-'+keyId} animate={animation} variants={boxVariants}
+  return keyInboxAddress.data !== ethers.constants.AddressZero && (<motion.div key={'jiggle-box-'+keyId} animate={animation} variants={boxVariants}
     {... (detailDisclosure.isOpen ? swipeProps : {})}>
     <Box ref={ref} bg='white' borderRadius='lg' boxShadow='lg' overflow='hidden' 
       style={{height: '100%', zIndex: 0, cursor: detailDisclosure.isOpen ? null : 'pointer'}} pos='relative'
@@ -593,17 +593,21 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
       initial={{x: 800, opacity: 0}}
       animate={{x: 0, opacity: 1}}
       exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}>
-      <Alert mt='1em' status={keyId.eq(trustInfo.rootKeyId) ? 'warning' : 'info'}>
+      { holders.length < 1 && <Alert mt='1em' status='info' fontSize='sm'>
+        <AlertIcon/>
+        Only admins have access right now.
+      </Alert> }
+      { holders.length > 0 && <Alert mt='1em' fontSize='sm' status={keyId.eq(trustInfo.rootKeyId) ? 'warning' : 'info'}>
         <AlertIcon/>
         { keyId.eq(trustInfo.rootKeyId) ? 'These addresses have full admin permissions to your Trust.' :
             'These addresses have full access to the funds in this account.' }
-      </Alert>
-      <List spacing='2em' mt='2em'>
+      </Alert> }
+      { holders.length > 0 && <List spacing='2em' mt='2em'>
           { holders.map((h) => (
             <motion.div layout key={'khd-'+keyId+h} initial={{x: '100vw'}} animate={{x: 0}} exit={{x: '-100vw'}}>
               <KeyHolderListItem key={'khli'+keyId+h} keyId={keyId} holder={h} burnAddress={burnAddress} setBurnAddress={setBurnAddress}/>
             </motion.div>)) }
-      </List>
+      </List> }
       { burnAddress === null && <Button 
           mt='2em' colorScheme='blue' width='100%' onClick={() => {processStep(1);}}>Add Account Access</Button> }
     </motion.div> }
@@ -674,10 +678,10 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
           <Button size='md' borderRadius='full' onClick={() => {processStep(previousStep);}}><FiEdit2/></Button>
         </HStack>
       </VStack>
-      <Alert mt='1em' status={keyId.eq(trustInfo.rootKeyId) ? 'warning' : 'info'}>
+      <Alert mt='1em' status={keyId.eq(trustInfo.rootKeyId) ? 'warning' : 'info'} fontSize='sm'>
         <AlertIcon/>
         { keyId.eq(trustInfo.rootKeyId) ? 'This user will become an admin of your Trust.' :
-            'This user have full access to the funds in this account.' }
+            'This user will have full access to the funds in this account.' }
       </Alert>
       <Button isDisabled={!copyKey.write} isLoading={copyKey.isLoading}
         mt='2em' colorScheme='blue' width='100%' onClick={() => {copyKey.write?.();}}>Confirm</Button>
@@ -748,7 +752,7 @@ const BurnHolderConfirmation = ({rootKeyId, keyId, keyInfo, holder, setBurnAddre
         </Box>
         <Text><b><DisplayAddress address={holder}/></b>?</Text></HStack>
     </VStack>
-    { account.address === holder && <Alert status={keyInfo.isRoot ? 'error' : 'warning'}>
+    { account.address === holder && <Alert fontSize='sm' status={keyInfo.isRoot ? 'error' : 'warning'}>
       <AlertIcon/>
       { !keyInfo.isRoot ? 'Careful. This is your own wallet.' :
           'Danger! You will lose admin rights!' }

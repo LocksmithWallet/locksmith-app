@@ -77,34 +77,28 @@ export function Onboard() {
     </AnimatePresence>
     <AnimatePresence>
     { step == 0 && <VStack pt='2em' maxWidth='20em' spacing='1em' as={motion.div} exit={{x: '-100vw', opacity: 0}}>
-      <HStack as={motion.div} {... intros(0)}>
-        <FcKey size='80px'/>
-        <VStack fontSize='xl' align='stretch' spacing='0em'>
-          <Text>Mint a <b>Master Key</b> and get:</Text>
-        </VStack>
-      </HStack>
-      <HStack pl='20px' as={motion.div} {... intros(1)}>
+      <HStack pl='20px' as={motion.div} {... intros(0)}>
         <FcApproval size='80px' style={{position: 'relative', top: '-10px'}}/>
         <VStack align='stretch' spacing='0em' pl='20px'>
           <Text fontSize='md' fontWeight='bold'>Secure Virtual Wallets</Text>
           <Text color='gray.600' fontSize='sm'>Create as many accounts as you need, controlled by your wallet.</Text>
         </VStack>
       </HStack>
-      <HStack pl='20px' as={motion.div} {... intros(2)}>
+      <HStack pl='20px' as={motion.div} {... intros(1)}>
         <FcApproval size='80px' style={{position: 'relative', top: '-10px'}}/>
         <VStack align='stretch' spacing='0em' pl='20px'>
           <Text fontSize='md' fontWeight='bold'>Granular Permissions</Text>
           <Text color='gray.600' fontSize='sm'>Add or remove anyone to or from your accounts at any time.</Text>
         </VStack>
       </HStack>
-      <HStack pl='20px' as={motion.div} {... intros(3)}>
+      <HStack pl='20px' as={motion.div} {... intros(2)}>
         <FcApproval size='80px' style={{position: 'relative', top: '-10px'}}/>
         <VStack align='stretch' spacing='0em' pl='20px'>
           <Text fontSize='md' fontWeight='bold'>Account Recovery</Text>
           <Text color='gray.600' fontSize='sm'>Recover all of your accounts if you lose access to your wallet.</Text>
         </VStack>
       </HStack>
-      <HStack width='100%' as={motion.div} {... intros(4)}>
+      <HStack width='100%' as={motion.div} {... intros(3)}>
         <Button width='100%'
           as={motion.button}
           whileHover={{scale: 1.1}}
@@ -119,16 +113,10 @@ export function Onboard() {
     </AnimatePresence>
     <AnimatePresence>
       { step === 1 && (<VStack maxWidth='20em' spacing='1em' as={motion.div} initial={{y: '25px', opacity: 0}} animate={{y: 0, opacity: 1, transition: {delay: 0.5}}} exit={{x: '-100vw'}}>
-        <HStack> 
-          <FcKey size='80px'/>
-          <VStack fontSize='xl' align='stretch' spacing='0em'>
-            <Text>This is your <b>Master Key</b>.</Text>
-          </VStack>
-        </HStack>
         <HStack pl='1em' spacing='1em'> 
           <Image src='/gold-lock-large.png' width='60px'/>
           <VStack fontSize='xl' align='stretch' spacing='0em'>
-            <Text>It controls your <b>Trust</b>, or collection of accounts.</Text>
+            <Text>Your <b>Trust</b> is your collection of accounts.</Text>
           </VStack>
         </HStack>
         <Text fontSize='xl' fontWeight='bold'>Name Your Trust</Text>
@@ -207,8 +195,8 @@ export function MintMasterKey({name, ...rest}) {
           colorScheme='blue'
           size='lg'
           border='1px' borderColor='blue.500'
-          leftIcon={ mintTrust.write && <FcKey size='28px'/>}
-          boxShadow='dark-lg'>Mint Master Key</Button>
+          leftIcon={ mintTrust.write && <Image width='24px' style={{filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))'}} src='/gold-lock-small.png'/> }  
+          boxShadow='dark-lg'>Create Trust</Button>
   </VStack>)
 }
 

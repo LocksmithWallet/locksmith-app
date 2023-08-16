@@ -12,6 +12,7 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react';
+import { ethers } from 'ethers';
 
 // animations
 import { 
@@ -25,7 +26,8 @@ import {
 import { useWalletKeys } from '../hooks/contracts/KeyVault';
 import { 
   useInspectKey,
-  useTrustInfo
+  useTrustInfo,
+  useTrustKeys,
 } from '../hooks/contracts/Locksmith';
 import {
   useKeyInboxAddress
@@ -42,19 +44,23 @@ import { KeyIcon } from '../components/Key';
 
 export const KeyNavigator = (onClose) => {
   const [unsortedKeys, setUnsortedKeys] = useState([]); // this is an array of key IDs
+  const [foundRootTrusts, setFoundRootTrusts] = useState([]); // an array of root key ids we've found
   const [sortedKeys, setSortedKeys] = useState({});     // this is a map of trust ID strings to key arrays
   const keys = useWalletKeys();
- 
+
   // when the keys load
   useEffect(() => {
     // this might happen on network or account switching
     if (!keys.data) { return; }
-
-    // set the pile of keys 
-    setUnsortedKeys(keys.data.map((k) => k.toString()));
+   
+    // clear out all of the found root trusts
+    setFoundRootTrusts([]);
 
     // clear all the sorted ones out
     setSortedKeys({});
+
+    // set the pile of keys 
+    setUnsortedKeys(keys.data.map((k) => k.toString()));
   }, [keys.data]);
 
   // when a key get's its data back
@@ -68,17 +74,42 @@ export const KeyNavigator = (onClose) => {
       return previous.filter((k) => k !== keyId);
     });
 
-    // sort the key
+    // sort the key, and spawn a trust collector
+    // if its a root key. Be careful to only sort
+    // or spawn if it isn't already there.
     setSortedKeys((previous) => {
       var sorted = {... previous};
       sorted[inspection.trustId.toString()] ||= [];
+      
+      // immmediately stop if its been sorted already.
+      // a particularly gross implementation because
+      // the objects aren't easily comparable
+      if(sorted[inspection.trustId.toString()].filter((i) => i.keyId.toString() === keyId.toString()).length > 0) {
+        return sorted;
+      }
+
+      // sort the inspection into the trust category
       sorted[inspection.trustId.toString()].push(inspection);
+      
+      // do we want to show root escalation?
+      if(inspection.isRoot) {
+        setFoundRootTrusts((prev) => {
+          // make sure we aren't duplicating
+          if (prev.filter((tid) => tid.eq(inspection.trustId)).length > 0) {
+            return prev;
+          }
+
+          return [prev, inspection.trustId].flat(2);
+        });
+      }
+
       return sorted; 
     });
   };
 
   return <Box m='8'>
-    { unsortedKeys.map((uk) => <KeyInspector key={'ki-'+uk.toString()} keyId={uk} sortKey={sortKey}/>) } 
+    { unsortedKeys.map((uk) => <KeyInspector key={'ki-'+uk.toString()} keyId={uk} sortKey={sortKey}/>) }
+    { foundRootTrusts.map((t) => <TrustInspector key={'ti-'+t.toString()} trustId={t} setUnsortedKeys={setUnsortedKeys}/>) }
     <LayoutGroup>
       { Object.keys(sortedKeys).map(
         (tid, i) => <TrustNavigationBox key={'tn-'+tid} trustId={tid} keys={sortedKeys[tid]} onClose={onClose}/>
@@ -97,13 +128,27 @@ export const KeyInspector = ({keyId, sortKey}) => {
   return '';
 }
 
+export const TrustInspector = ({trustId, setUnsortedKeys}) => {
+  const trustKeys = useTrustKeys(trustId);
+  useEffect(() => {
+    if(trustKeys.data) {
+      setUnsortedKeys((previous) => {
+        var merge = {};
+        previous.forEach((p) => {merge[p.toString()] = p;});
+        trustKeys.data.forEach((k) => {merge[k.toString()] = k});
+        return Object.values(merge);
+      });
+    } 
+  }, [trustKeys.data]);
+}
+
 export const TrustNavigationBox = ({trustId, keys, onClose}) => {
   const navigate = useNavigate();
   const trust = useTrustInfo(trustId);
   const hasRoot = trust && keys.filter(
     (k) => k.keyId === trust.rootKeyId.toString()).length > 0;
   return ( trust &&
-    <Box bg='gray.200' boxShadow='inner' borderRadius='md' mb='1em'>
+    <Box as={motion.div} layout bg='gray.200' boxShadow='inner' borderRadius='md' mb='1em'>
       <HStack p='0.5em'>
         <Heading fontSize='md'>{trust.name}</Heading>
         <Spacer/>
@@ -127,8 +172,9 @@ export const KeyListItem = ({k, i, onClose, ...rest}) => {
   const navigate = useNavigate();
   const inbox = useKeyInboxAddress(k.keyId);
 
-  return <ListItem key={'kl'+k.keyId.toString()} pos='relative'>
+  return (inbox.data && ethers.constants.AddressZero !== inbox.data) && <ListItem key={'kl'+k.keyId.toString()} pos='relative'>
     <motion.div layout
+      transition={{layout: {duration: 0}}}
       onMouseEnter={() => { setHover(true); }}
       onMouseLeave={() => { setHover(false); }}
       onClick={() => { onClose.onClose(); navigate('/key/' + k.keyId); }}

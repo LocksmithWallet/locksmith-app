@@ -298,12 +298,12 @@ export function RecoveryCreateWizard({keyId, trustInfo, toggleDetail, ...rest}) 
 export function StepZeroContent({keyId, setStep, ...rest}) {
   return (
     <VStack spacing='2em'>
-      <Text fontSize='lg' align='center'>Recover your <b>Master Key</b> easily.</Text>
+      <Text fontSize='lg' align='center'>Recover your <b>Trust </b> easily.</Text>
       <HStack width='100%'>
         <Tag size='lg'><TagLabel>1</TagLabel></Tag>
         <VStack align='stretch' spacing='0em'>
           <Text fontWeight='bold'>Choose Recovery Addresses</Text>
-          <Text fontSize='sm' color='gray'>Enable Master Key recovery.</Text>
+          <Text fontSize='sm' color='gray'>Enable Trust recovery.</Text>
         </VStack>
       </HStack>
       <HStack width='100%'>
@@ -332,7 +332,7 @@ export function StepOneContent({keyId, setStep, guardians, setGuardians, ...rest
       <Tag size='lg'><TagLabel>1</TagLabel></Tag>
       <Text fontWeight='bold'>Choose Recovery Addresses</Text>
     </HStack>
-    <Text align='center'>You decide when <i>these</i> addresses can recover your master key.</Text>
+    <Text align='center'>You decide when <i>these</i> addresses can recover your Trust.</Text>
     <Box width='100%'>
       <Input fontSize='xs' width='100%' size='md' mb='0.5em' placeholder='0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
         onChange={(event) => {setGuardian(event.target.value);}}
@@ -410,8 +410,8 @@ export function StepThreeContent({keyId, setStep, guardians, days, setDays, ...r
       <FcAlarmClock size='32px'/>
       <Text fontWeight='bold'>Inactivity Alarm</Text>
     </HStack>
-      <Text>Set a timespan to require check-ins with your <b>Master Key</b>.</Text>
-      <Text>Missed check-ins enable one of your <b>recovery addresses</b> to recover a single Master key.</Text>
+      <Text>Set a timespan to require check-ins from <b>Trust</b> admins.</Text>
+      <Text>Missed check-ins enable one of your <b>recovery addresses</b> to recover admin rights.</Text>
     </VStack>
     <Select variant='filled' size='lg' defaultValue={days} onChange={(e) => {setDays(e.target.value);}}>
       <option value='30'>Every 30 days</option>

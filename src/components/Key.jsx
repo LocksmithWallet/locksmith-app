@@ -17,12 +17,13 @@ import {
   FiCopy,
   FiExternalLink
 } from 'react-icons/fi';
+import { ethers } from 'ethers';
 
 export const KeySelectOption = ({keyId, selected, ...rest}) => {
   const keyInfo = useInspectKey(keyId);
   const inbox = useKeyInboxAddress(keyId);
 
-  return keyInfo && inbox.data && (
+  return keyInfo && inbox.data && inbox.data !== ethers.constants.AddressZero && (
     <option value={keyId.toString()} {... selected ? {selected: true} : {}}>{keyInfo.alias} (<DisplayAddress address={inbox.data}/>)</option>
   )
 }
