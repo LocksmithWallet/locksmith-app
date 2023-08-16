@@ -255,13 +255,13 @@ const CreateKeyFlow = ({trustId, trustInfo, toggleDetail, ...rest}) => {
               }}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' && !nameTooShort) {
-                  setStep(1); 
+                  setStep(2); 
                 }
               }}
             />
             <Button pos='absolute' top='160px' left='160px' width='180px' 
               isDisabled={nameTooShort} boxShadow='lg' colorScheme='blue'
-              onClick={() => {setStep(1);}}>Next</Button>
+              onClick={() => {setStep(2);}}>Next</Button>
         </Box>
       </motion.div>) }
       { step > 0 && (<motion.div key='review-key-0' {... stepAnimation}>
@@ -291,14 +291,6 @@ const CreateKeyFlow = ({trustId, trustInfo, toggleDetail, ...rest}) => {
           <Button borderRadius='full' onClick={() => {setStep(1);}}><FiEdit2/></Button>
         </HStack>
       </motion.div>) }
-      { step === 1 && (<motion.div key='create-key-2' {... stepAnimation} style={{margin: '1em', width: '20em'}}>
-        <Button width='100%'
-          onClick={() => {
-            setDestination(account.address);
-            setStep(3);
-        }}>Add Me</Button>
-        <Button mt='2em' width='100%' onClick={() => {setStep(2);}}>Add Someone Else</Button>
-      </motion.div>) }
       { step === 2 && (<motion.div key='create-key-3' {... stepAnimation} style={{marginTop: '2em', width: '20em'}}>
           <VStack spacing='1em'>
             <Input fontSize='xs' width='26em' value={destination} size='md' mb='0.5em' placeholder='0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
@@ -313,7 +305,7 @@ const CreateKeyFlow = ({trustId, trustInfo, toggleDetail, ...rest}) => {
             />
             { isValidAddress && <Text fontWeight='bold' textColor='green.600' fontSize='sm'><DisplayAddress address={destination || ''}/></Text> }
             { !isValidAddress && <Text textColor='red.600' fontStyle='italic' fontSize='sm'>Enter valid destination address</Text> }
-          <Button width='100%' onClick={() => {setStep(1);}}>Back</Button>
+          <Button width='100%' onClick={() => {setStep(0);}}>Back</Button>
           <Button isDisabled={!isValidAddress} width='100%' colorScheme='blue' onClick={() => {setStep(3);}}>Next</Button>
         </VStack>
       </motion.div>) }
@@ -587,7 +579,6 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
     setStep(newStep);
   }
 
-
   return (<AnimatePresence mode='wait'>
     { step === 0 && !burnAddress && <motion.div key={'khd0-'+keyId} 
       initial={{x: 800, opacity: 0}}
@@ -609,7 +600,7 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
             </motion.div>)) }
       </List> }
       { burnAddress === null && <Button 
-          mt='2em' colorScheme='blue' width='100%' onClick={() => {processStep(1);}}>Add Account Access</Button> }
+          mt='2em' colorScheme='blue' width='100%' onClick={() => {processStep(2);}}>Add Account Access</Button> }
     </motion.div> }
     { burnAddress !== null && <motion.div layout key={'bhc-'+burnAddress+keyId}
       initial={{x: 800, opacity: 0}}
@@ -617,19 +608,6 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
       exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}>
         <BurnHolderConfirmation rootKeyId={trustInfo.rootKeyId} keyId={keyId} keyInfo={keyInfo} 
           holder={burnAddress} setBurnAddress={setBurnAddress}/>
-    </motion.div> }
-    { step === 1 && <motion.div layout key={'khd1-'+keyId}
-      initial={{x: 800, opacity: 0}} 
-      animate={{x: 0, opacity:1}}
-      exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}>
-      <Button mt='2em' width='100%' 
-        isDisabled={!userKeyBalance.isSuccess || userKeyBalance.data.gt(0)}
-        onClick={() => {
-          setDestination(account.address);
-          processStep(3);
-      }}>Add Myself</Button>
-      <Button mt='2em' width='100%' onClick={() => {processStep(2);}}>Add Someone Else</Button>
-      <Button mt='2em' colorScheme='blue' width='100%' onClick={() => {processStep(0);}}>Nevermind</Button>
     </motion.div> }
     { step === 2 && <motion.div layout key={'khd2-'+keyId} 
       initial={{x: 800, opacity: 0}}
@@ -644,7 +622,7 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
         { (destinationKeyBalance.isSuccess && destinationKeyBalance.data.gt(0)) && (
           <Text mt='1em' textColor='red.600' fontStyle='italic' fontSize='sm'>This address already has permission.</Text>
         ) }
-        <Button mt='2em' width='100%' onClick={() => {processStep(1);}}>Back</Button>
+        <Button mt='2em' width='100%' onClick={() => {processStep(0);}}>Nevermind</Button>
         <Button mt='2em' isDisabled={!isValidAddress || !destinationKeyBalance.isSuccess || !destinationKeyBalance.data.eq(0)} 
           colorScheme='blue' width='100%' onClick={() => {processStep(3);}}>Next</Button>
     </motion.div> }
