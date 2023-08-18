@@ -1234,7 +1234,7 @@ export const SendGasButton = ({keyInfo, inbox, destination, arn, asset, amount, 
   const transactions = useContext(TransactionListContext);
   const network = useNetwork();
   const sendToken = useSend(inbox, Networks.getContractAddress(network.chain.id, 'EtherVault'),
-    ethers.utils.parseUnits(Number(amount).toFixed(asset.decimals), asset.decimals), destination,
+    ethers.utils.parseUnits(amount, asset.decimals), destination,
     (error) => {
       console.log('error');
       console.log(error);
