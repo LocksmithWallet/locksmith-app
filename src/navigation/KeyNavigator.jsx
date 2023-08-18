@@ -154,10 +154,11 @@ export const TrustNavigationBox = ({trustId, keys, onClose}) => {
         <Spacer/>
         { hasRoot && <motion.div
           style={{cursor: 'pointer', scale: 1.5}}
-            whileHover={{scale: 2.2, rotate: 180}}
+            whileHover={{scale: 2.2}}
             whileTap={{scale: 1.25}}
             onClick={() => { onClose.onClose(); navigate('/trust/' + trustId); }}>
-          <FcSettings size='20px'/></motion.div> }
+              <Image width='18px'style={{filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))'}} src='/gold-lock-small.png'/>
+        </motion.div> }
       </HStack>
       <List mt='0.5em' pb='0.5em' spacing='1em'>
         { keys.sort((a, b) => a.isRoot ? -1 : (b.isRoot ? 1 : 0)).
