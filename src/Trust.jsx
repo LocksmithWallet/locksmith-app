@@ -117,7 +117,7 @@ export function Trust() {
     <Box ml={{base: 0, md: 72}} pos='relative'>
       <VStack mb='1em'>
         <Tag colorScheme='blackAlpha' boxShadow='base'>
-          <FcSettings size='24px' styl/>
+          <FcSettings size='24px'/>
           <TagLabel pl='0.3em'>Trust Settings</TagLabel>
         </Tag>
       </VStack>
