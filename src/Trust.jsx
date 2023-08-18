@@ -105,6 +105,7 @@ import {
   AiOutlineNumber,
 } from 'react-icons/ai';
 import { IoMdArrowRoundBack } from 'react-icons/io';
+import { FcSettings } from 'react-icons/fc';
 import { FiEdit2, FiTrash2, FiSend } from 'react-icons/fi';
 
 export function Trust() {
@@ -114,6 +115,12 @@ export function Trust() {
 
   return (<motion.div key={"trust-"+trustId}>
     <Box ml={{base: 0, md: 72}} pos='relative'>
+      <VStack mb='1em'>
+        <Tag colorScheme='blackAlpha' boxShadow='base'>
+          <FcSettings size='24px' styl/>
+          <TagLabel pl='0.3em'>Trust Settings</TagLabel>
+        </Tag>
+      </VStack>
       <TrustHeader trustId={trustId} trustInfo={trustInfo}/>
       { trustInfo && trustKeys.isSuccess &&
         <TrustKeyList
