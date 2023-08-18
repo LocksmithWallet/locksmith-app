@@ -549,6 +549,7 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
   // hook and contract state
   const account = useAccount();
   const userKeyBalance = useKeyBalance(keyId, account.address);
+  const inbox = useKeyInboxAddress(keyId);
 
   // step state
   const [step, setStep] = useState(0);
@@ -612,7 +613,7 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
       animate={{x: 0, opacity: 1}}
       exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}>
         <BurnHolderConfirmation rootKeyId={trustInfo.rootKeyId} keyId={keyId} keyInfo={keyInfo} 
-          holder={burnAddress} setBurnAddress={setBurnAddress}/>
+          holder={burnAddress} setBurnAddress={setBurnAddress} inbox={inbox} trustInfo={trustInfo}/>
     </motion.div> }
     { step === 2 && <motion.div layout key={'khd2-'+keyId} 
       initial={{x: 800, opacity: 0}}
@@ -635,27 +636,29 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
       initial={{x: 800, opacity: 0}}
       animate={{x: 0, opacity: 1}}
       exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}>
-      <VStack mt='1em' spacing='0em'> 
-        <Text fontSize='lg' fontWeight='bold'>Add Permission</Text>
-        <HStack width='100%' pt='1em'>
-          <KeyIcon keyInfo={keyInfo} size={32}/>
-          <Text><b>{keyInfo.alias}</b></Text>
-          <Text fontSize='sm' color='gray' fontStyle='italic'>(#{keyInfo.keyId.toString()})</Text>
+      <VStack mt='1em' spacing='0.75em'> 
+        <Text fontSize='lg' fontWeight='bold'>Trust Account</Text>
+        <HStack width='100%'>
+          <AddressAvatar address={inbox.data}/>
+          <VStack align='stretch' spacing='0' pl='0.3em'>
+            <Text align='left'>{keyInfo.alias}</Text>
+            <Text align='left'fontSize='xs' color='gray' fontStyle='italic'>{trustInfo.name}</Text>
+          </VStack>
           <Spacer/>
           <Button size='md' borderRadius='full' onClick={() => {processStep(0);}}><IoMdArrowRoundBack/></Button>
         </HStack>
-        <HStack pl='0.3em' pos='relative' width='100%' pt='2em'>
+        <Text fontSize='lg' fontWeight='bold'>Add User:</Text>
+        <HStack pos='relative' width='100%'>
+          <AddressAvatar address={destination}/>
             { account.address === destination && <Spinner
               pos='absolute'
-              left='8px'
-              top='36px'
+              left='-12px'
               thickness='2px'
               speed='2s'
               color='blue.500'
               size='lg'
             /> }
-          <AddressAvatar address={destination}/>
-          <Text pl='0.3em' fontWeight='bold'><DisplayAddress address={destination}/></Text>
+          <Text pl='0.3em'><DisplayAddress address={destination}/></Text>
           <CopyButton content={destination} size={'16px'}/>
           <Spacer/>
           <Button size='md' borderRadius='full' onClick={() => {processStep(previousStep);}}><FiEdit2/></Button>
@@ -698,7 +701,7 @@ const KeyHolderListItem = ({keyId, holder, burnAddress, setBurnAddress, ...rest}
   </ListItem>)
 }
 
-const BurnHolderConfirmation = ({rootKeyId, keyId, keyInfo, holder, setBurnAddress, ...rest}) => {
+const BurnHolderConfirmation = ({rootKeyId, keyId, inbox, trustInfo, keyInfo, holder, setBurnAddress, ...rest}) => {
   const transactions = useContext(TransactionListContext);
   const account = useAccount();
   const keyBalance = useKeyBalance(keyId, holder);
@@ -717,10 +720,9 @@ const BurnHolderConfirmation = ({rootKeyId, keyId, keyInfo, holder, setBurnAddre
     });
 
   return <VStack mt='2em' spacing='2em'> 
-    <VStack fontSize='lg'>
-      <HStack><Text>Revoke</Text><KeyIcon size={32} keyInfo={keyInfo}/><Text><b>{keyInfo.alias}</b></Text></HStack>
-      <Text>from wallet</Text>
-      <HStack>
+    <VStack spacing='0.75em' width='100%'>
+      <Text fontSize='lg'><b>Remove</b></Text>
+      <HStack width='100%'>
         <Box pos='relative'>
           { account.address === holder && <Spinner
             pos='absolute'
@@ -733,11 +735,19 @@ const BurnHolderConfirmation = ({rootKeyId, keyId, keyInfo, holder, setBurnAddre
           /> }
           <AddressAvatar address={holder}/>
         </Box>
-        <Text><b><DisplayAddress address={holder}/></b>?</Text></HStack>
+        <Text><DisplayAddress address={holder}/></Text></HStack>
+        <Text fontSize='lg'><b>From Account:</b></Text>
+        <HStack width='100%'>
+          <AddressAvatar address={inbox.data}/>
+          <VStack spacing='0' align='stretch'>
+            <Text align='left'>{keyInfo.alias}</Text>
+            <Text align='left' fontSize='xs' color='gray.600' fontStyle='italic'>{trustInfo.name}</Text>
+          </VStack>
+        </HStack>
     </VStack>
     { account.address === holder && <Alert fontSize='sm' status={keyInfo.isRoot ? 'error' : 'warning'}>
       <AlertIcon/>
-      { !keyInfo.isRoot ? 'Careful. This is your own wallet.' :
+      { !keyInfo.isRoot ? 'Careful. This is your address.' :
           'Danger! You will lose admin rights!' }
     </Alert> }
     <Button width='100%' onClick={() =>{setBurnAddress(null);}}>Nevermind</Button>
