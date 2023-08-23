@@ -153,11 +153,11 @@ export const TrustNavigationBox = ({trustId, keys, onClose}) => {
         <Heading fontSize='md'>{trust.name}</Heading>
         <Spacer/>
         { hasRoot && <motion.div
-          style={{cursor: 'pointer', scale: 1.5}}
-            whileHover={{scale: 2.2}}
-            whileTap={{scale: 1.25}}
+          style={{cursor: 'pointer'}}
+            whileHover={{scale: 1.8}}
+            whileTap={{scale: 1.5}}
             onClick={() => { onClose.onClose(); navigate('/trust/' + trustId); }}>
-              <Image width='18px'style={{filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))'}} src='/gold-lock-small.png'/>
+              <Image width='22px'style={{filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))'}} src='/gold-lock-small.png'/>
         </motion.div> }
       </HStack>
       <List mt='0.5em' pb='0.5em' spacing='1em'>

@@ -105,7 +105,7 @@ import {
   AiOutlineNumber,
 } from 'react-icons/ai';
 import { IoMdArrowRoundBack } from 'react-icons/io';
-import { FcKey } from 'react-icons/fc';
+import { FcKey, FcApproval } from 'react-icons/fc';
 import { FiEdit2, FiTrash2, FiSend } from 'react-icons/fi';
 
 export function Trust() {
@@ -347,18 +347,162 @@ const CreateKeyConfirmationButton = ({trustId, trustInfo, keyName, destination, 
 const TrustKeyList = ({trustId, trustInfo, trustKeys, ...rest}) => {
   const initialX = useBreakpointValue({base: '140vw', md: '100vw'});
   const { detail } = useParams();
+  const ref = useRef();
   return (<motion.div initial={{x: initialX}} animate={{x: 0}} transition={{delay: 0.25}}>
-    <List spacing='1.8em' m='1em' mt='2em'>
-        { trustKeys.map((k,x) => <ListItem key={'tkli-'+k.toString()} pos='relative'>
-          <TrustKeyListItem trustInfo={trustInfo} keyId={k}/>
-        </ListItem>) }
-        <OnlyOnChains chains={[31337]}>
-          <ListItem key={'recovery-key'} pos='relative'>
-            <RecoveryStatusBox keyId={trustInfo.rootKeyId} trustInfo={trustInfo} autoOpen={detail === 'recovery'}/>
-          </ListItem>
-        </OnlyOnChains>
+    <OnlyOnChains chains={[31337]}>
+      <Box m='1em' mt='2em'>
+        <RecoveryStatusBox keyId={trustInfo.rootKeyId} trustInfo={trustInfo} autoOpen={detail === 'recovery'}/>
+      </Box>
+    </OnlyOnChains>
+    <AddAccountButtonAndModal trustId={trustId} trustInfo={trustInfo}/>
+    <List m='1em' spacing='1em'>
+      { trustKeys.map((k,x) => <TrustKeyListItem key={'tklia'+k.toString()} trustInfo={trustInfo} keyId={k}/>) }
     </List>
   </motion.div>)
+}
+
+const AddAccountButtonAndModal = ({trustId, trustInfo, ...rest}) => {
+  const isDesktop = useBreakpointValue({base: false, md: true});
+  const detailDisclosure = useDisclosure();
+  const animation = useAnimation();
+  const ref = useRef(null);
+
+  const toggleDetail = function() {
+    if (!detailDisclosure.isOpen) {
+      detailDisclosure.onOpen();
+      setTimeout(() => {
+        animation.set('click');
+        animation.start('open');
+      }, 1);
+    } else {
+      detailDisclosure.onClose();
+      setTimeout(async () => {
+        await animation.start('close');
+        animation.set('final');
+      }, 25);
+    }
+  };
+
+  const swipeProps = useBreakpointValue({base: {
+    drag: 'y',
+    onDragEnd: function(event, info) {
+      if (Math.abs(info.offset.y) >= 10 ) {
+        toggleDetail();
+      }
+    }
+  }, md: {}}); 
+
+  const boxVariants = {
+    click: function() {
+      const rect = ref.current.getBoundingClientRect();
+      return {
+        position: 'fixed',
+        zIndex: 500,
+        x: rect.width - 100,
+        width: 80,
+        height: 20,
+      };
+    },
+    open: function() {
+      const rect = ref.current.getBoundingClientRect();
+      return {
+        x: 0,
+        y: (rect.y) - 60, // no idea why its 60
+        zIndex: 500,
+        width: rect.width,
+        height: '95vh',
+      }
+    },
+    close: {
+      x: 0,
+      y: 0,
+      zIndex: 0,
+      height: null,
+      width: null,
+      position: null,
+    },
+    final: {
+      width: null,
+    }
+  };
+
+  return (
+    <HStack ml='1em' mr='1em' ref={ref} spacing='0'>
+      <Text><b>Accounts:</b></Text>
+      <Spacer/>
+      <motion.div key={'jiggle-add-account-'+trustId} animate={animation} variants={boxVariants}
+        {... (detailDisclosure.isOpen ? swipeProps : {})}> 
+        <Box bg='white' borderRadius='lg' boxShadow='lg' p={detailDisclosure.isOpen ? '0.8em' : '0em'} height='100%'>
+          { !detailDisclosure.isOpen && <Button size='sm' colorScheme='blue' onClick={toggleDetail}>New Account</Button> }
+          { detailDisclosure.isOpen && isDesktop && <motion.div key='asset-detail-back'>
+          <IconButton pos='absolute' top='1em' right='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
+            onClick={toggleDetail}/>
+          </motion.div> }
+          { detailDisclosure.isOpen && <AccountWizard trustId={trustId} trustInfo={trustInfo}/> }
+        </Box>
+      </motion.div>
+    </HStack>
+  )
+}
+
+const AccountWizard = ({trustId, trustInfo, ... rest}) => {
+  const [renderPauseDone, setRenderPauseDone] = useState(false);
+  const [step, setStep] = useState(0);
+  const animations = {
+    initial: {x: '50vw', opacity: 0},
+    animate: {x: '0', opacity: 1, transition: {delay: 0.2, type: 'spring', stiffness: 100 }},
+    exit: {x: '-50vw', opacity: 0},
+    transition: {duration: 0.2}
+  };
+
+  useEffect(() => {
+    setTimeout(() => {
+      setRenderPauseDone(true);
+    }, 50);
+  }, []);
+  return renderPauseDone && (
+    <VStack mt='1em' spacing='0' overflow='hidden'>
+      <Box width='20em'>
+        <AnimatePresence>
+          { step === 0 && <motion.div key='add-account-0' {... animations}>
+            <AccountWizardStepZero setStep={setStep}/>
+          </motion.div> }
+          { step === 1 && <motion.div key='add-recovery-1' {... animations}>
+          </motion.div> }
+        </AnimatePresence>
+      </Box>
+    </VStack>
+  )
+}
+
+const AccountWizardStepZero = ({setStep}) => {
+  return (
+    <VStack width='100%' mt='2em' spacing='1em'>
+      <Text align='center' width='20em'>Create a new account in your <b>Trust</b> to:</Text>
+      <HStack width='20em' align='center'>
+        <FcApproval size='40px' align='top'/>
+        <VStack align='stretch' width='80%' spacing='0'>
+          <Text>Organize assets</Text>
+          <Text fontSize='sm' color='gray.600'>Separate your funds by purpose.</Text>
+        </VStack>
+      </HStack>
+      <HStack width='20em' align='center'>
+        <FcApproval size='40px'/>
+        <VStack align='stretch' width='80%' spacing='0'>
+          <Text>Customize Permissions</Text>
+          <Text fontSize='sm' color='gray.600'>Add and remove users easily.</Text>
+        </VStack>
+      </HStack>
+      <HStack width='20em' align='center'>
+        <FcApproval size='40px'/>
+        <VStack align='stretch' width='80%' spacing='0'>
+          <Text>Recover funds</Text>
+          <Text fontSize='sm' color='gray.600'>Covered with your Trust recovery.</Text>
+        </VStack>
+      </HStack>
+      <Button width='100%' colorScheme='blue' onClick={() => {setStep(1);}}>Next</Button>
+    </VStack>
+  )
 }
 
 const TrustKeyListItem = ({trustInfo, keyId, ...rest}) => {
@@ -401,7 +545,7 @@ const TrustKeyListItem = ({trustInfo, keyId, ...rest}) => {
         y: -1 * (rect.y) - window.scrollY,
         zIndex: 500,
         minWidth: isDesktop ? '0' : '92vw',
-        marginTop: '3vh',
+        marginTop: '3vh', 
         height: '95vh',
       }
     },
@@ -469,7 +613,8 @@ const TrustKeyListItem = ({trustInfo, keyId, ...rest}) => {
     }
   }, md: {}});
 
-  return keyInboxAddress.data !== ethers.constants.AddressZero && (<motion.div key={'jiggle-box-'+keyId} animate={animation} variants={boxVariants}
+  return keyInboxAddress.data !== ethers.constants.AddressZero && (<ListItem key={'tkl-'+keyId.toString()}>
+    <motion.div key={'jiggle-box-'+keyId} animate={animation} variants={boxVariants}
     {... (detailDisclosure.isOpen ? swipeProps : {})}>
     <Box ref={ref} bg='white' borderRadius='lg' boxShadow='lg' overflow='hidden' 
       style={{height: '100%', zIndex: 0, cursor: detailDisclosure.isOpen ? null : 'pointer'}} pos='relative'
@@ -540,7 +685,7 @@ const TrustKeyListItem = ({trustInfo, keyId, ...rest}) => {
         </Tabs>
       </motion.div> }
     </Box>
-  </motion.div>)
+  </motion.div></ListItem>)
 }
 
 const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {

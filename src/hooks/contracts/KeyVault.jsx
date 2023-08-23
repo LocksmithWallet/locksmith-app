@@ -35,3 +35,13 @@ export function useKeyHolders(keyId) {
 export function useKeyBalance(keyId, address) {
   return useLocksmithRead('KeyVault', 'balanceOf', [address, keyId], keyId !== null && address !== null);
 }
+
+/**
+ * useSoulboundKeyRequirement
+ *
+ * Returns the number of keys that address must maintain after
+ * sending a key out of their wallet.
+ */
+export function useSoulboundKeyRequirement(keyId, address) {
+  return useLocksmithRead('KeyVault', 'keyBalanceOf', [address, keyId, true], keyId !== null && address !== null);
+}
