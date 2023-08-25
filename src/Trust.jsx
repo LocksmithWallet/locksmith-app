@@ -59,6 +59,7 @@ import {
 import {
   useKeyHolders,
   useKeyBalance,
+  useSoulboundKeyRequirement,
 } from './hooks/contracts/KeyVault';
 import {
   useTrustInfo,
@@ -326,7 +327,7 @@ const CreateKeyConfirmationButton = ({trustId, trustInfo, keyName, destination, 
   const navigate = useNavigate();
 
   // we are just going to assume its soulbound for now
-  const keyCreator = useMegaKeyCreator(trustInfo.rootKeyId, keyName, destination, true,
+  const keyCreator = useMegaKeyCreator(trustInfo.rootKeyId, keyName, [destination], [true],
     (error) => {
       console.log('error');
       console.log(error);
@@ -450,9 +451,12 @@ const AddAccountButtonAndModal = ({trustId, trustInfo, ...rest}) => {
 const AccountWizard = ({trustId, trustInfo, ... rest}) => {
   const [renderPauseDone, setRenderPauseDone] = useState(false);
   const [step, setStep] = useState(0);
+  const [name, setName] = useState(null);
+  const [receivers, setReceivers] = useState([]);
+
   const animations = {
     initial: {x: '50vw', opacity: 0},
-    animate: {x: '0', opacity: 1, transition: {delay: 0.2, type: 'spring', stiffness: 100 }},
+    animate: {x: '0', opacity: 1, transition: {delay: 0.22, type: 'spring', stiffness: 100, damping: 20}}, 
     exit: {x: '-50vw', opacity: 0},
     transition: {duration: 0.2}
   };
@@ -463,13 +467,20 @@ const AccountWizard = ({trustId, trustInfo, ... rest}) => {
     }, 50);
   }, []);
   return renderPauseDone && (
-    <VStack mt='1em' spacing='0' overflow='hidden'>
+    <VStack spacing='0' overflow='hidden'>
       <Box width='20em'>
         <AnimatePresence>
           { step === 0 && <motion.div key='add-account-0' {... animations}>
             <AccountWizardStepZero setStep={setStep}/>
           </motion.div> }
           { step === 1 && <motion.div key='add-recovery-1' {... animations}>
+            <AccountWizardStepOne setStep={setStep} name={name} setName={setName}/>
+          </motion.div> }
+          { step === 2 && <motion.div key='review-account-2' {... animations}>
+            <AccountWizardStepTwo trustInfo={trustInfo} setStep={setStep} name={name} receivers={receivers} setReceivers={setReceivers}/> 
+          </motion.div> }
+          { step === 3 && <motion.div key='add-account-user-3' {... animations}>
+            <AccountWizardStepThree trustInfo={trustInfo} setStep={setStep} name={name} receivers={receivers} setReceivers={setReceivers}/> 
           </motion.div> }
         </AnimatePresence>
       </Box>
@@ -507,6 +518,118 @@ const AccountWizardStepZero = ({setStep}) => {
   )
 }
 
+const AccountWizardStepOne = ({setStep, name, setName}) => {
+  const nameTooShort = (name||'').length < 3;
+  return (
+    <VStack width='100%' mt='2em' spacing='3em'>
+      <Text align='center' width='20em'>Name your new <b>account</b>.</Text>
+      <Input border='1px' borderColor={nameTooShort ? 'red' : 'gray.300'}
+        bgColor='white' textAlign='center'
+        placeholder='Savings' width='100%' size='lg'
+        maxLength={15}
+        p='1.4em'
+        value={name||''}
+        onChange={(e) => { setName(e.target.value); }}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' && !nameTooShort) {
+            setStep(2);
+          }
+        }}/>
+      <Button width='100%' colorScheme='blue' isDisabled={nameTooShort} onClick={() => {setStep(2);}}>Next</Button>
+    </VStack>
+  )
+}
+
+const ReviewAccountName = ({setStep, trustInfo, name, ...rest}) => {
+  const [index, setIndex] = useState(0); 
+  const exampleAddresses = [
+    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+    '0x4E5d95F1D3d1b1FB4a169554A6bff1fD164ACa2c',
+    '0x8a4c5612205C2a5ae2a7ff480F0f972496C96161'
+  ];
+
+  useEffect(() => {
+    setTimeout(() => {
+      setIndex((prev) => (prev) === (exampleAddresses.length - 1) ? 0 : prev+1);
+    }, 1000);
+  }, [index]);
+  return ( <VStack spacing='0.5em' width='100%'>
+    <Text><b>Account</b></Text>
+    <HStack width='100%'>
+      <AddressAvatar size='30' address={exampleAddresses[index]}/>
+      <VStack spacing='0'>
+        <Text>{name}</Text>
+        <Text fontStyle='italic' fontSize='sm' color='gray.600'>{trustInfo.name}</Text>
+      </VStack>
+      <Spacer/>
+      <Button size='md' borderRadius='full' onClick={() => {setStep(1);}}><FiEdit2/></Button>
+    </HStack>
+  </VStack> )
+}
+
+const AccountWizardStepTwo = ({trustInfo, setStep, name, receivers, setReceivers}) => {
+    // determine if we need to repair the root key
+
+    return (
+      <VStack width='100%' spacing='1em'>
+        <ReviewAccountName setStep={setStep} name={name} trustInfo={trustInfo}/>
+        <Text><b>Users</b></Text>
+        <AnimatePresence>
+          { receivers.length < 1 && 
+            <Text color='gray.600' fontStyle='italic' as={motion.div}
+              initial={{x: '50vw', opacity: 0, position: 'absolute'}}
+              animate={{position: 'relative', x: 0, opacity: 1, transition: {delay: 0.20}}}>Currently no additional users added.</Text> }
+        </AnimatePresence>
+        <List width='100%' spacing='0.5em'>
+          <AnimatePresence>
+            { receivers.map((r) => (<ListItem key={'narli'+r} as={motion.div} exit={{x: '-50vw', opacity: 0, transition: {duration: 0.2}}}>
+              <HStack width='100%'>
+                <AddressAvatar address={r}/>
+                <Text><DisplayAddress address={r}/></Text>
+                <Spacer/>
+                <IconButton size='sm' icon={<FiTrash2 size='22px' color='#ff7b47'/>} borderRadius='full' boxShadow='md'
+                onClick={() => {setReceivers((prev) => prev.filter((user) => user !== r));}}/>
+              </HStack>
+            </ListItem>)) }
+          </AnimatePresence>
+        </List>
+        <Button width='100%' onClick={() => {setStep(3);}}>Add User</Button>
+        <Button width='100%' colorScheme='blue'>Create Account</Button>
+      </VStack>
+    )
+}
+
+const AccountWizardStepThree = ({trustInfo, setStep, name, receivers, setReceivers}) => {
+  const [destination, setDestination] = useState(null); 
+  const isValidAddress = ethers.utils.isAddress(destination);
+  const duplicate = receivers.indexOf(destination) >= 0;
+
+  const addDestination = function() {
+    setReceivers((prev) => [prev, destination].flat(2));
+    setStep(2);
+  };
+
+  return (
+      <VStack width='100%' spacing='1em'>
+        <Text><b>Add User Address</b></Text>
+        <Input mt='2em' value={destination || ''} size='md' mb='0.5em' placeholder='0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+          onChange={(e) => {setDestination(e.target.value);}}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && (isValidAddress && !duplicate)) {
+              addDestination(); 
+            }
+          }}/>
+        { isValidAddress && !duplicate && 
+            <Text fontWeight='bold' textColor='green.600' fontSize='sm'>
+              <DisplayAddress address={destination || ''}/></Text> }
+        { isValidAddress && duplicate && <Text textColor='red.600' fontStyle='italic' fontSize='sm'>Address already added</Text> }
+        { !isValidAddress && <Text textColor='red.600' fontStyle='italic' fontSize='sm'>Enter valid ethereum address</Text> }
+        <Button width='100%' onClick={() => {setStep(2);}}>Nevermind</Button>
+        <Button colorScheme='blue' width='100%' isDisabled={!isValidAddress || duplicate}
+          onClick={addDestination}>Add User</Button>
+      </VStack>
+   )
+}
 const TrustKeyListItem = ({trustInfo, keyId, ...rest}) => {
   const keyInfo = useInspectKey(keyId);
   const keyInboxAddress = useKeyInboxAddress(keyId);
@@ -713,7 +836,7 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
   const destinationKeyBalance = useKeyBalance(keyId, destination);
 
   // contract call
-  const copyKey = useCopyKey(trustInfo.rootKeyId, keyId, destination, !keyInfo.isRoot,
+  const copyKey = useCopyKey(trustInfo.rootKeyId, keyId, step === 3 ? destination : null, !keyInfo.isRoot,
     (error) => {
       console.log('error');
       console.log(error);
@@ -784,7 +907,7 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
       animate={{x: 0, opacity: 1}}
       exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}>
       <VStack mt='1em' spacing='0.75em'> 
-        <Text fontSize='lg' fontWeight='bold'>Trust Account</Text>
+        <Text fontSize='lg' fontWeight='bold'>Add Account User</Text>
         <HStack width='100%'>
           <AddressAvatar address={inbox.data}/>
           <VStack align='stretch' spacing='0' pl='0.3em'>
@@ -794,7 +917,6 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
           <Spacer/>
           <Button size='md' borderRadius='full' onClick={() => {processStep(0);}}><IoMdArrowRoundBack/></Button>
         </HStack>
-        <Text fontSize='lg' fontWeight='bold'>Add User:</Text>
         <HStack pos='relative' width='100%'>
           <AddressAvatar address={destination}/>
             { account.address === destination && <Spinner
@@ -867,9 +989,10 @@ const BurnHolderConfirmation = ({rootKeyId, keyId, inbox, trustInfo, keyInfo, ho
     });
 
   return <VStack mt='2em' spacing='2em'> 
-    <VStack spacing='0.75em' width='100%'>
-      <Text fontSize='lg'><b>Remove</b></Text>
+    <VStack spacing='1em' width='100%'>
       <HStack width='100%'>
+        <Text fontSize='lg'><b>Remove:</b></Text>
+        <Spacer/>
         <Box pos='relative'>
           { account.address === holder && <Spinner
             pos='absolute'
@@ -883,8 +1006,9 @@ const BurnHolderConfirmation = ({rootKeyId, keyId, inbox, trustInfo, keyInfo, ho
           <AddressAvatar address={holder}/>
         </Box>
         <Text><DisplayAddress address={holder}/></Text></HStack>
-        <Text fontSize='lg'><b>From Account:</b></Text>
         <HStack width='100%'>
+          <Text fontSize='lg'><b>From Account:</b></Text>
+          <Spacer/>
           <AddressAvatar address={inbox.data}/>
           <VStack spacing='0' align='stretch'>
             <Text align='left'>{keyInfo.alias}</Text>

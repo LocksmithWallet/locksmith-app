@@ -125,7 +125,8 @@ import { IoMdArrowRoundBack } from 'react-icons/io';
 export function Key() {
   const { keyId } = useParams();
   const key = useInspectKey(keyId);
-  
+  const account = useAccount();
+
   return (key && <motion.div key={"key-"+keyId}>
     <Box ml={{base: 0, md: 72}}>
       { key.isRoot && (<OnlyOnChains chains={[31337]}><motion.div key='recovery-config'>
