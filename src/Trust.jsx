@@ -287,7 +287,7 @@ const AddAccountButtonAndModal = ({trustId, trustInfo, ...rest}) => {
       const rect = ref.current.getBoundingClientRect();
       return {
         x: 0,
-        y: (rect.y), // no idea why its 60
+        y: (rect.y) - 60, // no idea why its 60
         zIndex: 500,
         width: rect.width,
         height: '95vh',
