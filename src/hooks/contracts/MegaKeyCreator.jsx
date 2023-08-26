@@ -7,6 +7,7 @@ import {
 } from 'wagmi';
 import {ethers} from 'ethers';
 import { Networks } from '../../configuration/Networks';
+import { useNeedsRootKeyLockerRepair } from './KeyLocker';
 
 /**
  * useMegaKeyCreator
@@ -19,18 +20,27 @@ export function useMegaKeyCreator(rootKeyId, keyAlias, receivers, bound, errorFu
   const { address } = useAccount();
   const network = useNetwork();
   const megaKeyAddress = Networks.getContractAddress(network.chain.id, 'MegaKeyCreator');
+  const keyLockerAddress = Networks.getContractAddress(network.chain.id, 'KeyLocker');
+  const locksmithAddress = Networks.getContractAddress(network.chain.id, 'Locksmith');
+  const needsRepair = useNeedsRootKeyLockerRepair(address, rootKeyId).needsRepair();
 
   // this will likely break when this assumption fails, but we are going to assume the default
   // ethereum collateral provider is EtherVault
   const provider = Networks.getContractAddress(network.chain.id, 'EtherVault');
 
-  // encode the data
+  // encode the data for the mega key creator
   var data = ethers.utils.defaultAbiCoder.encode(
     ['bytes32','address','address[]','bool[]'],
     [ethers.utils.formatBytes32String(keyAlias), provider, receivers, bound]);
 
-   return useLocksmithWrite('KeyVault', 'safeTransferFrom',
-      [address, megaKeyAddress, rootKeyId, 1, data],
-      rootKeyId !== null && provider !== null && receivers !== null,
+  var repairData = ethers.utils.defaultAbiCoder.encode(
+    ['tuple(address,bytes)'],
+    [[megaKeyAddress, data]]);
+
+  return useLocksmithWrite(needsRepair ? 'KeyVault' : 'KeyLocker', // if its needs repair, you're sending the key to the locker 
+      needsRepair ? 'safeTransferFrom' : 'useKeys',                // if it doesn't, your calling useKey on the locker
+      needsRepair ? [address, keyLockerAddress, rootKeyId, 1, repairData] : // you want to send key to the locker with the instructions
+        [locksmithAddress, rootKeyId, 1, megaKeyAddress, data],             // or just send the instructions using useKey
+      rootKeyId !== null && provider !== null && receivers !== null && needsRepair !== null,
       errorFunc, successFunc);
 }

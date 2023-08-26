@@ -13,6 +13,7 @@ import * as MegaKeyCreator from './interfaces/agents/MegaKeyCreator.json';
 import * as VirtualKeyAddress from './interfaces/agents/VirtualKeyAddress.json';
 import * as TrustRecoveryCenter from './interfaces/agents/TrustRecoveryCenter.json';
 import * as RecoveryPolicyCreator from './interfaces/agents/RecoveryPolicyCreator.json';
+import * as KeyLocker from './interfaces/KeyLocker.json';
 import * as ShadowERC from './interfaces/ShadowERC.json';
 import { ethers } from 'ethers';
 
@@ -33,6 +34,7 @@ export const LocksmithInterface = (function() {
     'VirtualKeyAddress': VirtualKeyAddress,
     'TrustRecoveryCenter': TrustRecoveryCenter,
     'RecoveryPolicyCreator': RecoveryPolicyCreator,
+    'KeyLocker': KeyLocker,
     'ShadowERC': ShadowERC,
   };
 

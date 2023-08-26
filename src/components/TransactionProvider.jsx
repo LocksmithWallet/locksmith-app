@@ -5,12 +5,21 @@ import {
   useState,
 } from 'react';
 import {
-  useToast
+  useToast,
+  Skeleton,
+  HStack,
+  Text,
+  Spacer,
 } from '@chakra-ui/react';
 import {
   useProvider,
   useNetwork,
 } from 'wagmi';
+import { ethers } from 'ethers';
+import { GAS_ARN } from '../configuration/AssetResource';
+import { Networks } from '../configuration/Networks';
+
+import { useNetworkGasTokenPrice, USDFormatter } from '../hooks/Prices';
 
 export const TransactionListContext = createContext({});
 
@@ -55,4 +64,21 @@ export const TransactionContext = ({children}) => {
       });
     })
   }}>{children}</TransactionListContext.Provider>)
+}
+
+export const TransactionEstimate = ({promise, ...rest}) => {
+  const network = useNetwork();
+  const gasAssetPrice = useNetworkGasTokenPrice();
+  const totalGas = (promise.gasPrice && promise.gasLimit) ? ethers.utils.formatEther(promise.gasPrice.mul(promise.gasLimit)) : 0;
+  const costUsd = USDFormatter.format((promise.gasPrice && promise.gasLimit && gasAssetPrice.data) ?
+    gasAssetPrice.data * totalGas : 0);
+
+  return (
+     <HStack width='100%'>
+      <Text>Estimate:</Text>
+      <Spacer/>
+      <Skeleton isLoaded={promise.gasPrice && promise.gasLimit && gasAssetPrice.data}>
+        <Text>{costUsd} (~{parseFloat(totalGas).toFixed(5)} {Networks.getAsset(network.chain.id, GAS_ARN).symbol})</Text>
+      </Skeleton>
+    </HStack>)
 }

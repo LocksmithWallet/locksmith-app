@@ -50,7 +50,8 @@ import {
 import { Networks } from './configuration/Networks';
 import { LocksmithInterface } from './configuration/LocksmithInterface';
 import {
-  TransactionListContext
+  TransactionListContext,
+  TransactionEstimate,
 } from './components/TransactionProvider';
 
 import {
@@ -214,8 +215,6 @@ const TrustHeader = ({trustId, trustInfo, ...rest}) => {
       <HStack pl='5.2em' mt={detailDisclosure.isOpen? '1em' : '0em'}>
         <Text fontWeight='bold' fontSize='lg'>{trustInfo && trustInfo.name}</Text>
         <Spacer/>
-        { !detailDisclosure.isOpen &&
-          <Button size='sm' colorScheme='blue' onClick={toggleDetail}>Add Account</Button> }
         { detailDisclosure.isOpen && isDesktop && 
           <IconButton pos='absolute' top='1em' right='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
             onClick={toggleDetail}/> }
@@ -223,126 +222,6 @@ const TrustHeader = ({trustId, trustInfo, ...rest}) => {
       { detailDisclosure.isOpen && <CreateKeyFlow trustId={trustId} trustInfo={trustInfo} toggleDetail={toggleDetail}/> } 
     </Box>
   </motion.div>)
-}
-
-const CreateKeyFlow = ({trustId, trustInfo, toggleDetail, ...rest}) => {
-  const account = useAccount();
-  const [step, setStep] = useState(0);
-  const [keyName, setKeyName] = useState('');
-  const [destination, setDestination] = useState('');
-  const stepAnimation = {
-    initial: {x: '100vw'},
-    animate: {x: 0, transition:{duration: 0.2, delay: 0.15}},
-    exit: {x: '-100vw', transition: {duration: 0.1}},
-  };
-
-  const nameTooShort = (keyName||'').length < 3;
-  const isValidAddress = ethers.utils.isAddress(destination);
-  
-  return (
-    <VStack mt='2em' pos='relative' overflow='hidden' height='100%' m='-0.90em'>
-      <AnimatePresence>
-      { step === 0 && (<motion.div key='create-key-0' style={{position: 'relative'}}>
-        <Box as={motion.div} {... stepAnimation} pos='relative'>
-          <KeyIcon keyInfo={{isRoot: false}} size='500px' style={{filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5))'}}/>
-          <Text pos='absolute' top='50px' left='195px' color='white'>Name Your Account</Text>
-          <Input pos='absolute' top='84px' left='160px' border='1px' borderColor={nameTooShort ? 'red' : 'gray.300'}
-              bgColor='white' textAlign='center'
-              placeholder='Savings' width='10em' size='lg'
-              maxLength={15}
-              p='1.4em'
-              value={keyName}
-              onChange={(e) => {
-                setKeyName(e.target.value);
-              }}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' && !nameTooShort) {
-                  setStep(2); 
-                }
-              }}
-            />
-            <Button pos='absolute' top='160px' left='160px' width='180px' 
-              isDisabled={nameTooShort} boxShadow='lg' colorScheme='blue'
-              onClick={() => {setStep(2);}}>Next</Button>
-        </Box>
-      </motion.div>) }
-      { step > 0 && (<motion.div key='review-key-0' {... stepAnimation}>
-        <HStack mt='4em' mb='1em'width='20em'>
-          <KeyIcon keyInfo={{isRoot: false}} size={32}/>
-          <Text fontWeight='bold'>{keyName}</Text>
-          <Spacer/>
-          <Button borderRadius='full' onClick={() => {setStep(0);}}><FiEdit2/></Button>
-        </HStack>
-      </motion.div>) }
-      { step > 2 && (<motion.div key='review-key-3' {... stepAnimation}>
-        <HStack width='20em' pl='0.3em'>
-          <Box pos='relative'>
-            { account.address === destination && <Spinner
-              pos='absolute'
-              thickness='2px'
-              top='-4px'
-              left='-4px'
-              speed='2s'
-              color='blue.500'
-              size='lg'
-            /> } 
-            <AddressAvatar address={destination}/>
-          </Box>
-          <Text fontWeight='bold' pl='0.1em'><DisplayAddress address={destination}/></Text>
-          <Spacer/>
-          <Button borderRadius='full' onClick={() => {setStep(1);}}><FiEdit2/></Button>
-        </HStack>
-      </motion.div>) }
-      { step === 2 && (<motion.div key='create-key-3' {... stepAnimation} style={{marginTop: '2em', width: '20em'}}>
-          <VStack spacing='1em'>
-            <Input fontSize='xs' width='26em' value={destination} size='md' mb='0.5em' placeholder='0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
-              onChange={(e) => {
-                setDestination(e.target.value);
-              }}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' && isValidAddress) {
-                  setStep(3);
-                }
-              }} 
-            />
-            { isValidAddress && <Text fontWeight='bold' textColor='green.600' fontSize='sm'><DisplayAddress address={destination || ''}/></Text> }
-            { !isValidAddress && <Text textColor='red.600' fontStyle='italic' fontSize='sm'>Enter valid destination address</Text> }
-          <Button width='100%' onClick={() => {setStep(0);}}>Back</Button>
-          <Button isDisabled={!isValidAddress} width='100%' colorScheme='blue' onClick={() => {setStep(3);}}>Next</Button>
-        </VStack>
-      </motion.div>) }
-      { step === 3 && (<motion.div key='create-key-3' {... stepAnimation} style={{marginTop:'2em', width: '20em'}}>
-        <CreateKeyConfirmationButton 
-          trustId={trustId}
-          trustInfo={trustInfo}
-          keyName={keyName}
-          destination={destination} toggleDetail={toggleDetail}/>
-      </motion.div>) }
-      </AnimatePresence>
-    </VStack>)
-}
-
-const CreateKeyConfirmationButton = ({trustId, trustInfo, keyName, destination, toggleDetail, ...rest}) => {
-  const transactions = useContext(TransactionListContext);
-  const navigate = useNavigate();
-
-  // we are just going to assume its soulbound for now
-  const keyCreator = useMegaKeyCreator(trustInfo.rootKeyId, keyName, [destination], [true],
-    (error) => {
-      console.log('error');
-      console.log(error);
-    }, (data) => {
-      transactions.addTransaction({
-        type: 'CREATE_KEY',
-        title: 'Mint ' + keyName,
-        subtitle: 'Send to ' + destination.substring(0,6) + '...' + destination.substring(destination.length - 4),
-        data: data
-      });
-      toggleDetail();
-    });
-
-  return (<Button isDisabled={!keyCreator.write} isLoading={keyCreator.isLoading}
-    width='100%' colorScheme='blue' onClick={() => {keyCreator.write?.();}}>Create Account</Button>)
 }
 
 const TrustKeyList = ({trustId, trustInfo, trustKeys, ...rest}) => {
@@ -440,7 +319,7 @@ const AddAccountButtonAndModal = ({trustId, trustInfo, ...rest}) => {
           <IconButton pos='absolute' top='1em' right='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
             onClick={toggleDetail}/>
           </motion.div> }
-          { detailDisclosure.isOpen && <AccountWizard trustId={trustId} trustInfo={trustInfo}/> }
+          { detailDisclosure.isOpen && <AccountWizard trustId={trustId} trustInfo={trustInfo} toggleDetail={toggleDetail}/> }
         </Box>
       </motion.div>
       </OnlyOnChains>
@@ -448,7 +327,7 @@ const AddAccountButtonAndModal = ({trustId, trustInfo, ...rest}) => {
   )
 }
 
-const AccountWizard = ({trustId, trustInfo, ... rest}) => {
+const AccountWizard = ({trustId, trustInfo, toggleDetail, ... rest}) => {
   const [renderPauseDone, setRenderPauseDone] = useState(false);
   const [step, setStep] = useState(0);
   const [name, setName] = useState(null);
@@ -477,7 +356,7 @@ const AccountWizard = ({trustId, trustInfo, ... rest}) => {
             <AccountWizardStepOne setStep={setStep} name={name} setName={setName}/>
           </motion.div> }
           { step === 2 && <motion.div key='review-account-2' {... animations}>
-            <AccountWizardStepTwo trustInfo={trustInfo} setStep={setStep} name={name} receivers={receivers} setReceivers={setReceivers}/> 
+            <AccountWizardStepTwo trustInfo={trustInfo} setStep={setStep} name={name} receivers={receivers} setReceivers={setReceivers} toggleDetail={toggleDetail}/> 
           </motion.div> }
           { step === 3 && <motion.div key='add-account-user-3' {... animations}>
             <AccountWizardStepThree trustInfo={trustInfo} setStep={setStep} name={name} receivers={receivers} setReceivers={setReceivers}/> 
@@ -557,7 +436,7 @@ const ReviewAccountName = ({setStep, trustInfo, name, ...rest}) => {
     <Text><b>Account</b></Text>
     <HStack width='100%'>
       <AddressAvatar size='30' address={exampleAddresses[index]}/>
-      <VStack spacing='0'>
+      <VStack spacing='0' align='stretch'>
         <Text>{name}</Text>
         <Text fontStyle='italic' fontSize='sm' color='gray.600'>{trustInfo.name}</Text>
       </VStack>
@@ -567,11 +446,11 @@ const ReviewAccountName = ({setStep, trustInfo, name, ...rest}) => {
   </VStack> )
 }
 
-const AccountWizardStepTwo = ({trustInfo, setStep, name, receivers, setReceivers}) => {
-    // determine if we need to repair the root key
+const AccountWizardStepTwo = ({trustInfo, setStep, name, receivers, setReceivers, toggleDetail}) => {
+    const account = useAccount();
 
     return (
-      <VStack width='100%' spacing='1em'>
+      <VStack width='100%' spacing='0.8em'>
         <ReviewAccountName setStep={setStep} name={name} trustInfo={trustInfo}/>
         <Text><b>Users</b></Text>
         <AnimatePresence>
@@ -584,6 +463,16 @@ const AccountWizardStepTwo = ({trustInfo, setStep, name, receivers, setReceivers
           <AnimatePresence>
             { receivers.map((r) => (<ListItem key={'narli'+r} as={motion.div} exit={{x: '-50vw', opacity: 0, transition: {duration: 0.2}}}>
               <HStack width='100%'>
+                <Box pos='relative'>
+                  { account.address === r && <Spinner
+                    pos='absolute'
+                    thickness='2px'
+                    top='-16px'
+                    left='4px'
+                    speed='2s'
+                    color='blue.500'
+                    size='lg'/> }
+                </Box>
                 <AddressAvatar address={r}/>
                 <Text><DisplayAddress address={r}/></Text>
                 <Spacer/>
@@ -594,9 +483,35 @@ const AccountWizardStepTwo = ({trustInfo, setStep, name, receivers, setReceivers
           </AnimatePresence>
         </List>
         <Button width='100%' onClick={() => {setStep(3);}}>Add User</Button>
-        <Button width='100%' colorScheme='blue'>Create Account</Button>
+        <CreateAccountConfirmationButton trustInfo={trustInfo} name={name} receivers={receivers} toggleDetail={toggleDetail}/>
       </VStack>
     )
+}
+
+const CreateAccountConfirmationButton = ({trustInfo, name, receivers, toggleDetail, ...rest}) => {
+  const transactions = useContext(TransactionListContext);
+  const navigate = useNavigate();
+
+  // we are just going to assume its soulbound for now
+  const keyCreator = useMegaKeyCreator(trustInfo.rootKeyId, name, receivers, receivers.map((r) => true),
+    (error) => {
+      console.log('error');
+      console.log(error);
+    }, (data) => {
+      transactions.addTransaction({
+        type: 'CREATE_KEY',
+        title: 'Create ' + name,
+        subtitle: 'Add ' + receivers.length + ' users.', 
+        data: data
+      });
+      toggleDetail();
+    });
+
+  return (<>
+    <TransactionEstimate promise={keyCreator}/>
+    <Button isDisabled={!keyCreator.write} isLoading={keyCreator.isLoading}
+    width='100%' colorScheme='blue' onClick={() => {keyCreator.write?.();}}>Create Account</Button>
+  </>)
 }
 
 const AccountWizardStepThree = ({trustInfo, setStep, name, receivers, setReceivers}) => {
@@ -630,6 +545,7 @@ const AccountWizardStepThree = ({trustInfo, setStep, name, receivers, setReceive
       </VStack>
    )
 }
+
 const TrustKeyListItem = ({trustInfo, keyId, ...rest}) => {
   const keyInfo = useInspectKey(keyId);
   const keyInboxAddress = useKeyInboxAddress(keyId);

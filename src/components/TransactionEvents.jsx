@@ -22,6 +22,7 @@ import {
   FcDownload,
   FcFlashOn,
   FcAdvance,
+  FcFilingCabinet,
   FcLink,
   FcSafe,
   FcShare,
@@ -359,6 +360,35 @@ export const RecoveryCreatedEvent = ({event, receipt}) => {
   </HStack>)
 }
 
+export const KeyLockerDepositEvent = ({event}) => {
+  const keyInfo = useInspectKey(event.topics.keyId);
+
+  return (<HStack ml='3px' pos='relative'>
+    <FcFilingCabinet size='28px'/>
+    <Box pos='absolute' left='8px' top='20px'><FcPlus size='16px'/></Box>
+    <VStack align='stretch' spacing='0em' fontSize='0.8em'>
+      <Text fontWeight='bold'>{keyInfo ? "'" + keyInfo.alias + "'": 'Key'} Lockered</Text>
+      <Text fontStyle='italic' textColor='gray.500'>
+        Deposited by <AddressAlias address={event.topics.operator}/>
+      </Text>
+    </VStack>
+  </HStack>) 
+}
+
+export const KeyLockerLoanEvent = ({event}) => {
+  const keyInfo = useInspectKey(event.topics.keyId);
+
+  return (<HStack ml='3px' pos='relative'>
+    <FcFilingCabinet size='28px'/>
+    <Box pos='absolute' left='8px' top='20px'><ImMinus size='16px'/></Box>
+    <VStack align='stretch' spacing='0em' fontSize='0.8em'>
+      <Text fontWeight='bold'>{keyInfo ? "'" + keyInfo.alias + "'": 'Key'} Borrowed</Text>
+      <Text fontStyle='italic' textColor='gray.500'>
+        Borrowed by <AddressAlias address={event.topics.destination}/>
+      </Text>
+    </VStack>
+  </HStack>)
+}
 
 export const InitializedEvent = ({event}) => {}
 export const UpgradedEvent = ({event}) => {}
