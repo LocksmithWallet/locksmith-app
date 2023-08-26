@@ -310,7 +310,6 @@ const AddAccountButtonAndModal = ({trustId, trustInfo, ...rest}) => {
     <HStack mt='1em' ml='1em' mr='1em' ref={ref} spacing='0'>
       <Text><b>Accounts:</b></Text>
       <Spacer/>
-      <OnlyOnChains chains={[31337]}>
       <motion.div key={'jiggle-add-account-'+trustId} animate={animation} variants={boxVariants}
         {... (detailDisclosure.isOpen ? swipeProps : {})}> 
         <Box bg='white' borderRadius='lg' boxShadow='lg' p={detailDisclosure.isOpen ? '0.8em' : '0em'} height='100%'>
@@ -322,7 +321,6 @@ const AddAccountButtonAndModal = ({trustId, trustInfo, ...rest}) => {
           { detailDisclosure.isOpen && <AccountWizard trustId={trustId} trustInfo={trustInfo} toggleDetail={toggleDetail}/> }
         </Box>
       </motion.div>
-      </OnlyOnChains>
     </HStack>
   )
 }
