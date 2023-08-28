@@ -229,11 +229,9 @@ const TrustKeyList = ({trustId, trustInfo, trustKeys, ...rest}) => {
   const { detail } = useParams();
   const ref = useRef();
   return (<motion.div initial={{x: initialX}} animate={{x: 0}} transition={{delay: 0.25}}>
-    <OnlyOnChains chains={[31337]}>
-      <Box m='1em' mt='2em'>
-        <RecoveryStatusBox keyId={trustInfo.rootKeyId} trustInfo={trustInfo} autoOpen={detail === 'recovery'}/>
-      </Box>
-    </OnlyOnChains>
+    <Box m='1em' mt='2em'>
+      <RecoveryStatusBox keyId={trustInfo.rootKeyId} trustInfo={trustInfo} autoOpen={detail === 'recovery'}/>
+    </Box>
     <AddAccountButtonAndModal trustId={trustId} trustInfo={trustInfo}/>
     <List m='1em' spacing='1em'>
       { trustKeys.map((k,x) => <TrustKeyListItem key={'tklia'+k.toString()} trustInfo={trustInfo} keyId={k}/>) }
@@ -290,8 +288,7 @@ const AddAccountButtonAndModal = ({trustId, trustInfo, ...rest}) => {
       const rect = ref.current.getBoundingClientRect();
       return {
         x: 0,
-        y: [31337].includes(network.chain.id) ? rect.y - 60 + window.scrollY 
-          : 1.5 * rect.y + rect.height, 
+        y: rect.y - 60 + window.scrollY, 
         zIndex: 500,
         width: rect.width,
         height: '95vh',
