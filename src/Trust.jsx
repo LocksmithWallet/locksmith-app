@@ -243,6 +243,7 @@ const TrustKeyList = ({trustId, trustInfo, trustKeys, ...rest}) => {
 
 const AddAccountButtonAndModal = ({trustId, trustInfo, ...rest}) => {
   const isDesktop = useBreakpointValue({base: false, md: true});
+  const [peek, setPeek] = useState(null);
   const detailDisclosure = useDisclosure();
   const animation = useAnimation();
   const ref = useRef(null);
@@ -285,9 +286,10 @@ const AddAccountButtonAndModal = ({trustId, trustInfo, ...rest}) => {
     },
     open: function() {
       const rect = ref.current.getBoundingClientRect();
+      setPeek(rect);  
       return {
         x: 0,
-        y: rect.y + rect.height + 80, // no idea why its 80 
+        y: rect.y - 60, 
         zIndex: 500,
         width: rect.width,
         height: '95vh',
@@ -318,6 +320,7 @@ const AddAccountButtonAndModal = ({trustId, trustInfo, ...rest}) => {
           <IconButton pos='absolute' top='1em' right='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
             onClick={toggleDetail}/>
           </motion.div> }
+          { detailDisclosure.isOpen && (peek||'').y }
           { detailDisclosure.isOpen && <AccountWizard trustId={trustId} trustInfo={trustInfo} toggleDetail={toggleDetail}/> }
         </Box>
       </motion.div>
