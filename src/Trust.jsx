@@ -229,10 +229,14 @@ const TrustKeyList = ({trustId, trustInfo, trustKeys, ...rest}) => {
   const { detail } = useParams();
   const ref = useRef();
   return (<motion.div initial={{x: initialX}} animate={{x: 0}} transition={{delay: 0.25}}>
-    <Box m='1em' mt='2em'>
-      <RecoveryStatusBox keyId={trustInfo.rootKeyId} trustInfo={trustInfo} autoOpen={detail === 'recovery'}/>
+    <OnlyOnChains chains={[31337]}>
+      <Box m='1em' mt='2em'>
+        <RecoveryStatusBox keyId={trustInfo.rootKeyId} trustInfo={trustInfo} autoOpen={detail === 'recovery'}/>
+      </Box>
+    </OnlyOnChains>
+    <Box m='1em'>
+      <AddAccountButtonAndModal trustId={trustId} trustInfo={trustInfo}/>
     </Box>
-    <AddAccountButtonAndModal trustId={trustId} trustInfo={trustInfo}/>
     <List m='1em' spacing='1em'>
       { trustKeys.map((k,x) => <TrustKeyListItem key={'tklia'+k.toString()} trustInfo={trustInfo} keyId={k}/>) }
     </List>
@@ -253,7 +257,9 @@ const AddAccountButtonAndModal = ({trustId, trustInfo, ...rest}) => {
       detailDisclosure.onOpen();
       setTimeout(() => {
         animation.set('click');
-        animation.start('open');
+        setTimeout(() => {
+          animation.start('open');
+        }, 3);
       }, 1);
     } else {
       detailDisclosure.onClose();
@@ -286,9 +292,10 @@ const AddAccountButtonAndModal = ({trustId, trustInfo, ...rest}) => {
     },
     open: function() {
       const rect = ref.current.getBoundingClientRect();
+      console.log(rect);
       return {
         x: 0,
-        y: rect.y - 60 + window.scrollY, 
+        top: -1 * rect.y + 20, 
         zIndex: 500,
         width: rect.width,
         height: '95vh',
@@ -307,7 +314,7 @@ const AddAccountButtonAndModal = ({trustId, trustInfo, ...rest}) => {
     }
   };
 
-  return (<Box ref={ref} m='1em' mb='0em'>
+  return (<Box ref={ref}>
     <HStack spacing='0'>
       <Text><b>Accounts:</b></Text>
       <Spacer/>
@@ -369,29 +376,29 @@ const AccountWizard = ({trustId, trustInfo, toggleDetail, ... rest}) => {
 const AccountWizardStepZero = ({setStep}) => {
   return (
     <VStack width='100%' mt='2em' spacing='1em'>
-      <Text align='center' width='20em'>Create a new account in your <b>Trust</b> to:</Text>
-      <HStack width='20em' align='center'>
+      <Text align='center'>Create a new account in your <b>Trust</b> to:</Text>
+      <HStack width='19em' align='stretch'>
         <FcApproval size='40px' align='top'/>
         <VStack align='stretch' width='80%' spacing='0'>
           <Text>Organize assets</Text>
           <Text fontSize='sm' color='gray.600'>Separate your funds by purpose.</Text>
         </VStack>
       </HStack>
-      <HStack width='20em' align='center'>
+      <HStack width='19em' align='stretch'>
         <FcApproval size='40px'/>
         <VStack align='stretch' width='80%' spacing='0'>
           <Text>Customize Permissions</Text>
           <Text fontSize='sm' color='gray.600'>Add and remove users easily.</Text>
         </VStack>
       </HStack>
-      <HStack width='20em' align='center'>
+      <HStack width='19em' align='stretch'>
         <FcApproval size='40px'/>
         <VStack align='stretch' width='80%' spacing='0'>
           <Text>Recover funds</Text>
           <Text fontSize='sm' color='gray.600'>Covered with your Trust recovery.</Text>
         </VStack>
       </HStack>
-      <Button width='100%' colorScheme='blue' onClick={() => {setStep(1);}}>Next</Button>
+      <Button width='95%' colorScheme='blue' onClick={() => {setStep(1);}}>Next</Button>
     </VStack>
   )
 }
@@ -403,7 +410,7 @@ const AccountWizardStepOne = ({setStep, name, setName}) => {
       <Text align='center' width='20em'>Name your new <b>account</b>.</Text>
       <Input border='1px' borderColor={nameTooShort ? 'red' : 'gray.300'}
         bgColor='white' textAlign='center'
-        placeholder='Savings' width='98%' size='lg'
+        placeholder='Savings' width='94%' size='lg'
         maxLength={15}
         p='1.4em'
         value={name||''}
@@ -413,7 +420,7 @@ const AccountWizardStepOne = ({setStep, name, setName}) => {
             setStep(2);
           }
         }}/>
-      <Button width='100%' colorScheme='blue' isDisabled={nameTooShort} onClick={() => {setStep(2);}}>Next</Button>
+      <Button width='95%' colorScheme='blue' isDisabled={nameTooShort} onClick={() => {setStep(2);}}>Next</Button>
     </VStack>
   )
 }
