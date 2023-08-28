@@ -243,10 +243,12 @@ const TrustKeyList = ({trustId, trustInfo, trustKeys, ...rest}) => {
 
 const AddAccountButtonAndModal = ({trustId, trustInfo, ...rest}) => {
   const isDesktop = useBreakpointValue({base: false, md: true});
-  const [peek, setPeek] = useState(null);
   const detailDisclosure = useDisclosure();
   const animation = useAnimation();
   const ref = useRef(null);
+
+  // hack we need this until recovery is out
+  const network = useNetwork();
 
   const toggleDetail = function() {
     if (!detailDisclosure.isOpen) {
@@ -286,10 +288,10 @@ const AddAccountButtonAndModal = ({trustId, trustInfo, ...rest}) => {
     },
     open: function() {
       const rect = ref.current.getBoundingClientRect();
-      setPeek(rect);  
       return {
         x: 0,
-        y: rect.y - 60, 
+        y: [31337].includes(network.chain.id) ? rect.y - 60 + window.scrollY 
+          : 1.5 * rect.y + rect.height + window.scrollY, 
         zIndex: 500,
         width: rect.width,
         height: '95vh',
@@ -308,8 +310,8 @@ const AddAccountButtonAndModal = ({trustId, trustInfo, ...rest}) => {
     }
   };
 
-  return (
-    <HStack mt='1em' ml='1em' mr='1em' ref={ref} spacing='0'>
+  return (<Box ref={ref} m='1em' mb='0em'>
+    <HStack spacing='0'>
       <Text><b>Accounts:</b></Text>
       <Spacer/>
       <motion.div key={'jiggle-add-account-'+trustId} animate={animation} variants={boxVariants}
@@ -320,11 +322,10 @@ const AddAccountButtonAndModal = ({trustId, trustInfo, ...rest}) => {
           <IconButton pos='absolute' top='1em' right='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
             onClick={toggleDetail}/>
           </motion.div> }
-          { detailDisclosure.isOpen && (peek||'').y }
           { detailDisclosure.isOpen && <AccountWizard trustId={trustId} trustInfo={trustInfo} toggleDetail={toggleDetail}/> }
         </Box>
       </motion.div>
-    </HStack>
+    </HStack></Box>
   )
 }
 
@@ -405,7 +406,7 @@ const AccountWizardStepOne = ({setStep, name, setName}) => {
       <Text align='center' width='20em'>Name your new <b>account</b>.</Text>
       <Input border='1px' borderColor={nameTooShort ? 'red' : 'gray.300'}
         bgColor='white' textAlign='center'
-        placeholder='Savings' width='100%' size='lg'
+        placeholder='Savings' width='98%' size='lg'
         maxLength={15}
         p='1.4em'
         value={name||''}
@@ -528,7 +529,7 @@ const AccountWizardStepThree = ({trustInfo, setStep, name, receivers, setReceive
   return (
       <VStack width='100%' spacing='1em'>
         <Text><b>Add User Address</b></Text>
-        <Input mt='2em' value={destination || ''} size='md' mb='0.5em' placeholder='0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+        <Input mt='2em' width='96%' value={destination || ''} size='md' mb='0.5em' placeholder='0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
           onChange={(e) => {setDestination(e.target.value);}}
           onKeyDown={(event) => {
             if (event.key === 'Enter' && (isValidAddress && !duplicate)) {
