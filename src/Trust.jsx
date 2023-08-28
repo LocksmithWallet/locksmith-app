@@ -291,7 +291,7 @@ const AddAccountButtonAndModal = ({trustId, trustInfo, ...rest}) => {
       return {
         x: 0,
         y: [31337].includes(network.chain.id) ? rect.y - 60 + window.scrollY 
-          : 1.5 * rect.y + rect.height + window.scrollY, 
+          : 1.5 * rect.y + rect.height, 
         zIndex: 500,
         width: rect.width,
         height: '95vh',
