@@ -292,7 +292,6 @@ const AddAccountButtonAndModal = ({trustId, trustInfo, ...rest}) => {
     },
     open: function() {
       const rect = ref.current.getBoundingClientRect();
-      console.log(rect);
       return {
         x: 0,
         top: -1 * rect.y + 20, 
