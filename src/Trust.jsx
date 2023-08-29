@@ -889,8 +889,11 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
         { keyId.eq(trustInfo.rootKeyId) ? 'This user will become an admin of your Trust.' :
             'This user will have full access to the funds in this account.' }
       </Alert>
-      <Button isDisabled={!copyKey.write} isLoading={copyKey.isLoading}
-        mt='2em' colorScheme='blue' width='100%' onClick={() => {copyKey.write?.();}}>Confirm</Button>
+      <Box mt='2em'>
+        <TransactionEstimate promise={copyKey}/>
+        <Button isDisabled={!copyKey.write} isLoading={copyKey.isLoading}
+          colorScheme='blue' width='100%' onClick={() => {copyKey.write?.();}}>Confirm</Button>
+      </Box>
     </motion.div> }
   </AnimatePresence>)
 }
@@ -975,9 +978,12 @@ const BurnHolderConfirmation = ({rootKeyId, keyId, inbox, trustInfo, keyInfo, ho
           'Danger! You will lose admin rights!' }
     </Alert> }
     <Button width='100%' onClick={() =>{setBurnAddress(null);}}>Nevermind</Button>
-    <Button isDisabled={!burnKeys.write} isLoading={burnKeys.isLoading} 
-      onClick={() => {burnKeys.write?.();}}
-      width='100%' colorScheme='red'>Revoke Access</Button>
+    <Box width='100%'>
+      <TransactionEstimate promise={burnKeys}/>
+      <Button isDisabled={!burnKeys.write} isLoading={burnKeys.isLoading} 
+        onClick={() => {burnKeys.write?.();}}
+          width='100%' colorScheme='red'>Revoke Access</Button>
+    </Box>
   </VStack>
 }
 
