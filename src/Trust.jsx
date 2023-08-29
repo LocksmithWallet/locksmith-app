@@ -117,7 +117,7 @@ export function Trust() {
 
   return (<motion.div key={"trust-"+trustId}>
     <Box ml={{base: 0, md: 72}} pos='relative'>
-      <TrustHeader trustId={trustId} trustInfo={trustInfo}/>
+      { trustInfo && <TrustHeader trustId={trustId} trustInfo={trustInfo}/> }
       { trustInfo && trustKeys.isSuccess &&
         <TrustKeyList
           trustId={trustId}
@@ -144,6 +144,7 @@ const TrustHeader = ({trustId, trustInfo, ...rest}) => {
   const isDesktop = useBreakpointValue({base: false, md: true});
   const detailDisclosure = useDisclosure();
   const animation = useAnimation();
+  const rootKeyInfo = useInspectKey(trustInfo.rootKeyId);
   const ref = useRef(null);
 
   const toggleDetail = function() {
@@ -184,7 +185,7 @@ const TrustHeader = ({trustId, trustInfo, ...rest}) => {
     open: function() {
       const rect = ref.current.getBoundingClientRect();
       return {
-        y: -1.5 * (rect.y) - window.scrollY,
+        y: -1.3 * (rect.y) - window.scrollY,
         zIndex: 500,
         minWidth: isDesktop ? '0' : '92vw',
         marginTop: '3vh',
@@ -218,10 +219,36 @@ const TrustHeader = ({trustId, trustInfo, ...rest}) => {
         { detailDisclosure.isOpen && isDesktop && 
           <IconButton pos='absolute' top='1em' right='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
             onClick={toggleDetail}/> }
+        { !detailDisclosure.isOpen && (
+          <Button onClick={toggleDetail} size='sm'>Admins</Button>
+        ) }
       </HStack>
-      { detailDisclosure.isOpen && <CreateKeyFlow trustId={trustId} trustInfo={trustInfo} toggleDetail={toggleDetail}/> } 
+      { detailDisclosure.isOpen && <AdminManagementPanel trustId={trustId} trustInfo={trustInfo} rootKeyInfo={rootKeyInfo} toggleDetail={toggleDetail}/> } 
     </Box>
   </motion.div>)
+}
+
+const AdminManagementPanel = ({trustId, trustInfo, rootKeyInfo, toggleDetail, ...rest}) => {
+  const holders = useKeyHolders(trustInfo.rootKeyId);
+  // by default root keys won't have an inbox, but that's not the case for every account
+  // on mainnet as of this writing, so we will ensure to filter it out so they dont accidentally
+  // disable their root account address.
+  const keyInboxAddress = useKeyInboxAddress(trustInfo.rootKeyId);
+  const network = useNetwork();
+  const keyLockerAddress = Networks.getContractAddress(network.chain.id, 'KeyLocker');
+  const [filteredHolders, setFilteredHolders] = useState(null);
+  
+  useEffect(() => {
+    if (holders.data && keyInboxAddress.data) {
+      setFilteredHolders(holders.data.filter((h) => ![keyInboxAddress.data, keyLockerAddress].includes(h)));
+    }
+  }, [holders.data, keyInboxAddress.data]);
+
+  return <Box mt='2em' textAlign='center' overflow='hidden'><KeyHoldersDetail 
+    trustInfo={trustInfo}
+    keyId={trustInfo.rootKeyId}
+    keyInfo={rootKeyInfo}
+    holders={filteredHolders || []}/></Box>
 }
 
 const TrustKeyList = ({trustId, trustInfo, trustKeys, ...rest}) => {
@@ -229,7 +256,7 @@ const TrustKeyList = ({trustId, trustInfo, trustKeys, ...rest}) => {
   const { detail } = useParams();
   const ref = useRef();
   return (<motion.div initial={{x: initialX}} animate={{x: 0}} transition={{delay: 0.25}}>
-    <OnlyOnChains chains={[31337]}>
+    <OnlyOnChains chains={[]}>
       <Box m='1em' mt='2em'>
         <RecoveryStatusBox keyId={trustInfo.rootKeyId} trustInfo={trustInfo} autoOpen={detail === 'recovery'}/>
       </Box>
@@ -787,7 +814,7 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
       </Alert> }
       { holders.length > 0 && <Alert mt='1em' fontSize='sm' status={keyId.eq(trustInfo.rootKeyId) ? 'warning' : 'info'}>
         <AlertIcon/>
-        { keyId.eq(trustInfo.rootKeyId) ? 'These addresses have full admin permissions to your Trust.' :
+        { keyId.eq(trustInfo.rootKeyId) ? 'Trust admins control all accounts, users, and permissions.' :
             'These addresses have full access to the funds in this account.' }
       </Alert> }
       { holders.length > 0 && <List spacing='2em' mt='2em'>
@@ -797,7 +824,8 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
             </motion.div>)) }
       </List> }
       { burnAddress === null && <Button 
-          mt='2em' colorScheme='blue' width='100%' onClick={() => {processStep(2);}}>Add Account Access</Button> }
+          mt='2em' colorScheme='blue' width='100%' onClick={() => {processStep(2);}}>
+            { keyId.eq(trustInfo.rootKeyId) ? 'Add Trust Admin' : 'Add Account Access' }</Button> }
     </motion.div> }
     { burnAddress !== null && <motion.div layout key={'bhc-'+burnAddress+keyId}
       initial={{x: 800, opacity: 0}}
@@ -828,9 +856,11 @@ const KeyHoldersDetail = ({trustInfo, keyId, keyInfo, holders, ...rest}) => {
       animate={{x: 0, opacity: 1}}
       exit={{x: -800, opacity: 0, transition: {duration: 0.2}}}>
       <VStack mt='1em' spacing='0.75em'> 
-        <Text fontSize='lg' fontWeight='bold'>Add Account User</Text>
+        <Text fontSize='lg' fontWeight='bold'>{trustInfo.rootKeyId.eq(keyId) ? 'Add Trust Admin' : 'Add Account User'}</Text>
         <HStack width='100%'>
-          <AddressAvatar address={inbox.data}/>
+          { trustInfo.rootKeyId.eq(keyId) ? 
+              <Image src='/gold-lock-large.png' width='24px' style={{filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5)'}}/> : 
+                <AddressAvatar address={inbox.data}/> }
           <VStack align='stretch' spacing='0' pl='0.3em'>
             <Text align='left'>{keyInfo.alias}</Text>
             <Text align='left'fontSize='xs' color='gray' fontStyle='italic'>{trustInfo.name}</Text>
@@ -928,9 +958,11 @@ const BurnHolderConfirmation = ({rootKeyId, keyId, inbox, trustInfo, keyInfo, ho
         </Box>
         <Text><DisplayAddress address={holder}/></Text></HStack>
         <HStack width='100%'>
-          <Text fontSize='lg'><b>From Account:</b></Text>
+          <Text fontSize='lg'><b>From {keyId.eq(rootKeyId) ? 'Admin' : 'Account'}:</b></Text>
           <Spacer/>
-          <AddressAvatar address={inbox.data}/>
+          { keyId.eq(rootKeyId) ? 
+            <Image src='/gold-lock-large.png' width='24px' style={{filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5)'}}/> : 
+              <AddressAvatar address={inbox.data}/> }
           <VStack spacing='0' align='stretch'>
             <Text align='left'>{keyInfo.alias}</Text>
             <Text align='left' fontSize='xs' color='gray.600' fontStyle='italic'>{trustInfo.name}</Text>
