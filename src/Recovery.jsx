@@ -45,7 +45,8 @@ import {
 import { Networks } from './configuration/Networks';
 import { LocksmithInterface } from './configuration/LocksmithInterface';
 import {
-  TransactionListContext
+  TransactionListContext,
+  TransactionEstimate,
 } from './components/TransactionProvider';
 
 import {
@@ -486,8 +487,11 @@ export function StepFourContent({keyId, trustInfo, setStep, needsAlarmNotary, gu
         <AlertIcon/>First check-in: {(new Date(time)).toDateString()}
       </Alert>
     </VStack>
-    <Button isDisabled={!createPolicy.write} isLoading={createPolicy.isLoading}
-      onClick={() => { createPolicy.write?.();}} width='100%' colorScheme='blue'>Enable Recovery Now</Button>
+    <Box width='100%'>
+      <TransactionEstimate promise={createPolicy}/>
+      <Button isDisabled={!createPolicy.write} isLoading={createPolicy.isLoading}
+        onClick={() => { createPolicy.write?.();}} width='100%' colorScheme='blue'>Enable Recovery</Button>
+    </Box>
   </VStack>
 }
 
