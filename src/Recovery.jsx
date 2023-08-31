@@ -28,6 +28,7 @@ import {
   Tag,
   TagLabel,
   TagLeftIcon,
+  Skeleton,
   Select,
   Spacer,
   Spinner,
@@ -95,9 +96,10 @@ import {
   useAnimation,
 } from 'framer-motion';
 import { IoMdArrowRoundBack } from 'react-icons/io';
-import { MdHealthAndSafety } from 'react-icons/md';
+import { MdHealthAndSafety, MdOutlineHourglassTop } from 'react-icons/md';
 import { FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { FcAlarmClock } from 'react-icons/fc';
+import { ImCheckmark } from 'react-icons/im';
 import { AiOutlineNumber } from 'react-icons/ai';
 
 export const ConfigureRecoveryAlertIngress = ({keyInfo, ...rest}) => {
@@ -224,7 +226,9 @@ export const RecoveryStatusBox = ({keyId, trustInfo, autoOpen, ...rest}) => {
           <IconButton pos='absolute' top='1em' right='1em' icon={<IoMdArrowRoundBack/>} borderRadius='full' boxShadow='md'
             onClick={toggleDetail}/> }
       </HStack>
-      { !detailDisclosure.isOpen ? '' : <RecoveryCreateWizard keyId={keyId} trustInfo={trustInfo} toggleDetail={toggleDetail}/> }
+      { !detailDisclosure.isOpen ? '' : (
+        policy && policy.isValid ? <RecoveryManagementWizard keyId={keyId} trustInfo={trustInfo} policy={policy} toggleDetail={toggleDetail}/> :
+          <RecoveryCreateWizard keyId={keyId} trustInfo={trustInfo} toggleDetail={toggleDetail}/> ) } 
     </Box>
     </motion.div>)
 }
@@ -236,14 +240,34 @@ export function RecoveryStatusPreview({keyId, trustInfo, policy, ...rest}) {
   const eventInfo = useEventInfo(policy.events[0]);
   const alarmInfo = useAlarmClock(policy.events[0]);
 
-  if (eventInfo && alarmInfo) {
-    console.log(eventInfo);
-    console.log((new Date(alarmInfo.alarmTime*1000)));
-  }
   return eventInfo && alarmInfo && (<>
     { eventInfo.fired && <Text fontColor='red'>Awaiting Recovery</Text> }
     { !eventInfo.fired && <Text>{(new Date(alarmInfo.alarmTime*1000)).toDateString()}</Text> }
   </>)
+}
+
+export function RecoveryManagementWizard({keyId, trustInfo, policy, toggleDetail, ...rest}) {
+  // assume its an alarm clock, which will break later
+  const eventInfo = useEventInfo(policy.events[0]);
+  const alarmInfo = useAlarmClock(policy.events[0]);
+  
+  return <VStack mt='2em' spacing='1em'>
+    <HStack>
+      <FcAlarmClock size='50'/>
+      <VStack spacing='0' align='stretch'>
+        <Text fontWeight='bold'>{eventInfo ? eventInfo.description: '...'}</Text>
+        <Skeleton isLoaded={alarmInfo}>
+          { alarmInfo && <Text size='sm'>{(new Date(alarmInfo.alarmTime*1000)).toDateString()}</Text> }
+        </Skeleton>
+      </VStack>
+    </HStack>
+    { alarmInfo && !alarmInfo.tooEarly && 
+      <Button colorScheme='green' size='sm' leftIcon={<ImCheckmark size='20'/>} width='16em'>Check In</Button>
+    }
+    { alarmInfo && alarmInfo.tooEarly && 
+      <Button colorScheme='gray' isDisabled={true} size='sm' leftIcon={<MdOutlineHourglassTop size='20'/>} width='16em'>Checked In</Button>
+    }
+  </VStack>
 }
 
 export function RecoveryCreateWizard({keyId, trustInfo, toggleDetail, ...rest}) {
