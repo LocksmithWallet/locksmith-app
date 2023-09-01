@@ -251,23 +251,98 @@ export function RecoveryManagementWizard({keyId, trustInfo, policy, toggleDetail
   const eventInfo = useEventInfo(policy.events[0]);
   const alarmInfo = useAlarmClock(policy.events[0]);
   
-  return <VStack mt='2em' spacing='1em'>
-    <HStack>
-      <FcAlarmClock size='50'/>
-      <VStack spacing='0' align='stretch'>
-        <Text fontWeight='bold'>{eventInfo ? eventInfo.description: '...'}</Text>
-        <Skeleton isLoaded={alarmInfo}>
-          { alarmInfo && <Text size='sm'>{(new Date(alarmInfo.alarmTime*1000)).toDateString()}</Text> }
-        </Skeleton>
-      </VStack>
-    </HStack>
-    { alarmInfo && !alarmInfo.tooEarly && 
-      <Button colorScheme='green' size='sm' leftIcon={<ImCheckmark size='20'/>} width='16em'>Check In</Button>
-    }
-    { alarmInfo && alarmInfo.tooEarly && 
-      <Button colorScheme='gray' isDisabled={true} size='sm' leftIcon={<MdOutlineHourglassTop size='20'/>} width='16em'>Checked In</Button>
-    }
+  return <VStack mt='2em' spacing='2em'>
+    <VStack spacing='1em'>
+      <HStack>
+        <FcAlarmClock size='50'/>
+        <VStack spacing='0' align='stretch'>
+          <Text fontWeight='bold'>{eventInfo ? eventInfo.description: '...'}</Text>
+          <Skeleton isLoaded={alarmInfo}>
+            { alarmInfo && <Text size='sm'>{(new Date(alarmInfo.alarmTime*1000)).toDateString()}</Text> }
+          </Skeleton>
+        </VStack>
+      </HStack>
+      { alarmInfo && !alarmInfo.tooEarly && 
+        <Button colorScheme='green' size='sm' leftIcon={<ImCheckmark size='20'/>} width='16em'>Check In</Button>
+      }
+      { alarmInfo && alarmInfo.tooEarly && 
+        <Button colorScheme='gray' isDisabled={true} size='sm' leftIcon={<MdOutlineHourglassTop size='20'/>} width='16em'>Checked In</Button>
+      }
+    </VStack>
+    <VStack width='20em' spacing='1em'>
+      <Text width='100%' align='left' fontWeight='bold'>Recovery Addresses ({policy.guardians.length}):</Text>
+      <RecoveryAddressManager keyId={keyId} trustInfo={trustInfo} policy={policy} toggleDetail={toggleDetail}/>
+    </VStack>
   </VStack>
+}
+
+export function RecoveryAddressManager({keyId, trustInfo, policy, toggleDetail, ...rest}) {
+  const account = useAccount();
+  const [action, setAction] = useState(null); // true for adding, false for removing
+  const [guardianActionList, setGuardianActionList] = useState([]);
+
+  const buttonAnimation = {
+    initial: {
+      y: 100,
+      opacity: 0,
+    },
+    animate: {
+      y: 0,
+      opacity: 1,
+      transiton: {delay: 0.25, duration: 0.2}
+    },
+    exit: {
+      y: 100, 
+      opacity: 0,
+      transition: {duration: 0.1}
+    }
+  };
+
+  // exit remove mode if the list gets empty after a change
+  useEffect(() => {
+    if(guardianActionList.length === 0 && action === false) {
+      setAction(null);
+    }
+  }, [guardianActionList]);
+
+  return (<VStack width='100%' spacing='1em'>
+    <List width='100%' spacing='0.75em'>
+    <AnimatePresence>
+      { policy.guardians.map((r) => (<ListItem key={'ramra'+r} as={motion.div} exit={{x: '-50vw', opacity: 0, transition: {duration: 0.2}}}>
+        <HStack width='100%'>
+          <Box pos='relative'>
+            { account.address === r && <Spinner
+                pos='absolute'
+                thickness='2px'
+                top='-16px'
+                left='4px'
+                speed='2s'
+                color='blue.500'
+                size='lg'/> }
+           </Box>
+           <AddressAvatar address={r}/>
+           <HStack><Text><DisplayAddress address={r}/></Text><CopyButton content={r} size='20'/></HStack>
+           <Spacer/>
+          { !action && !guardianActionList.includes(r) && <IconButton size='sm' icon={<FiTrash2 size='22px' color='#ff7b47'/>} borderRadius='full' boxShadow='md'
+            onClick={() => {setAction(false); setGuardianActionList((prev) => [... prev, r]);}}/> }
+          { action === false && guardianActionList.includes(r) && <Button 
+              size='sm' fontStyle='italic' color='gray.600'
+              onClick={() => {setGuardianActionList((prev) => prev.filter((g) => g !== r));}}>Undo</Button> }
+         </HStack>
+       </ListItem>)) }
+     </AnimatePresence>
+    </List>
+    <AnimatePresence>
+      { !action && action !== false && <motion.div key='add-guardian-button' {... buttonAnimation}>
+          <Button colorScheme='blue' width='20em' exit={{x: '-100vw', opacity: 0}}>Add Address</Button>
+      </motion.div> }
+    </AnimatePresence>
+    <AnimatePresence>
+      { action === false && <motion.div key='remove-guardian-button' {... buttonAnimation}>
+        <Button colorScheme='red' width='20em'>Remove Addresses ({guardianActionList.length})</Button>
+      </motion.div> }
+    </AnimatePresence>
+  </VStack>)
 }
 
 export function RecoveryCreateWizard({keyId, trustInfo, toggleDetail, ...rest}) {

@@ -107,7 +107,7 @@ export function RevealTrust() {
             <BsHammer size='38px' color='#EFEFEF'/>
           </Box> } 
           { (!key || !trust) && <Text as={motion.div} animate={{scale: [1, 1.1], transition: {repeat: Infinity, repeatType: 'mirror', duration: 0.5}}}
-            pos='relative' top='-10' color='gray.100' fontStyle='italic'>Minting Key...</Text> }
+            pos='relative' top='-10' color='gray.100' fontStyle='italic'>Creating Trust...</Text> }
         </VStack>
       </motion.div>
     </AnimatePresence>
