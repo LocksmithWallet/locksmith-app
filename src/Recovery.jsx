@@ -289,7 +289,7 @@ export function RecoveryAddressManager({keyId, trustInfo, policy, toggleDetail, 
     animate: {
       y: 0,
       opacity: 1,
-      transiton: {delay: 0.25, duration: 0.2}
+      transition: {delay: 0.25, duration: 0.2}
     },
     exit: {
       y: 100, 
