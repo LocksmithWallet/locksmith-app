@@ -251,9 +251,14 @@ export function RecoveryManagementWizard({keyId, trustInfo, policy, toggleDetail
   // assume its an alarm clock, which will break later
   const eventInfo = useEventInfo(policy.events[0]);
   const alarmInfo = useAlarmClock(policy.events[0]);
-  
+  const [hideCheckIn, setHideCheckIn] = useState(false);
+
   return <VStack mt='2em' spacing='2em'>
-    <VStack spacing='1em'>
+    <AnimatePresence>
+      { !hideCheckIn && (<VStack as={motion.div} 
+        initial={{y: '-10vh', opacity: 0}}
+        animate={{y: 0, opacity: 1, transition: {delay: 0.45}}}
+        exit={{x: '-50vw', opacity: 0}} spacing='1em'>
       <HStack>
         <FcAlarmClock size='50'/>
         <VStack spacing='0' align='stretch'>
@@ -269,15 +274,15 @@ export function RecoveryManagementWizard({keyId, trustInfo, policy, toggleDetail
       { alarmInfo && alarmInfo.tooEarly && 
         <Button colorScheme='gray' isDisabled={true} size='sm' leftIcon={<MdOutlineHourglassTop size='20'/>} width='16em'>Checked In</Button>
       }
-    </VStack>
+    </VStack>) }
+    </AnimatePresence>
     <VStack width='20em' spacing='1em'>
-      <Text width='100%' align='left' fontWeight='bold'>Recovery Addresses ({policy.guardians.length}):</Text>
-      <RecoveryAddressManager keyId={keyId} trustInfo={trustInfo} policy={policy} toggleDetail={toggleDetail}/>
+      <RecoveryAddressManager keyId={keyId} trustInfo={trustInfo} policy={policy} setHideCheckIn={setHideCheckIn} toggleDetail={toggleDetail}/>
     </VStack>
   </VStack>
 }
 
-export function RecoveryAddressManager({keyId, trustInfo, policy, toggleDetail, ...rest}) {
+export function RecoveryAddressManager({keyId, trustInfo, policy, setHideCheckIn, toggleDetail, ...rest}) {
   const account = useAccount();
   const [action, setAction] = useState(null); // true for adding, false for removing
   const [guardianActionList, setGuardianActionList] = useState([]);
@@ -299,6 +304,23 @@ export function RecoveryAddressManager({keyId, trustInfo, policy, toggleDetail, 
     }
   };
 
+  const stepAnimation = {
+    initial: {
+      y: '50vh',
+      opacity: 0,
+    },
+    animate: {
+      y: 0,
+      opacity: 1,
+      transition: {delay: 0.45, duration: 0.2}
+    },
+    exit: {
+      x: '-50vw',
+      opacity: 0,
+      transition: {duration: 0.2},
+    }
+  };
+
   // exit remove mode if the list gets empty after a change
   useEffect(() => {
     if(guardianActionList.length === 0 && action === false) {
@@ -306,7 +328,16 @@ export function RecoveryAddressManager({keyId, trustInfo, policy, toggleDetail, 
     }
   }, [guardianActionList]);
 
-  return (<VStack width='100%' spacing='1em'>
+  useEffect(() => {
+    setHideCheckIn(action);
+  }, [action]);
+
+
+  return <AnimatePresence>
+    { action === true ? (<motion.div key='agf' {... stepAnimation}> 
+      <AddGuardiansFlow trustInfo={trustInfo} policy={policy}/>
+    </motion.div>) : (<VStack width='100%' spacing='1em' as={motion.div} {...stepAnimation}>
+    <Text width='100%' align='left' fontWeight='bold'>Recovery Addresses ({policy.guardians.length}):</Text>
     <List width='100%' spacing='0.75em'>
     <AnimatePresence>
       { policy.guardians.map((r) => (<ListItem key={'ramra'+r} as={motion.div} exit={{x: '-50vw', opacity: 0, transition: {duration: 0.2}}}>
@@ -335,7 +366,8 @@ export function RecoveryAddressManager({keyId, trustInfo, policy, toggleDetail, 
     </List>
     <AnimatePresence>
       { !action && action !== false && <motion.div key='add-guardian-button' {... buttonAnimation}>
-          <Button colorScheme='blue' width='20em' exit={{x: '-100vw', opacity: 0}}>Add Address</Button>
+          <Button onClick={() => {setAction(true);}}
+            colorScheme='blue' width='20em' exit={{x: '-100vw', opacity: 0}}>Add Address</Button>
       </motion.div> }
     </AnimatePresence>
     <AnimatePresence>
@@ -347,7 +379,19 @@ export function RecoveryAddressManager({keyId, trustInfo, policy, toggleDetail, 
           callback={() => {setGuardianActionList([]);}}/>
       </motion.div> }
     </AnimatePresence>
-  </VStack>)
+  </VStack>) }
+  </AnimatePresence>
+}
+
+export function AddGuardiansFlow({trustInfo, policy, ...rest}) {
+  const [step, setStep] = useState(1); // we start at one to re-use stuff
+  const [newGuardians, setNewGuardians] = useState([]);
+
+  return (
+    <StepOneContent keyId={trustInfo.rootKeyId} setStep={setStep}
+      guardians={[policy.guardians, newGuardians].flat(2)}
+        setGuardians={setNewGuardians}/>
+  )
 }
 
 export function RemoveGuardiansConfirmationButton({trustInfo, policy, guardianActionList, callback, ...rest}) {
