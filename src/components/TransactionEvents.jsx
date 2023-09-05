@@ -11,6 +11,7 @@ import { ethers, BigNumber } from 'ethers';
 import { Networks } from '../configuration/Networks';
 import { useInspectKey } from '../hooks/contracts/Locksmith';
 import { useTrustedActorAlias } from '../hooks/contracts/Notary';
+import { useRecoveryPolicy } from '../hooks/contracts/TrustRecoveryCenter';
 
 import { motion } from 'framer-motion';
 import { DisplayAddress, AddressAlias } from './Address';
@@ -385,6 +386,21 @@ export const KeyLockerLoanEvent = ({event}) => {
       <Text fontWeight='bold'>{keyInfo ? "'" + keyInfo.alias + "'": 'Key'} Borrowed</Text>
       <Text fontStyle='italic' textColor='gray.500'>
         Borrowed by <AddressAlias address={event.topics.destination}/>
+      </Text>
+    </VStack>
+  </HStack>)
+}
+
+export const GuardiansChangedEvent = ({event}) => {
+  const policy = useRecoveryPolicy(event.topics.rootKeyId);
+
+  return (<HStack ml='3px' pos='relative'>
+    <FcFilingCabinet size='28px'/>
+    <Box pos='absolute' left='8px' top='20px'>{ event.topics.added[0] ? <FcPlus size='16px'/> : <ImMinus size='16px'/> }</Box>
+    <VStack align='stretch' spacing='0em' fontSize='0.8em'>
+      <Text fontWeight='bold'>Addresses { event.topics.added[0] ? 'Added' : 'Removed' }</Text>
+      <Text fontStyle='italic' textColor='gray.500'>
+        New total of <b>{ policy && policy.guardians.length }</b> addresses.
       </Text>
     </VStack>
   </HStack>)

@@ -37,3 +37,17 @@ export function useRecoveryPolicy(keyId) {
 
   return policyData;
 }
+
+/**
+ * useChangeGuardians
+ *
+ * A root key holder can call this to add or remove guardian recovery addresses
+ * from the recovery policy.
+ *
+ */
+export function useChangeGuardians(rootKeyId, addresses, addOrRemove, errorFunc, successFunc) {
+  return useLocksmithWrite('TrustRecoveryCenter', 'changeGuardians',
+      [rootKeyId, addresses, addOrRemove],
+      rootKeyId !== null && addresses !== null && addresses.length !== 0 && addOrRemove !== null,
+      errorFunc, successFunc);
+}

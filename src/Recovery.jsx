@@ -68,7 +68,8 @@ import {
   useKeyInboxAddress
 } from './hooks/contracts/PostOffice';
 import {
-  useRecoveryPolicy
+  useRecoveryPolicy,
+  useChangeGuardians,
 } from './hooks/contracts/TrustRecoveryCenter';
 import {
   useRecoveryPolicyCreator
@@ -339,10 +340,43 @@ export function RecoveryAddressManager({keyId, trustInfo, policy, toggleDetail, 
     </AnimatePresence>
     <AnimatePresence>
       { action === false && <motion.div key='remove-guardian-button' {... buttonAnimation}>
-        <Button colorScheme='red' width='20em'>Remove Addresses ({guardianActionList.length})</Button>
+        <RemoveGuardiansConfirmationButton 
+          trustInfo={trustInfo}
+          policy={policy}
+          guardianActionList={guardianActionList}
+          callback={() => {setGuardianActionList([]);}}/>
       </motion.div> }
     </AnimatePresence>
   </VStack>)
+}
+
+export function RemoveGuardiansConfirmationButton({trustInfo, policy, guardianActionList, callback, ...rest}) {
+  const transactions = useContext(TransactionListContext);
+  const changeGuardians = useChangeGuardians(trustInfo.rootKeyId, guardianActionList, 
+    guardianActionList.map((g) => false), 
+    (error) => {
+      console.log(error);
+    }, (data) => {
+      transactions.addTransaction({
+        type: 'REMOVE_RECOVERY_ADDRESSES',
+        title: 'Change Recovery',
+        subtitle: 'Removed ' + guardianActionList.length + " addresses",
+        data: data
+      });
+
+      // this is going to clear the list and reset
+      // the view
+      callback();
+    });
+
+  return (<>
+    <TransactionEstimate promise={changeGuardians}/>
+    <Button colorScheme='red' width='20em'
+    isDisabled={!changeGuardians.write}
+    onClick={() => {changeGuardians.write?.();}}>
+      Remove Addresses ({guardianActionList.length})
+    </Button>
+  </>)
 }
 
 export function RecoveryCreateWizard({keyId, trustInfo, toggleDetail, ...rest}) {
