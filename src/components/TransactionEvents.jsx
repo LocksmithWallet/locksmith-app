@@ -31,6 +31,7 @@ import {
   FcPlus,
   FcQuestions,
   FcMoneyTransfer,
+  FcCustomerSupport,
   FcRight,
   FcLeft,
   FcMultipleInputs,
@@ -350,6 +351,17 @@ export const AlarmClockRegisteredEvent = ({event, receipt}) => {
   </HStack>)
 }
 
+export const AlarmClockSnoozedEvent = ({event, receipt}) => {
+  return (<HStack ml='3px' pos='relative'>
+    <FcAlarmClock size='28px'/>
+    <Box pos='absolute' left='8px' top='20px'><FcApproval size='16px'/></Box>
+    <VStack align='stretch' spacing='0em' fontSize='0.8em'>
+      <Text fontWeight='bold'>Alarm Clock Snoozed</Text>
+      <Text fontStyle='italic' textColor='gray.500'>Until {(new Date(event.topics.newAlarmTime*1000)).toDateString()}</Text>
+    </VStack>
+  </HStack>)
+}
+
 export const RecoveryCreatedEvent = ({event, receipt}) => {
   return (<HStack ml='3px' pos='relative'>
     <MdHealthAndSafety color='#3186CE' size='28px'/>
@@ -395,7 +407,7 @@ export const GuardiansChangedEvent = ({event}) => {
   const policy = useRecoveryPolicy(event.topics.rootKeyId);
 
   return (<HStack ml='3px' pos='relative'>
-    <FcFilingCabinet size='28px'/>
+    <FcCustomerSupport size='28px'/>
     <Box pos='absolute' left='8px' top='20px'>{ event.topics.added[0] ? <FcPlus size='16px'/> : <ImMinus size='16px'/> }</Box>
     <VStack align='stretch' spacing='0em' fontSize='0.8em'>
       <Text fontWeight='bold'>Addresses { event.topics.added[0] ? 'Added' : 'Removed' }</Text>

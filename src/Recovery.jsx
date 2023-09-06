@@ -78,7 +78,8 @@ import {
   useEventInfo
 } from './hooks/contracts/TrustEventLog';
 import {
-  useAlarmClock
+  useAlarmClock,
+  useSnoozeAlarm,
 } from './hooks/contracts/AlarmClock';
 
 import {
@@ -248,17 +249,31 @@ export function RecoveryStatusPreview({keyId, trustInfo, policy, ...rest}) {
 }
 
 export function RecoveryManagementWizard({keyId, trustInfo, policy, toggleDetail, ...rest}) {
+  const transactions = useContext(TransactionListContext);
+
   // assume its an alarm clock, which will break later
   const eventInfo = useEventInfo(policy.events[0]);
   const alarmInfo = useAlarmClock(policy.events[0]);
   const [hideCheckIn, setHideCheckIn] = useState(false);
 
+  const snoozeAlarm = useSnoozeAlarm(alarmInfo && !alarmInfo.tooEarly ? policy.events[0] : null,
+    (error) => {
+      console.log(error);
+    }, (data) => {
+      transactions.addTransaction({
+        type: 'SNOOZE_ALARM',
+        title: 'Check-in',
+        subtitle: 'Successful check-in.',
+        data: data
+      });
+    });
+
   return <VStack mt='2em' spacing='2em'>
     <AnimatePresence>
       { !hideCheckIn && (<VStack as={motion.div} 
         initial={{y: '-10vh', opacity: 0}}
-        animate={{y: 0, opacity: 1, transition: {delay: 0.45}}}
-        exit={{x: '-50vw', opacity: 0}} spacing='1em'>
+        animate={{y: 0, opacity: 1, transition: {delay: 0.25}}}
+        exit={{y: '-10vh', opacity: 0}} spacing='1em'>
       <HStack>
         <FcAlarmClock size='50'/>
         <VStack spacing='0' align='stretch'>
@@ -269,7 +284,10 @@ export function RecoveryManagementWizard({keyId, trustInfo, policy, toggleDetail
         </VStack>
       </HStack>
       { alarmInfo && !alarmInfo.tooEarly && 
-        <Button colorScheme='green' size='sm' leftIcon={<ImCheckmark size='20'/>} width='16em'>Check In</Button>
+        <Button isDisabled={!snoozeAlarm.write} 
+          isLoading={snoozeAlarm.isLoading}
+          onClick={() => {snoozeAlarm.write?.();}}
+          colorScheme='green' size='sm' leftIcon={<ImCheckmark size='20'/>} width='16em'>Check In</Button>
       }
       { alarmInfo && alarmInfo.tooEarly && 
         <Button colorScheme='gray' isDisabled={true} size='sm' leftIcon={<MdOutlineHourglassTop size='20'/>} width='16em'>Checked In</Button>
@@ -315,7 +333,7 @@ export function RecoveryAddressManager({keyId, trustInfo, policy, setHideCheckIn
       transition: {delay: 0.45, duration: 0.2}
     },
     exit: {
-      x: '-50vw',
+      y: '50vh',
       opacity: 0,
       transition: {duration: 0.2},
     }
@@ -335,7 +353,7 @@ export function RecoveryAddressManager({keyId, trustInfo, policy, setHideCheckIn
 
   return <AnimatePresence>
     { action === true ? (<motion.div key='agf' {... stepAnimation}> 
-      <AddGuardiansFlow trustInfo={trustInfo} policy={policy}/>
+      <AddGuardiansFlow trustInfo={trustInfo} policy={policy} setAction={setAction}/>
     </motion.div>) : (<VStack width='100%' spacing='1em' as={motion.div} {...stepAnimation}>
     <Text width='100%' align='left' fontWeight='bold'>Recovery Addresses ({policy.guardians.length}):</Text>
     <List width='100%' spacing='0.75em'>
@@ -383,15 +401,74 @@ export function RecoveryAddressManager({keyId, trustInfo, policy, setHideCheckIn
   </AnimatePresence>
 }
 
-export function AddGuardiansFlow({trustInfo, policy, ...rest}) {
+export function AddGuardiansFlow({trustInfo, policy, setAction, ...rest}) {
   const [step, setStep] = useState(1); // we start at one to re-use stuff
   const [newGuardians, setNewGuardians] = useState([]);
 
-  return (
-    <StepOneContent keyId={trustInfo.rootKeyId} setStep={setStep}
-      guardians={[policy.guardians, newGuardians].flat(2)}
-        setGuardians={setNewGuardians}/>
-  )
+  useEffect(() => {
+    if (step === 0) {
+      setAction(null);
+    }
+  }, [step]);
+
+  const stepAnimation = {
+    initial: {
+      y: '50vh',
+      opacity: 0,
+    },
+    animate: {
+      y: 0,
+      opacity: 1,
+      transition: {delay: 0.45, duration: 0.2}
+    },
+    exit: {
+      y: '50vh',
+      opacity: 0,
+      transition: {duration: 0.2},
+    }
+  };
+
+  return (<AnimatePresence>
+    { step < 2 && <motion.div key='step1add' {... stepAnimation}>
+      <StepOneContent keyId={trustInfo.rootKeyId} setStep={setStep}
+        baseGuardians={policy.guardians}
+        guardians={newGuardians}
+        setGuardians={setNewGuardians}/> 
+    </motion.div>}
+    { step === 2 && <Box as={motion.div} width='20em' {... stepAnimation}><StepTwoContent keyId={trustInfo.rootKeyId} setStep={setStep}
+        addToPolicy={true}
+        guardians={newGuardians}
+        setGuardians={setNewGuardians}/></Box> }
+  </AnimatePresence>)
+}
+
+export function AddGuardiansConfirmationButton({keyId, guardians, setStep, ...rest}) {
+  const { address } = useAccount();
+  const transactions = useContext(TransactionListContext);
+  const changeGuardians = useChangeGuardians(keyId, guardians,
+    guardians.map((g) => true),
+    (error) => {
+      console.log(error);
+    }, (data) => {
+      transactions.addTransaction({
+        type: 'ADD_RECOVERY_ADDRESSES',
+        title: 'Change Recovery',
+        subtitle: 'Added ' + guardians.length + " addresses",
+        data: data
+      });
+
+      // this is going to clear the list and reset
+      // the view
+      setStep(0);
+    });
+
+    return (<Box width='100%'>
+      <TransactionEstimate promise={changeGuardians}/>
+      <Button width='100%' colorScheme='blue' 
+        isDisabled={!changeGuardians.write}
+        isLoading={changeGuardians.isLoading}
+        onClick={() => {changeGuardians.write?.();}}>Add Addresses ({guardians.length})</Button>
+    </Box>)
 }
 
 export function RemoveGuardiansConfirmationButton({trustInfo, policy, guardianActionList, callback, ...rest}) {
@@ -497,12 +574,12 @@ export function StepZeroContent({keyId, setStep, ...rest}) {
   )
 }
 
-export function StepOneContent({keyId, setStep, guardians, setGuardians, ...rest}) {
+export function StepOneContent({keyId, setStep, guardians, baseGuardians, setGuardians, ...rest}) {
   const [guardian, setGuardian] = useState(null); 
   const isValidAddress = ethers.utils.isAddress(guardian);
 
   const canAddAddress = function() {
-    return isValidAddress && guardians.indexOf(guardian) < 0;
+    return isValidAddress && [(baseGuardians || []), guardians].flat(2).indexOf(guardian) < 0;
   };
 
   return <VStack spacing='2em'>
@@ -528,14 +605,13 @@ export function StepOneContent({keyId, setStep, guardians, setGuardians, ...rest
     </Box>
     <Button width='100%' onClick={()=>{setStep(guardians.length > 0 ? 2 : 0);}}>Back</Button>
     <Button width='100%' isDisabled={!canAddAddress()} colorScheme='blue' onClick={()=>{
-      // it won't be a
       setGuardians((prev) => [prev, guardian].flat(2));
       setStep(2);
     }}>Next</Button>
   </VStack>
 }
 
-export function StepTwoContent({keyId, setStep, guardians, setGuardians, ...rest}) {
+export function StepTwoContent({keyId, setStep, guardians, setGuardians, addToPolicy, ...rest}) {
   const { address } = useAccount();
 
   const removeGuardian = function(guardian) {
@@ -573,7 +649,8 @@ export function StepTwoContent({keyId, setStep, guardians, setGuardians, ...rest
       </AnimatePresence>
     </List>
     <Button width='100%' onClick={() => {setStep(1);}}>Add Address</Button>
-    <Button width='100%' onClick={() => {setStep(3);}} colorScheme='blue'>Next</Button> 
+    { !addToPolicy && <Button width='100%' onClick={() => {setStep(3);}} colorScheme='blue'>Next</Button> }
+    { addToPolicy && <AddGuardiansConfirmationButton keyId={keyId} guardians={guardians} setStep={setStep}/> }
   </VStack>
 }
 

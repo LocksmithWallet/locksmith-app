@@ -11,7 +11,7 @@ import { useLocksmithRead, useLocksmithWrite } from '../Utils';
  */
 export function useAlarmClock(eventHash) {
   const [eventData, setEventData] = useState(null);
-  const eventInfo = useLocksmithRead('AlarmClock', 'alarms', [eventHash], eventHash !== null || eventHash !== '', false); 
+  const eventInfo = useLocksmithRead('AlarmClock', 'alarms', [eventHash], eventHash !== null || eventHash !== '', true); 
 
   useEffect(() => {
     if (!eventInfo.data) { return; }
@@ -27,4 +27,15 @@ export function useAlarmClock(eventHash) {
   }, [eventInfo.data]);
 
   return eventData;
+}
+
+/**
+ * useSnoozeAlarm
+ *
+ * Will attempt to snooze a particular alarm. If the caller isn't holding the snooze 
+ * key the transaction will revert.
+ */
+export function useSnoozeAlarm(eventHash, errorFunc, successFunc) {
+  return useLocksmithWrite('AlarmClock', 'snoozeAlarm',
+      [eventHash], eventHash, errorFunc, successFunc);
 }
