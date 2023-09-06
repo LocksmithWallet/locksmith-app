@@ -39,6 +39,16 @@ export function useRecoveryPolicy(keyId) {
 }
 
 /**
+ * useGuardianPolicies
+ *
+ * Given a specific address, find all of the root key policies they are recovery
+ * addresses for.
+ */
+export function useGuardianPolicies(address) {
+  return useLocksmithRead('TrustRecoveryCenter', 'getGuardianPolicies', [address], address, true);
+}
+
+/**
  * useChangeGuardians
  *
  * A root key holder can call this to add or remove guardian recovery addresses
@@ -50,4 +60,14 @@ export function useChangeGuardians(rootKeyId, addresses, addOrRemove, errorFunc,
       [rootKeyId, addresses, addOrRemove],
       rootKeyId !== null && addresses !== null && addresses.length !== 0 && addOrRemove !== null,
       errorFunc, successFunc);
+}
+
+/**
+ * useRecoverKey
+ *
+ * Attempt to recover a trust's root key.
+ */
+export function useRecoverKey(keyId, errorFunc, successFunc) {
+  return useLocksmithWrite('TrustRecoveryCenter', 'recoverKey', 
+    [keyId], keyId, errorFunc, successFunc);
 }

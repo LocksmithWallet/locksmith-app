@@ -11,7 +11,7 @@ import { useLocksmithRead, useLocksmithWrite } from '../Utils';
  */
 export function useAlarmClock(eventHash) {
   const [eventData, setEventData] = useState(null);
-  const eventInfo = useLocksmithRead('AlarmClock', 'alarms', [eventHash], eventHash !== null || eventHash !== '', true); 
+  const eventInfo = useLocksmithRead('AlarmClock', 'alarms', [eventHash], eventHash, true); 
 
   useEffect(() => {
     if (!eventInfo.data) { return; }
@@ -22,7 +22,8 @@ export function useAlarmClock(eventHash) {
       snoozeInterval: eventInfo.data[2],
       snoozeKeyId: eventInfo.data[3],
       rangeStart: eventInfo.data[1].sub(eventInfo.data[2]),
-      tooEarly: (new Date(eventInfo.data[1].sub(eventInfo.data[2])*1000)) > Date.now()
+      tooEarly: (new Date(eventInfo.data[1].sub(eventInfo.data[2])*1000)) > Date.now(),
+      canChallenge: Date.now() >= (new Date(eventInfo.data[1]*1000))
     });
   }, [eventInfo.data]);
 
@@ -38,4 +39,14 @@ export function useAlarmClock(eventHash) {
 export function useSnoozeAlarm(eventHash, errorFunc, successFunc) {
   return useLocksmithWrite('AlarmClock', 'snoozeAlarm',
       [eventHash], eventHash, errorFunc, successFunc);
+}
+
+/**
+ * useChallengeAlarm
+ * 
+ * A permissionless API to challenge any alarm clock.
+ */
+export function useChallengeAlarm(eventHash, errorFunc, successFunc) {
+  return useLocksmithWrite('AlarmClock', 'challengeAlarm', 
+    [eventHash], eventHash, errorFunc, successFunc);
 }

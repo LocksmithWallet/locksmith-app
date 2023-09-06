@@ -70,6 +70,8 @@ import {
 import {
   useRecoveryPolicy,
   useChangeGuardians,
+  useGuardianPolicies,
+  useRecoverKey,
 } from './hooks/contracts/TrustRecoveryCenter';
 import {
   useRecoveryPolicyCreator
@@ -80,6 +82,7 @@ import {
 import {
   useAlarmClock,
   useSnoozeAlarm,
+  useChallengeAlarm,
 } from './hooks/contracts/AlarmClock';
 
 import {
@@ -103,6 +106,7 @@ import { FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { FcAlarmClock } from 'react-icons/fc';
 import { ImCheckmark } from 'react-icons/im';
 import { AiOutlineNumber } from 'react-icons/ai';
+import { BsLightning } from 'react-icons/bs';
 
 export const ConfigureRecoveryAlertIngress = ({keyInfo, ...rest}) => {
   const policy = useRecoveryPolicy(keyInfo.keyId);
@@ -256,7 +260,7 @@ export function RecoveryManagementWizard({keyId, trustInfo, policy, toggleDetail
   const alarmInfo = useAlarmClock(policy.events[0]);
   const [hideCheckIn, setHideCheckIn] = useState(false);
 
-  const snoozeAlarm = useSnoozeAlarm(alarmInfo && !alarmInfo.tooEarly ? policy.events[0] : null,
+  const snoozeAlarm = useSnoozeAlarm((alarmInfo && !alarmInfo.tooEarly) && eventInfo && !eventInfo.fired ? policy.events[0] : null,
     (error) => {
       console.log(error);
     }, (data) => {
@@ -467,7 +471,7 @@ export function AddGuardiansConfirmationButton({keyId, guardians, setStep, ...re
       <Button width='100%' colorScheme='blue' 
         isDisabled={!changeGuardians.write}
         isLoading={changeGuardians.isLoading}
-        onClick={() => {changeGuardians.write?.();}}>Add Addresses ({guardians.length})</Button>
+        onClick={() => {changeGuardians.write?.();}}>Confirm Addresses ({guardians.length})</Button>
     </Box>)
 }
 
@@ -750,8 +754,89 @@ export function StepFourContent({keyId, trustInfo, setStep, needsAlarmNotary, gu
 }
 
 export function Recovery() {
-  const { keyId } = useParams();
+  const account = useAccount();
+  const policies = useGuardianPolicies(account.address);
 
-  return '';
+  return (<Box ml={{base: 0, md: 72}} pos='relative'>
+    <Text fontWeight='bold' align='center'>Trust Recovery</Text>
+    <List spacing='2em'>
+      <AnimatePresence>
+        { (policies.data||[]).map((keyId) => <ListItem key={'litrp'+keyId.toString()} as={motion.div} exit={{x: '100vw', opacity: 0}}>
+          <TrustRecoveryPolicy keyId={keyId}/>
+        </ListItem>) }
+      </AnimatePresence>
+    </List>
+  </Box>)
 }
 
+export function TrustRecoveryPolicy({keyId, ...rest}) {
+  // get the key and trust info 
+  const keyInfo = useInspectKey(keyId);
+  const trustInfo = useTrustInfo(keyInfo ? keyInfo.trustId : null);
+
+  const policy = useRecoveryPolicy(keyId);
+  const alarmInfo = useAlarmClock(policy ? policy.events[0] : null);
+  const eventInfo = useEventInfo(policy ? policy.events[0] : null);
+
+  return (<Box p='0.5em' bg='white' boxShadow='lg' borderRadius='lg' m='1em'>
+    <HStack>
+      <Image src='/gold-lock-large.png' pos='absolute' width='50px' style={{filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5)'}}/>
+      <VStack pl='3.5em' align='stretch' spacing='0'>
+        <Skeleton isLoaded={trustInfo}>
+          <Text fontWeight='bold'>{trustInfo ? trustInfo.name : ''}</Text>
+        </Skeleton>
+        <Skeleton isLoaded={alarmInfo}>
+          <Text color='gray.600' fontSize='sm'>{alarmInfo ? (new Date(alarmInfo.alarmTime*1000)).toDateString() : ''}</Text>
+        </Skeleton>
+      </VStack>
+      <Spacer/>
+      { eventInfo && !eventInfo.fired && 
+          <TriggerRecoveryButton keyId={keyId} alarmHash={policy.events[0]} alarmInfo={alarmInfo}/> }
+      { eventInfo && eventInfo.fired && <RecoverKeyButton keyId={keyId}/> }
+    </HStack>
+  </Box>)
+}
+
+export function TriggerRecoveryButton({keyId, alarmHash, alarmInfo, ...rest}) {
+  const transactions = useContext(TransactionListContext);
+  const challenge = useChallengeAlarm(alarmInfo.canChallenge ? alarmHash : null, 
+    (error) => {
+      console.log(error);
+    }, (data) => {
+      transactions.addTransaction({
+        type: 'CHALLENGE_ALARM',
+        title: 'Alarm Challenged',
+        subtitle: 'Successful challenge',
+        data: data
+      });
+    });
+
+  return (<Button size='sm'
+    colorScheme={!alarmInfo || !alarmInfo.canChallenge ? 'gray' : 'red'}
+    isDisabled={!alarmInfo || alarmInfo.tooEarly || !challenge.write }
+    isLoading={challenge.isLoading}
+    onClick={() => {challenge.write?.();}}
+    leftIcon={<BsLightning size='20px'/>}>Enable</Button>)
+}
+
+export function RecoverKeyButton({keyId, ...rest}) {
+  const transactions = useContext(TransactionListContext);
+  const recoverKey = useRecoverKey(keyId, 
+    (error) => {
+      console.log(error);
+    }, (data) => {
+      transactions.addTransaction({
+        type: 'RECOVER_KEY',
+        title: 'Trust Recovered',
+        subtitle: 'Successful Recovery',
+        data: data
+      });
+    });
+
+  return (<Button size='sm'
+    colorScheme='blue'
+    isDisabled={!recoverKey.write}
+    isLoading={recoverKey.isLoading}
+    leftIcon={<MdHealthAndSafety size='20px'/>}
+    onClick={() => {recoverKey.write?.();}}>Recover</Button>)
+}

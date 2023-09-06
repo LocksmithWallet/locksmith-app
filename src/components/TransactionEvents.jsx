@@ -12,6 +12,7 @@ import { Networks } from '../configuration/Networks';
 import { useInspectKey } from '../hooks/contracts/Locksmith';
 import { useTrustedActorAlias } from '../hooks/contracts/Notary';
 import { useRecoveryPolicy } from '../hooks/contracts/TrustRecoveryCenter';
+import { useEventInfo } from '../hooks/contracts/TrustEventLog';
 
 import { motion } from 'framer-motion';
 import { DisplayAddress, AddressAlias } from './Address';
@@ -30,6 +31,7 @@ import {
   FcRules,
   FcPlus,
   FcQuestions,
+  FcOvertime,
   FcMoneyTransfer,
   FcCustomerSupport,
   FcRight,
@@ -362,6 +364,18 @@ export const AlarmClockSnoozedEvent = ({event, receipt}) => {
   </HStack>)
 }
 
+export const AlarmClockChallengedEvent = ({event}) => {
+  const eventInfo = useEventInfo(event.topics.eventHash);
+
+  return (<HStack ml='3px' pos='relative'>
+    <FcOvertime size='28px'/>
+    <VStack align='stretch' spacing='0em' fontSize='0.8em'>
+      <Text fontWeight='bold'>Alarm Challenged</Text>
+      <Text fontStyle='italic' textColor='gray.500'><b>{eventInfo ? eventInfo.description : 'Event'}</b> was fired.</Text>
+    </VStack>
+  </HStack>)
+}
+
 export const RecoveryCreatedEvent = ({event, receipt}) => {
   return (<HStack ml='3px' pos='relative'>
     <MdHealthAndSafety color='#3186CE' size='28px'/>
@@ -418,6 +432,8 @@ export const GuardiansChangedEvent = ({event}) => {
   </HStack>)
 }
 
+export const KeyRecoveredEvent = ({event}) => {}
+export const TrustEventLoggedEvent = ({event}) => {}
 export const InitializedEvent = ({event}) => {}
 export const UpgradedEvent = ({event}) => {}
 export const NotaryEventRegistrationApprovalEvent = ({event}) => {}

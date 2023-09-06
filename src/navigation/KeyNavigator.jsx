@@ -13,6 +13,7 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { ethers } from 'ethers';
+import { useAccount } from 'wagmi';
 
 // animations
 import { 
@@ -33,11 +34,15 @@ import {
   useKeyInboxAddress
 } from '../hooks/contracts/PostOffice';
 import {
+  useGuardianPolicies
+} from '../hooks/contracts/TrustRecoveryCenter';
+
+import {
   KEY_CONTEXT,
 } from '../hooks/contracts/Ledger';
 import { ContextBalanceUSD } from '../components/Ledger';
 import { AddressAvatar } from '../components/Address';
-import { FcSettings } from 'react-icons/fc';
+import { MdHealthAndSafety } from 'react-icons/md';
 
 // components
 import { KeyIcon } from '../components/Key';
@@ -47,6 +52,9 @@ export const KeyNavigator = (onClose) => {
   const [foundRootTrusts, setFoundRootTrusts] = useState([]); // an array of root key ids we've found
   const [sortedKeys, setSortedKeys] = useState({});     // this is a map of trust ID strings to key arrays
   const keys = useWalletKeys();
+  const account = useAccount();
+  const recoveryPolicies = useGuardianPolicies(account.address);
+  const navigate = useNavigate();
 
   // when the keys load
   useEffect(() => {
@@ -111,6 +119,14 @@ export const KeyNavigator = (onClose) => {
     { unsortedKeys.map((uk) => <KeyInspector key={'ki-'+uk.toString()} keyId={uk} sortKey={sortKey}/>) }
     { foundRootTrusts.map((t) => <TrustInspector key={'ti-'+t.toString()} trustId={t} setUnsortedKeys={setUnsortedKeys}/>) }
     <LayoutGroup>
+      { recoveryPolicies.isSuccess && recoveryPolicies.data.length > 0 && (
+        <Box as={motion.div} layout bg='gray.200' boxShadow='inner' borderRadius='md' mb='1em'>
+          <HStack p='0.5em' style={{cursor: 'pointer', background: 'none'}} as={motion.div} whileHover={{background: '#EEE'}}
+              onClick={() => {navigate('/recovery');}}>
+            <MdHealthAndSafety size='30' color='#3186CE'/>
+            <Text>Trust Recovery</Text>    
+          </HStack>
+        </Box>) }
       { Object.keys(sortedKeys).map(
         (tid, i) => <TrustNavigationBox key={'tn-'+tid} trustId={tid} keys={sortedKeys[tid]} onClose={onClose}/>
       )}

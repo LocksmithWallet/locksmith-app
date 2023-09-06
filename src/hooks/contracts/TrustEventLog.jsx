@@ -11,7 +11,7 @@ import { useLocksmithRead, useLocksmithWrite } from '../Utils';
  */
 export function useEventInfo(eventHash) {
   const [eventData, setEventData] = useState(null);
-  const eventInfo = useLocksmithRead('TrustEventLog', 'getEventInfo', [eventHash], eventHash !== null || eventHash !== '', false); 
+  const eventInfo = useLocksmithRead('TrustEventLog', 'getEventInfo', [eventHash], eventHash, true); 
   
   useEffect(() => {
     if (!eventInfo.data) { return; }
