@@ -33,7 +33,7 @@
   },
   "AlarmClock": {
     "address": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
-    "codeHash": "0x02b52bb78623e45dfde1c3a4558abf30b415cf4c663a89db81f1e3138564e7a5"
+    "codeHash": "0x880e37dc7755663262960d10abd431272a84e914a1cdaae57f3a7a1416e2c755"
   },
   "KeyOracle": {
     "address": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
@@ -60,11 +60,11 @@
     "codeHash": "0xe9642227b0f2956f298f9393431fb791fedda4c3f6378c7acffc552f63ff0817"
   },
   "MegaKeyCreator": {
-    "address": "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570",
+    "address": "0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690",
     "codeHash": "0x220680be4e0c2aa98bdeffb5e1aec97452357ab0c0a0fcd19a152eba2e777db5"
   },
   "TrustCreator": {
-    "address": "0x162A433068F51e18b7d13932F27e66a3f99E6890",
+    "address": "0x9E545E3C0baAB3E08CdfD552C960A1050f373042",
     "codeHash": "0xca7e8caf44be5df2b6cfc1e7587a34e2c89b467660c8f444a1322cfadbc079a8"
   },
   "TrustRecoveryCenter": {
