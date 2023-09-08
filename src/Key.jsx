@@ -1243,7 +1243,7 @@ export const SendGasButton = ({keyInfo, inbox, destination, arn, asset, amount, 
       transactions.addTransaction({
         type: 'SEND_ASSET',
         title: 'Send ' + asset.name,
-        subtitle: "" + ethers.utils.parseUnits(amount, asset.decimals) + " " + asset.symbol,
+        subtitle: "" + amount + " " + asset.symbol,
         data: data
       });
       toggleDetail();
