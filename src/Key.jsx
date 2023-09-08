@@ -1181,14 +1181,14 @@ export const AssetSendFlow = ({keyInfo, arn, balance, asset, price, container, t
         destinationKey={key}
         arn={arn}
         asset={asset}
-        amount={isSendDollars ? amount / price : amount}
+        amount={isSendDollars ? (''+(amount / price).toPrecision(8)) : amount}
         toggleDetail={toggleDetail}/> }
       { !isSendKey && <SendToEOAConfirmationButton
         keyInfo={keyInfo}
         destination={destination}
         arn={arn}
         asset={asset}
-        amount={isSendDollars ? amount / price : amount}
+        amount={isSendDollars ? (''+(amount / price).toPrecision(8)) : amount}
         toggleDetail={toggleDetail}/> }
     </motion.div> }
   </AnimatePresence>)
