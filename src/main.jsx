@@ -15,6 +15,7 @@ import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
 // Supported Network Configurations
 import { Networks } from './configuration/Networks'
 import { HardHat } from './configuration/networks/Hardhat'
+import { ScrollSepolia } from './configuration/networks/ScrollSepolia'
 import { BaseGoerli } from './configuration/networks/BaseGoerli'
 import { Base } from './configuration/networks/Base';
 
@@ -24,6 +25,7 @@ import App from './App'
 // Add Network Support
 Networks.addNetwork(Base);
 Networks.addNetwork(BaseGoerli);
+Networks.addNetwork(ScrollSepolia);
 
 // only add this network if we are local
 if(window.location.href.match(/localhost/)) {
