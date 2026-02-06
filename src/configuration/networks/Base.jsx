@@ -22,7 +22,7 @@ export const Base = (function() {
         symbol: 'ETH'
       },
       rpcUrls: {
-        default: {http: ['https://mainnet.base.org']}
+        default: {http: ['https://base.publicnode.com']}
       }
     },
     label: 'Base',
